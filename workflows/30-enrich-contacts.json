@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "942715de-94f2-4657-8612-c90780bee52f",
+      "id": "4a9a60da-10d9-4268-b71d-503725ecdc6c",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "8d75632d-73a0-44d2-b5e9-81ebf5233540",
+      "id": "8608e2d3-9440-4f7e-bccf-cd4189a76038",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "eecd9c4c-b6e5-49c4-bae5-3c2f1781115d",
+      "id": "3ae21d24-99dc-4578-b8db-af416806ac9b",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -35,11 +35,11 @@
         280
       ],
       "parameters": {
-        "jsCode": "// 30 · Enrich contacts: config + monthly budget guard.\n// Free tiers: Brave $5 credit/month (~1,000 searches), Hunter 50 credits/month.\n// We stay well below both. Counters live in workflow static data and are\n// only persisted on ACTIVE (production) runs, not on manual test runs.\nconst cfg = {\n  notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2',\n  maxContactsPerRun: 5,\n  braveMonthlyCap: 300,     // searches; worst case 3 per contact (website + 2 LinkedIn)\n  hunterMonthlyCap: 40,     // credits; finder 1 (only if found) + verifier 0.5\n  personaOrder: [\n    /\\b(ceo|chief executive|geschäftsführer|managing director)\\b/i,\n    /\\b(founder|co-founder|cofounder|gründer)\\b/i,\n    /\\b(cro|chief revenue|head of sales|vp sales|sales director)\\b/i,\n    /\\b(partnership|growth|business development|bd)\\b/i\n  ].map(String)\n};\nconst s = $getWorkflowStaticData('global');\nconst month = new Date().toISOString().slice(0, 7);\nif (s.month !== month) { s.month = month; s.brave = 0; s.hunter = 0; }\nconst braveLeft = cfg.braveMonthlyCap - (s.brave || 0);\nconst hunterLeft = cfg.hunterMonthlyCap - (s.hunter || 0);\n// worst case per contact: 2 Brave searches, 1.5 Hunter credits\nconst allowed = Math.max(0, Math.min(cfg.maxContactsPerRun, Math.floor(braveLeft / 3), Math.floor(hunterLeft / 1.5)));\nreturn [{ json: { ...cfg, month, braveUsed: s.brave || 0, hunterUsed: s.hunter || 0, allowed } }];"
+        "jsCode": "// 30 · Enrich contacts: config + monthly budget guard.\n// Free tiers: Brave $5 credit/month (~1,000 searches), Hunter 50 credits/month.\n// We stay well below both. Counters live in workflow static data and are\n// only persisted on ACTIVE (production) runs, not on manual test runs.\nconst cfg = {\n  notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2',\n  maxContactsPerRun: 8,\n  braveMonthlyCap: 300,     // searches; worst case 3 per contact (website + 2 LinkedIn)\n  hunterMonthlyCap: 40,     // credits; finder 1 (only if found) + verifier 0.5\n  personaOrder: [\n    /\\b(ceo|chief executive|geschäftsführer|managing director)\\b/i,\n    /\\b(founder|co-founder|cofounder|gründer)\\b/i,\n    /\\b(cro|chief revenue|head of sales|vp sales|sales director)\\b/i,\n    /\\b(partnership|growth|business development|bd)\\b/i\n  ].map(String)\n};\nconst s = $getWorkflowStaticData('global');\nconst month = new Date().toISOString().slice(0, 7);\nif (s.month !== month) { s.month = month; s.brave = 0; s.hunter = 0; }\nconst braveLeft = cfg.braveMonthlyCap - (s.brave || 0);\nconst hunterLeft = cfg.hunterMonthlyCap - (s.hunter || 0);\n// worst case per contact: 2 Brave searches, 1.5 Hunter credits\nconst allowed = Math.max(0, Math.min(cfg.maxContactsPerRun, Math.floor(braveLeft / 3), Math.floor(hunterLeft / 1.5)));\nreturn [{ json: { ...cfg, month, braveUsed: s.brave || 0, hunterUsed: s.hunter || 0, allowed } }];"
       }
     },
     {
-      "id": "2c92676a-cd58-4f88-943a-c91065ef7925",
+      "id": "28c1660a-fd81-4817-90a8-926c82a86fcd",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "805b6dd9-9911-450b-916d-fea1d68c5549",
+              "id": "55223694-29cc-4c91-8986-2396da0281da",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "65a65613-4919-4b02-bd08-95dbbe6163cf",
+      "id": "9c97eb58-7d4e-444e-ba1e-9722c9840814",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -97,11 +97,11 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Needs email\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: 25 }) }}"
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", or: [\"Needs email\", \"Ready to draft\", \"Draft ready\", \"Awaiting approval\", \"Approved\", \"Sent\", \"Replied\", \"Meeting booked\"].map(n => ({ property: \"Status\", status: { equals: n } })) }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: 100 }) }}"
       }
     },
     {
-      "id": "1d9fe679-f33e-4a13-a87c-72b1cf707338",
+      "id": "9bf44e1a-58f1-4b86-9a72-45201af99517",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -110,11 +110,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($input.first().json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const clean = name.replace(/^((dr|prof|ing|mag|dipl)\\.?\\s+)+/i, '').trim();\n  const parts = clean.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\n// Budget: only the best persona per company is enriched in a run. Others wait (stay \"Needs email\").\nconst perCompany = new Set();\nconst picked = rows.filter(r => !perCompany.has(r.companyPageId) && perCompany.add(r.companyPageId));\nreturn picked.slice(0, cfg.allowed).map(r => ({ json: r }));"
+        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst all = $input.first().json.results || [];\nconst statusOf = pg => pg.properties.Status?.status?.name;\n// Companies that already have a contact with a verified email (or further down the funnel): skip them.\nconst covered = new Set(all.filter(pg => statusOf(pg) !== 'Needs email')\n  .map(pg => pg.properties.Company?.relation?.[0]?.id).filter(Boolean));\nconst rows = all.filter(pg => statusOf(pg) === 'Needs email').map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const clean = name.replace(/^((dr|prof|ing|mag|dipl)\\.?\\s+)+/i, '').trim();\n  const parts = clean.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && !covered.has(r.companyPageId) && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\n// Budget: only the best persona per company is enriched in a run. Others wait (stay \"Needs email\").\nconst perCompany = new Set();\nconst picked = rows.filter(r => !perCompany.has(r.companyPageId) && perCompany.add(r.companyPageId));\nreturn picked.slice(0, cfg.allowed).map(r => ({ json: r }));"
       }
     },
     {
-      "id": "3423c61d-aef2-4db0-abb5-bb0e54209a0f",
+      "id": "5136182e-201f-4205-b472-9f5e4eb69819",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "55111340-28a0-4de4-99b9-56290779ee74",
+      "id": "729fdffe-0b57-4724-bec6-acab2da613c6",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -149,12 +149,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, q1, q2, braveCalls: 0 } };",
+        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = `\"${company}\" official website`;\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, q1, q2, q3, braveCalls: 0 } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "ba9cc019-b1b5-48e3-bf9f-a218b3787733",
+      "id": "1b2000bf-61ff-457b-81bf-4303ef8a1d65",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -197,12 +197,7 @@
           "batching": {
             "batch": {
               "batchSize": 1,
-              "batchInterval": 1100
-            }
-          },
-          "response": {
-            "response": {
-              "neverError": true
+              "batchInterval": 1500
             }
           }
         }
@@ -213,10 +208,13 @@
           "name": "Brave Search API"
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
-      "id": "b5f5b84a-4d6e-4e2f-aa95-de52e8abcb0e",
+      "id": "4424fde9-9e13-4fda-9f41-f81af6c69df9",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -230,7 +228,7 @@
       }
     },
     {
-      "id": "e8c5c9e8-4533-4093-a9d2-850aa0a34195",
+      "id": "79d49422-6e75-4097-b958-84e9eb87baae",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -248,7 +246,7 @@
           },
           "conditions": [
             {
-              "id": "3acea68d-3130-4c15-aa74-616d9f9cc995",
+              "id": "88844aaa-5d72-445c-a514-544c5648151c",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -264,7 +262,7 @@
       }
     },
     {
-      "id": "331c0c4c-1c58-4814-9d9a-c60c22b207ea",
+      "id": "ea9a0aea-d416-41a2-8b00-e4588f7be4ba",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -307,12 +305,7 @@
           "batching": {
             "batch": {
               "batchSize": 1,
-              "batchInterval": 1100
-            }
-          },
-          "response": {
-            "response": {
-              "neverError": true
+              "batchInterval": 1500
             }
           }
         }
@@ -323,10 +316,13 @@
           "name": "Brave Search API"
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
-      "id": "c1336204-5d58-41f0-800a-5275b25aef41",
+      "id": "9518c057-70ab-4495-8797-9e496800da18",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -340,7 +336,7 @@
       }
     },
     {
-      "id": "b2e996e6-5016-416b-8089-ac8d7586eed6",
+      "id": "d9c27a45-baa5-4d52-a107-714fe404b7a4",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -387,7 +383,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7a4e0e97-f773-4ca7-98eb-276079821ba7",
+      "id": "20a1e4d7-173f-4f71-804d-6400a431a12c",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -405,7 +401,7 @@
           },
           "conditions": [
             {
-              "id": "9ea6764e-9c56-4488-9e21-0fda30256dd0",
+              "id": "76c0778d-d16e-47ea-89de-1ae4ed7c6aee",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -421,7 +417,7 @@
       }
     },
     {
-      "id": "85b313d9-8212-40f1-aa09-8680e3bc7904",
+      "id": "ac6b4887-b2f3-4e0a-b756-d16c24ed0f96",
       "name": "Brave · company website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -439,7 +435,7 @@
           "parameters": [
             {
               "name": "q",
-              "value": "={{ `\"${$json.company}\"` }}"
+              "value": "={{ $json.q3 }}"
             },
             {
               "name": "count",
@@ -464,12 +460,7 @@
           "batching": {
             "batch": {
               "batchSize": 1,
-              "batchInterval": 1100
-            }
-          },
-          "response": {
-            "response": {
-              "neverError": true
+              "batchInterval": 1500
             }
           }
         }
@@ -480,10 +471,13 @@
           "name": "Brave Search API"
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
-      "id": "aa258380-5df2-40ed-8ab5-dc56a9b1ce26",
+      "id": "c891056e-4bab-4627-9e40-a9400f93f11f",
       "name": "Pick company domain",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -492,12 +486,12 @@
         -120
       ],
       "parameters": {
-        "jsCode": "// Company website from search results (rules): first result whose domain matches the company name.\nconst prev = $('Has domain?').item.json;\nconst tr = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\nconst core = tr(prev.companyCore).replace(/[^a-z0-9]/g, '');\nconst SKIP = /(linkedin|crunchbase|wikipedia|facebook|instagram|youtube|twitter|x\\.com|tech\\.eu|eu-startups|techcrunch|sifted|dealroom|pitchbook|glassdoor|zoominfo|apollo|rocketreach|bloomberg|reuters|tracxn|cbinsights|northdata|startupdetector|medium|substack)/i;\nconst hosts = ($json.web?.results || []).map(r => { try { return new URL(r.url).hostname.replace(/^www\\./, '').toLowerCase(); } catch (e) { return null; } })\n  .filter(h => h && !SKIP.test(h));\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nconst domain = core.length >= 3 ? hosts.find(h => stem(h).includes(core) || (stem(h).length >= 4 && core.includes(stem(h)))) || null : null;\nreturn { json: { ...prev, domain: domain || '', domainSource: domain ? 'Brave search' : 'none',\n  braveCalls: (prev.braveCalls || 0) + 1,\n  linkedinMatch: prev.linkedinMatch + (domain ? ` | Website: ${domain}` : ' | Website: not found') } };",
+        "jsCode": "// Company website from search results (rules): first result whose domain matches the company name.\nconst prev = $('Has domain?').item.json;\nconst tr = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\nconst core = tr(prev.companyCore).replace(/[^a-z0-9]/g, '');\nconst SKIP = /(linkedin|crunchbase|wikipedia|facebook|instagram|youtube|twitter|x\\.com|tech\\.eu|eu-startups|techcrunch|sifted|dealroom|pitchbook|glassdoor|zoominfo|apollo|rocketreach|bloomberg|reuters|tracxn|cbinsights|northdata|startupdetector|medium|substack)/i;\nconst hosts = ($json.web?.results || []).map(r => { try { return new URL(r.url).hostname.replace(/^www\\./, '').toLowerCase(); } catch (e) { return null; } })\n  .filter(h => h && !SKIP.test(h));\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nconst domain = core.length >= 3 ? hosts.find(h => stem(h).includes(core) || (stem(h).length >= 4 && core.includes(stem(h)))) || null : null;\nreturn { json: { ...prev, domain: domain || '', domainSource: domain ? 'Brave search' : 'none',\n  braveCalls: (prev.braveCalls || 0) + 1,\n  linkedinMatch: prev.linkedinMatch + (domain ? ` | Website: ${domain}`\n    : $json.error ? ` | Website search error: ${JSON.stringify($json.error).slice(0, 120)}`\n    : ` | Website: no match in ${hosts.length} results (${hosts.slice(0, 3).join(', ')})`) } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "de2c8949-a48c-4659-bf55-7e765e7efe4b",
+      "id": "8c5eb91f-4269-455d-995a-4aef13e101be",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -527,7 +521,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "666f826a-b9c7-4bd7-a4e1-f1ef790b0357",
+      "id": "31257390-3c7a-4bda-ae25-570da8be0101",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -541,7 +535,7 @@
       }
     },
     {
-      "id": "9b7d4c20-71b2-4984-a3a9-41fd22523592",
+      "id": "d83bc149-ab80-4c4e-8e6f-ca182c207b69",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -550,12 +544,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Read Hunter finder result. Verify only when the finder isn't already sure.\n// Paired item points back to whichever verify node fed this branch.\nconst prev = $('Ready for Hunter').item.json;\nconst d = $json.data || {};\nconst email = d.email || null;\nconst finderStatus = d.verification?.status || null;\nreturn { json: { ...prev,\n  email, emailScore: d.score ?? null, finderStatus,\n  hunterCredits: email ? 1 : 0,\n  hunterError: $json.errors ? JSON.stringify($json.errors).slice(0, 200) : null,\n  needVerify: !!email && finderStatus !== 'valid' } };",
+        "jsCode": "// Read Hunter finder result. Verify only when the finder isn't already sure.\n// Paired item points back to whichever verify node fed this branch.\nconst prev = $('Ready for Hunter').item.json;\nconst d = $json.data || {};\nconst email = d.email || null;\nconst finderStatus = d.verification?.status || null;\nconst hunterDomain = d.domain || null;\nreturn { json: { ...prev,\n  email, emailScore: d.score ?? null, finderStatus,\n  hunterCredits: email ? 1 : 0, hunterDomain,\n  hunterError: $json.errors ? JSON.stringify($json.errors).slice(0, 200) : null,\n  needVerify: !!email && finderStatus !== 'valid' } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "586f8f9d-88b0-4c4a-b6b9-3011896bcac3",
+      "id": "95586043-9538-45be-a0f3-7ab2b26533c5",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -573,7 +567,7 @@
           },
           "conditions": [
             {
-              "id": "4302ff0d-9992-4bfa-8290-bfc00419f446",
+              "id": "abdd5379-6b8b-4f04-89c3-97d9ebda2950",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -589,7 +583,7 @@
       }
     },
     {
-      "id": "877f3d3f-a7ba-4004-b517-30947cf3f502",
+      "id": "0760b45a-301f-4e3d-9a8b-a195d987120c",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -628,7 +622,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "8e80544c-b931-4502-9db0-9b91a0cd268d",
+      "id": "bf670d11-f28a-45d1-a943-28ee1ffbdfbc",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -637,12 +631,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterError ? 0 : d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\n// Auth / quota / network errors say nothing about the person: keep \"Needs email\" so the next run retries.\nconst apiError = !!d.hunterError || (!!d.braveError && !d.linkedin && !d.email);\nconst nextStatus = ok ? 'Ready to draft' : apiError ? 'Needs email' : 'No email found';\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: nextStatus } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nif (!apiError) props['Email status'] = { select: { name: status } };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status: apiError ? 'api error' : status, ready: ok, apiError,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
+        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterError ? 0 : d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\n// Auth / quota / network errors say nothing about the person: keep \"Needs email\" so the next run retries.\nconst apiError = !!d.hunterError || (!!d.braveError && !d.linkedin && !d.email);\nconst nextStatus = ok ? 'Ready to draft' : apiError ? 'Needs email' : 'No email found';\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: nextStatus } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.hunterDomain && !d.domain ? ` | Hunter resolved domain: ${d.hunterDomain}` : '') + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nif (!apiError) props['Email status'] = { select: { name: status } };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status: apiError ? 'api error' : status, ready: ok, apiError,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "0ddded4b-3207-4116-835b-e399dd1c92fd",
+      "id": "4e110f02-9fc8-4122-92b3-1922b51b5d6e",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -671,7 +665,7 @@
       }
     },
     {
-      "id": "e1cf4f6b-aae2-423a-804f-1aea92a364d5",
+      "id": "76ffd53a-1169-4400-8cf9-55a05361bc7b",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -684,7 +678,7 @@
       }
     },
     {
-      "id": "879115e9-ac4d-406d-907e-d14f2149ce92",
+      "id": "daf8cb48-1468-446d-8c72-4be2e7304ebc",
       "name": "Note · 30",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
