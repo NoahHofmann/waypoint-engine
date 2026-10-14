@@ -55,7 +55,7 @@
         220
       ],
       "parameters": {
-        "chatId": "REPLACE_WITH_YOUR_CHAT_ID",
+        "chatId": "1170608781",
         "text": "={{ $json.subject + '\\n\\n' + $json.text }}",
         "additionalFields": {
           "appendAttribution": false
