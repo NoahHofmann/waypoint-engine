@@ -1,0 +1,180 @@
+{
+  "name": "WP \u00b7 90 Error handler",
+  "nodes": [
+    {
+      "id": "9f356305-b6fc-4436-8e4d-58fef93b8b6d",
+      "name": "On workflow error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "32c18844-531f-4d60-89e1-70306240c0b8",
+      "name": "Format alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Turn any failed execution into one readable alert.\nconst e = $json.execution || {}, wf = $json.workflow || {};\nconst msg = e.error?.message || 'Unknown error';\nconst node = e.lastNodeExecuted || e.error?.node?.name || 'n/a';\nconst when = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });\nreturn [{ json: {\n  subject: `\u26a0\ufe0f Waypoint engine: \"${wf.name}\" failed`,\n  text: `Workflow: ${wf.name}\\nNode: ${node}\\nError: ${msg}\\nTime: ${when}\\nMode: ${e.mode || 'n/a'}\\nExecution: ${e.url || e.id || 'n/a'}\\n\\nNo action was sent to any contact by this execution.`,\n  workflow: wf.name, node, msg, executionId: String(e.id || '')\n}}];"
+      }
+    },
+    {
+      "id": "11557c4c-300b-46c0-9f5d-863b098b4c67",
+      "name": "Email \u00b7 hello@",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        60
+      ],
+      "parameters": {
+        "sendTo": "hello@noahhofmann.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "dc9de70f-0c5b-49d9-a199-a635a6b65f3f",
+      "name": "Telegram \u00b7 Noah",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        220
+      ],
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_CHAT_ID",
+        "text": "={{ $json.subject + '\\n\\n' + $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "1bad699a-6ab3-4390-a5e5-06702cdddef0",
+      "name": "Build Notion log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        380
+      ],
+      "parameters": {
+        "jsCode": "const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`ERROR \u00b7 ${$json.workflow}`) },\n  'Workflow': { select: { name: 'Error handler' } },\n  'Status': { select: { name: 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($json.executionId) },\n  'Errors': { number: 1 },\n  'Notes': { rich_text: t(`${$json.node}: ${$json.msg}`) }\n}}}];"
+      }
+    },
+    {
+      "id": "6693e705-7b6b-4740-8fbf-0791b12da0f9",
+      "name": "Notion \u00b7 log error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        740,
+        380
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "115474b7-5c3a-4c3f-ac60-26de288e87a0",
+      "name": "Note \u00b7 Error handler",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -80
+      ],
+      "parameters": {
+        "content": "## Error handler\nSet as Error Workflow in the settings of 00, 10 and 20. Any failure \u2192 email to hello@, Telegram ping, and a Failed row in Notion \u203a Runs. Each channel fails independently, so one broken channel never hides the alert.",
+        "height": 170,
+        "width": 520,
+        "color": 3
+      }
+    }
+  ],
+  "connections": {
+    "On workflow error": {
+      "main": [
+        [
+          {
+            "node": "Format alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format alert": {
+      "main": [
+        [
+          {
+            "node": "Email \u00b7 hello@",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram \u00b7 Noah",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Notion log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Notion log": {
+      "main": [
+        [
+          {
+            "node": "Notion \u00b7 log error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Email signature · Noah Hofmann</title>
+<style>
+  body{margin:0;padding:40px 24px;background:#F5F6F7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#0D0F12}
+  .howto{max-width:620px;margin:0 auto 28px;font-size:14px;line-height:1.55;color:#3A3F46}
+  .howto b{color:#0D0F12}
+  .card{max-width:620px;margin:0 auto 20px;background:#fff;border:1px solid #ECEEF0;border-radius:14px;padding:28px}
+  .tag{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8B929B;margin:0 0 16px}
+  button{font:inherit;font-size:13px;font-weight:600;margin-top:20px;padding:9px 16px;border-radius:999px;border:1px solid #0D0F12;background:#0D0F12;color:#fff;cursor:pointer}
+  button:hover{background:#2F5BFF;border-color:#2F5BFF}
+  .ok{font-size:13px;color:#2F5BFF;margin-left:10px}
+</style>
+</head>
+<body>
+
+<div class="howto">
+  <b>Install in Gmail:</b> click "Copy signature" on the version you want, then open Gmail → Settings (gear) → See all settings → General → Signature → Create new, name it, paste, and save at the bottom of the page. In "Signature defaults" choose it for new emails and for replies/forwards.
+</div>
+
+<!-- ============ VERSION A: FULL (new emails) ============ -->
+<div class="card">
+  <p class="tag">A · Full, for new emails</p>
+  <div id="sigA">
+<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;color:#0D0F12;">
+  <tr>
+    <td style="padding:0 0 10px 0;">
+      <span style="font-size:15px;font-weight:bold;letter-spacing:-0.2px;color:#0D0F12;">Noah Hofmann</span><span style="font-size:15px;font-weight:bold;color:#2F5BFF;">.</span><br>
+      <span style="font-size:13px;color:#3A3F46;">Founder, Waypoint · Market entry, GTM &amp; partnerships</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="border-top:1px solid #D3D7DC;padding:10px 0 0 0;font-size:13px;line-height:20px;color:#3A3F46;">
+      <a href="https://noahhofmann.com" style="color:#0D0F12;text-decoration:none;">noahhofmann.com</a>
+      <span style="color:#D3D7DC;">&nbsp;|&nbsp;</span>
+      <a href="https://linkedin.com/in/noahhofmann" style="color:#0D0F12;text-decoration:none;">LinkedIn</a>
+      <span style="color:#D3D7DC;">&nbsp;|&nbsp;</span>
+      Berlin<br>
+      <a href="tel:+4916094497236" style="color:#0D0F12;text-decoration:none;">+49 160 944 97 236</a><br>
+      <a href="https://cal.com/book-a-call-with-noah/30min" style="color:#2F5BFF;text-decoration:none;font-weight:bold;">Book a 30-min call &rarr;</a>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px 0 0 0;font-size:11px;line-height:16px;color:#8B929B;">
+      Noah Hofmann Consulting · Emser Straße 69 · 12051 Berlin
+    </td>
+  </tr>
+</table>
+  </div>
+  <button onclick="copySig('sigA','okA')">Copy signature</button><span class="ok" id="okA"></span>
+</div>
+
+<!-- ============ VERSION B: SHORT (replies) ============ -->
+<div class="card">
+  <p class="tag">B · Short, for replies and forwards</p>
+  <div id="sigB">
+<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td style="font-size:13px;line-height:20px;color:#3A3F46;">
+      <span style="font-weight:bold;color:#0D0F12;">Noah Hofmann</span> · Waypoint<br>
+      <a href="https://noahhofmann.com" style="color:#0D0F12;text-decoration:none;">noahhofmann.com</a>
+      <span style="color:#D3D7DC;">&nbsp;|&nbsp;</span>
+      <a href="https://cal.com/book-a-call-with-noah/30min" style="color:#2F5BFF;text-decoration:none;">Book a call</a>
+      <span style="color:#D3D7DC;">&nbsp;|&nbsp;</span>
+      <a href="tel:+4916094497236" style="color:#0D0F12;text-decoration:none;">+49 160 944 97 236</a>
+    </td>
+  </tr>
+</table>
+  </div>
+  <button onclick="copySig('sigB','okB')">Copy signature</button><span class="ok" id="okB"></span>
+</div>
+
+<script>
+function copySig(id,okId){
+  const el=document.getElementById(id);
+  const r=document.createRange(); r.selectNodeContents(el);
+  const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+  let done=false;
+  try{done=document.execCommand('copy')}catch(e){}
+  s.removeAllRanges();
+  document.getElementById(okId).textContent=done?'Copied. Paste it into Gmail.':'Select the signature above and copy manually (Cmd+C).';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Waypoint · Market entry, GTM and partnerships by Noah Hofmann</title>
+<meta name="description" content="Waypoint by Noah Hofmann: market entry, GTM strategy, partnerships and commercial automation for early-stage B2B startups. Projects, retainers and advisory.">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .wp-hero{display:grid;grid-template-columns:1.35fr 1fr;gap:64px;align-items:end;padding:64px 0 88px}
+  .formats{border:1px solid var(--mist);border-radius:22px;padding:8px;background:var(--paper)}
+  .fmt{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 18px;border-radius:14px;transition:background .3s}
+  .fmt+.fmt{border-top:1px solid var(--mist)}
+  .fmt:hover{background:var(--white)}
+  .fmt b{font-size:17px}
+  .fmt span{font-family:var(--mono);font-size:12px;color:var(--steel);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+  .offers{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .offer{position:relative;overflow:hidden;border:1px solid var(--mist);border-radius:22px;padding:32px;background:var(--white);display:flex;flex-direction:column;gap:14px;transition:transform .45s var(--ease),border-color .3s,box-shadow .45s var(--ease)}
+  .offer::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-18deg);opacity:0}
+  .offer:hover{transform:translateY(-6px);border-color:var(--silver);box-shadow:0 26px 54px -30px rgba(13,15,18,.35)}
+  .offer:hover::after{animation:sheen .9s var(--ease)}
+  .offer .top{display:flex;justify-content:space-between;align-items:center}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid var(--mist);color:var(--graphite);background:var(--paper)}
+  .offer h3{font-size:28px;letter-spacing:-.03em;line-height:1.1}
+  .offer .for{color:var(--graphite);font-size:15.5px}
+  .offer ul{list-style:none;display:grid;gap:8px;margin-top:4px}
+  .offer li{position:relative;padding-left:22px;font-size:15.5px}
+  .offer li::before{content:"";position:absolute;left:0;top:10px;width:10px;height:1px;background:var(--accent)}
+  .offer.feature{grid-column:1/-1;background:var(--ink);color:var(--white);border-color:var(--ink);display:grid;grid-template-columns:1.1fr 1fr;gap:40px}
+  .offer.feature .for{color:#A9B0B9}
+  .offer.feature .chip{background:transparent;border-color:#3A3F46;color:#C9CDD2}
+  .offer.feature .new{background:var(--volt);color:var(--ink);border-color:var(--volt)}
+  .offer.feature li::before{background:var(--volt)}
+  .offer.feature::after{background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent)}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .flow span{font-family:var(--mono);font-size:12px;padding:8px 12px;border:1px solid #2A2F36;border-radius:10px;color:#D9DDE2;transition:border-color .3s,color .3s}
+  .flow span:hover{border-color:var(--volt);color:var(--volt)}
+
+  .cases{display:grid;gap:18px}
+  .case{display:grid;grid-template-columns:280px 1fr 300px;gap:40px;padding:36px;border:1px solid var(--mist);border-radius:22px;background:var(--white);transition:border-color .3s,box-shadow .45s var(--ease)}
+  .case:hover{border-color:var(--silver);box-shadow:0 26px 54px -34px rgba(13,15,18,.35)}
+  .case .idx{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase}
+  .case h3{font-size:30px;letter-spacing:-.03em;line-height:1.05;margin:12px 0 8px}
+  .case .role{color:var(--steel);font-size:14px}
+  .case ul{list-style:none;display:grid;gap:12px}
+  .case li{position:relative;padding-left:22px;color:var(--graphite);font-size:15.5px}
+  .case li::before{content:"";position:absolute;left:0;top:10px;width:10px;height:1px;background:var(--silver);transition:width .3s,background .3s}
+  .case:hover li::before{width:14px;background:var(--accent)}
+  .nums{display:grid;gap:10px;align-content:start}
+  .n{background:var(--paper);border-radius:14px;padding:16px 18px;transition:background .3s,color .3s}
+  .case:hover .n{background:var(--ink);color:var(--white)}
+  .case:hover .n span{color:#A9B0B9}
+  .n b{display:block;font-size:26px;letter-spacing:-.03em;line-height:1.1}
+  .n span{font-size:13.5px;color:var(--graphite)}
+  .markets{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+  .markets span{font-size:12.5px;padding:5px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--mist)}
+
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--ink)}
+  .step{padding:26px 22px 0 0;position:relative}
+  .step::before{content:"";position:absolute;top:-5px;left:0;width:9px;height:9px;border-radius:50%;background:var(--white);border:1px solid var(--ink);transition:background .3s,transform .3s}
+  .step:hover::before{background:var(--accent);border-color:var(--accent);transform:scale(1.3)}
+  .step .k{font-family:var(--mono);font-size:12px;color:var(--steel)}
+  .step h3{font-size:21px;letter-spacing:-.02em;margin:10px 0 8px}
+  .step p{color:var(--graphite);font-size:15px}
+  .back{font-size:15px;color:var(--graphite)}
+  .back:hover{color:var(--ink)}
+
+  @media (max-width:980px){
+    .wp-hero,.offer.feature{grid-template-columns:1fr;gap:32px}
+    .offers{grid-template-columns:1fr}
+    .case{grid-template-columns:1fr;gap:22px;padding:26px}
+    .steps{grid-template-columns:1fr 1fr;row-gap:28px}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Noah Hofmann, home">Noah Hofmann<span>.</span></a>
+    <div class="switch" role="navigation" aria-label="Pages">
+      <a href="/">Noah</a>
+      <a href="/waypoint/" class="on" aria-current="page">Waypoint</a>
+    </div>
+    <div class="navr">
+      <ul><li><a class="ul" href="#offering">Offering</a></li><li><a class="ul" href="#cases">Cases</a></li><li><a class="ul" href="#process">Process</a></li></ul>
+      <a class="navcta" href="#contact">Book a call</a>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap">
+  <div class="wp-hero">
+    <div class="rv">
+      <a class="back ul" href="/">← noahhofmann.com</a>
+      <p class="label" style="margin-top:36px"><b>Waypoint</b> · by Noah Hofmann</p>
+      <h1 style="font-size:clamp(46px,7vw,96px);margin:20px 0 22px">Open the market.<br><span class="thin" style="font-weight:300;color:var(--steel)">Then build the pipeline.</span></h1>
+      <p class="lead">Waypoint is my commercial practice for early-stage B2B founders who have product signals but no systematised go-to-market yet. I map the market, open the doors and run the outreach, until the first partnerships are signed.</p>
+      <div class="btns">
+        <a class="btn btn-dark" href="#contact">Book a call <span class="arr">→</span></a>
+        <a class="btn btn-line" href="#offering">See the offering</a>
+      </div>
+    </div>
+    <div class="formats rv" aria-label="Engagement formats">
+      <div class="fmt"><b>Project</b><span>6–12 weeks</span></div>
+      <div class="fmt"><b>Fractional retainer</b><span>3–6 months</span></div>
+      <div class="fmt"><b>Advisory</b><span>Ongoing sparring</span></div>
+      <div class="fmt"><b>Engine setup</b><span>Automation</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="block" id="offering">
+  <div class="wrap">
+    <div class="head rv">
+      <div>
+        <span class="label"><b>01</b> · Offering</span>
+        <h2>Five ways to work together.</h2>
+      </div>
+      <p class="lead">Defined scope, defined hours and a small number of clients at a time, so the work gets my full attention. Most engagements start with a scoped project and grow from there.</p>
+    </div>
+
+    <div class="offers">
+      <article class="offer rv">
+        <div class="top"><span class="chip">Project · 6–12 weeks</span><span class="label">/01</span></div>
+        <h3>Market entry &amp; international expansion</h3>
+        <p class="for">For startups and scale-ups entering a new geography, especially DACH.</p>
+        <ul>
+          <li>Landscape map: buyers, partners, competitors, ecosystem gatekeepers</li>
+          <li>Local partners and champions identified and approached</li>
+          <li>First conversations booked and run, through to signed LOIs</li>
+        </ul>
+      </article>
+
+      <article class="offer rv">
+        <div class="top"><span class="chip">Project · 6–12 weeks</span><span class="label">/02</span></div>
+        <h3>GTM strategy &amp; ICP definition</h3>
+        <p class="for">For founders with product-market signals but no systematised commercial motion.</p>
+        <ul>
+          <li>ICP and buyer personas grounded in real conversations</li>
+          <li>Messaging, positioning and a pricing hypothesis to test</li>
+          <li>A concrete plan for the first 90 days of traction</li>
+        </ul>
+      </article>
+
+      <article class="offer rv">
+        <div class="top"><span class="chip">Project or advisory</span><span class="label">/03</span></div>
+        <h3>Partnerships &amp; C-level access</h3>
+        <p class="for">For teams that need the right doors opened, not more cold lists.</p>
+        <ul>
+          <li>Warm intros into the VC, accelerator and corporate-innovation ecosystem</li>
+          <li>Investor and partner narrative preparation</li>
+          <li>Conference strategy that turns events into pipeline</li>
+        </ul>
+      </article>
+
+      <article class="offer rv">
+        <div class="top"><span class="chip">Retainer · 3–6 months</span><span class="label">/04</span></div>
+        <h3>Fractional partnerships lead</h3>
+        <p class="for">For teams that need a commercial lead but can't justify a full-time hire yet.</p>
+        <ul>
+          <li>Embedded on defined days: pipeline, outreach and closing</li>
+          <li>Partner and customer conversations run end to end</li>
+          <li>Process and playbook handed over to your future hire</li>
+        </ul>
+      </article>
+
+      <article class="offer feature rv">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="top"><span class="chip new">New</span><span class="label" style="color:#8B929B">/05</span></div>
+          <h3 style="font-size:36px">Outbound engine setup</h3>
+          <p class="for">For small B2B teams who want a steady, personal outbound motion without hiring an SDR. Built in n8n on your own accounts, and run first on my own pipeline.</p>
+          <ul>
+            <li>Funding and accelerator signals turned into qualified leads</li>
+            <li>AI-researched, evidence-based first drafts in your voice</li>
+            <li>Every message approved by a human before it goes out</li>
+            <li>Bookings flow straight into your CRM with attribution</li>
+            <li>GDPR-aware by design, with a legal-basis check per lead</li>
+          </ul>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:16px">
+          <span class="label" style="color:#8B929B">How it flows</span>
+          <div class="flow">
+            <span>Signals</span><span>→ Qualify</span><span>→ Research</span><span>→ Draft</span><span>→ You approve</span><span>→ Send</span><span>→ Meeting booked</span>
+          </div>
+          <p class="for" style="font-size:14px">Your data stays in your tools: Notion or your CRM, your mailbox, your calendar.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block soft" id="cases">
+  <div class="wrap">
+    <div class="head rv">
+      <div>
+        <span class="label"><b>02</b> · Case studies</span>
+        <h2>What this looked like before Waypoint.</h2>
+      </div>
+      <p class="lead">Three chapters that shaped how I work: opening markets for a global accelerator, building a startup from zero, and running a large event on no budget.</p>
+    </div>
+
+    <div class="cases">
+      <article class="case rv">
+        <div>
+          <span class="idx">A · Market entry</span>
+          <h3>Techstars</h3>
+          <p class="role">Partnerships Manager EMEA &amp; APAC · 2022–2024</p>
+          <p class="role" style="margin-top:16px">Example campaigns</p>
+          <div class="markets" style="margin-top:8px"><span>Japan</span><span>CEE</span><span>South Africa</span><span>Nigeria</span><span>Gulf region</span></div>
+        </div>
+        <ul>
+          <li>Opened new markets for Techstars worldwide to trigger foreign direct investment, grassroots innovation and strategic partnerships for industry leaders.</li>
+          <li>Ran focused market-entry campaigns to win new partner accounts, among them Japan, CEE, South Africa, Nigeria and the Gulf region.</li>
+          <li>Worked with universities, development agencies and private partners across Europe, and led RFP processes with USAID and GIZ.</li>
+          <li>Managed corporate partners including Audi, ABN Amro, Equinor, Intesa Sanpaolo and JETRO.</li>
+          <li>Hosted delegations and events for high-level guests and national leaders.</li>
+        </ul>
+        <div class="nums">
+          <div class="n"><b>$14M</b><span>qualified partnership pipeline in 24 months, built from zero</span></div>
+          <div class="n"><b>USAID · GIZ</b><span>RFP processes led across MENA, Eastern Europe, Japan and Nigeria</span></div>
+        </div>
+      </article>
+
+      <article class="case rv">
+        <div>
+          <span class="idx">B · Zero to launch</span>
+          <h3>Qualas</h3>
+          <p class="role">Co-founder &amp; CEO · B2B SaaS · 2021–2022</p>
+        </div>
+        <ul>
+          <li>Built two functional prototypes in under nine months and validated them in 50+ discovery interviews.</li>
+          <li>Certified through Y Combinator's Startup School and won a startup competition in Romania.</li>
+          <li>Pivoted to a Figma-native product after learning buyers wanted workflow integration, and launched it as a Figma community plugin.</li>
+          <li>Launched on Product Hunt.</li>
+        </ul>
+        <div class="nums">
+          <div class="n"><b>3 LOIs</b><span>signed before launch</span></div>
+          <div class="n"><b>130+</b><span>Product Hunt upvotes on launch day</span></div>
+        </div>
+      </article>
+
+      <article class="case rv">
+        <div>
+          <span class="idx">C · Events &amp; community</span>
+          <h3>Sigma Squared Summit</h3>
+          <p class="role">Co-Managing Director · Venice &amp; Barcelona · 2018–2020</p>
+        </div>
+        <ul>
+          <li>Brought together the leaders of tomorrow and industry experts to tackle problems in education, healthcare and sustainability.</li>
+          <li>Designed think-tank sessions as the centrepiece of the programme.</li>
+          <li>Co-led 25 remote contributors across Europe before remote work was normal, and 60+ volunteers on site.</li>
+        </ul>
+        <div class="nums">
+          <div class="n"><b>300</b><span>attendees over three days</span></div>
+          <div class="n"><b>€100K</b><span>event value delivered on zero cash budget</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="process">
+  <div class="wrap">
+    <div class="head rv">
+      <div>
+        <span class="label"><b>03</b> · How I work</span>
+        <h2>From first call to signed partners.</h2>
+      </div>
+      <p class="lead">Clear steps, written scope and a defined end, so you always know what you're getting and when.</p>
+    </div>
+    <div class="steps rv">
+      <div class="step"><span class="k">Step 1</span><h3>30-minute call</h3><p>Where your commercial motion stands, and whether I'm the right fit.</p></div>
+      <div class="step"><span class="k">Step 2</span><h3>Scope</h3><p>A written proposal: goals, deliverables, hours and timeline.</p></div>
+      <div class="step"><span class="k">Step 3</span><h3>Execution</h3><p>Weekly check-ins, a shared pipeline and visible progress.</p></div>
+      <div class="step"><span class="k">Step 4</span><h3>Handover</h3><p>Playbooks, contacts and systems stay with your team.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contact">
+  <div class="wrap">
+    <span class="label" style="color:#8B929B"><b>Book a call</b> · 30 minutes</span>
+    <h2 style="margin-top:22px">Ready to open your next market? <em>Let's talk.</em></h2>
+    <p>Tell me what you're building and where you want to go. If it's a fit, you'll get a written scope within a few days.</p>
+    <div class="btns">
+      <a class="btn btn-dark" href="https://cal.com/book-a-call-with-noah/30min">Book a call <span class="arr">→</span></a>
+      <a class="btn btn-line" href="mailto:hello@noahhofmann.com">hello@noahhofmann.com</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Waypoint · Noah Hofmann Consulting · Berlin</span>
+    <span><a class="ul" href="/">noahhofmann.com</a> &nbsp;·&nbsp; <a class="ul" href="https://linkedin.com/in/noahhofmann">LinkedIn</a> &nbsp;·&nbsp; <a class="ul" href="/impressum.html">Impressum</a></span>
+  </div>
+</footer>
+
+<script>
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1});
+  document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*70+'ms';io.observe(el)});
+  const nav=document.getElementById('nav');
+  addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>8),{passive:true});
+</script>
+</body>
+</html>

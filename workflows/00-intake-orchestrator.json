@@ -1,0 +1,469 @@
+{
+  "name": "WP \u00b7 00 Intake (orchestrator)",
+  "nodes": [
+    {
+      "id": "5eaa23ca-49e5-4262-90a1-692a2bafe15c",
+      "name": "Weekdays 07:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 7 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ffaf111e-0e8d-4ff5-9d50-08afad0c0c83",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1839f5b1-988f-412b-92a7-e143cf872868",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Central config for the whole engine. Passed to every sub-workflow inside each item.\nreturn [{ json: {\n  maxLeadsPerRun: 15,\n  maxAgeDays: 7,\n  notionCompaniesDb: '1247998a78a8446993afa06d9811c436',\n  notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2',\n  notionRunsDb: '84a655097a4449588604e918ae009c1b',\n  promptVersion: 'qualify-v1 / people-v1',\n  model: 'gpt-4o-mini',\n  eurPer1kTokens: 0.00025   // rough blended gpt-4o-mini price incl. output, for the run log\n} }];"
+      }
+    },
+    {
+      "id": "4023ea96-cd83-405c-9f0e-c6a97ac071b0",
+      "name": "RSS \u00b7 EU-Startups funding",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        440,
+        100
+      ],
+      "parameters": {
+        "url": "https://www.eu-startups.com/category/fundin/feed/",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "d958c6a5-56a6-46c1-9be4-c4d5a759ba72",
+      "name": "RSS \u00b7 Tech.eu",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "url": "https://tech.eu/feed/",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "bfa2b699-6419-4ee4-b7ff-4a43e74c4149",
+      "name": "Merge feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        660,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d69d4a43-cb75-4a86-9c61-6db31b6c2364",
+      "name": "Normalize + funding filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Deterministic intake: clean, keep recent funding-like news, dedupe within batch.\nconst cfg = $('Config').first().json;\nconst cutoff = Date.now() - cfg.maxAgeDays * 864e5;\nconst FUNDING = /\\b(raises?|raised|secures?|secured|closes?|lands?|bags?|funding|seed|pre-seed|series [a-c]|investment round)\\b/i;\nconst strip = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\\s+/g, ' ').trim();\nconst seen = new Set(); const out = [];\nfor (const it of $input.all()) {\n  const j = it.json;\n  const link = (j.link || j.guid || '').split('?')[0].replace(/\\/$/, '');\n  if (!link || seen.has(link)) continue;\n  const date = new Date(j.isoDate || j.pubDate || 0).getTime();\n  if (!date || date < cutoff) continue;\n  const title = strip(j.title);\n  const text = strip(j['content:encoded'] || j.content || j.contentSnippet || j.description).slice(0, 2500);\n  if (!FUNDING.test(title + ' ' + text.slice(0, 400))) continue;\n  seen.add(link);\n  out.push({ json: { title, link, text, published: new Date(date).toISOString().slice(0, 10),\n    source: link.includes('eu-startups') ? 'EU-Startups' : link.includes('tech.eu') ? 'Tech.eu' : 'Other' } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "00f26a63-6b9c-427d-b02b-efa88311bdfe",
+      "name": "Notion \u00b7 known companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionCompaniesDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"page_size\": 100, \"sorts\": [{\"timestamp\": \"created_time\", \"direction\": \"descending\"}]}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "executeOnce": true
+    },
+    {
+      "id": "ed3f4faa-2369-4119-9e25-4a677a55663a",
+      "name": "Drop known + cap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Idempotency across runs: skip any article already stored as a company. Cap volume for cost.\nconst cfg = $('Config').first().json;\nconst known = new Set(($input.first().json.results || [])\n  .map(p => (p.properties?.['Signal source']?.url || '').split('?')[0].replace(/\\/$/, '')).filter(Boolean));\nreturn $('Normalize + funding filter').all()\n  .filter(i => !known.has(i.json.link))\n  .slice(0, cfg.maxLeadsPerRun)\n  .map(i => ({ json: { ...i.json, cfg } }));"
+      }
+    },
+    {
+      "id": "013d1b40-9e90-4ee9-8c0e-f7a784788c84",
+      "name": "Sub \u00b7 10 Qualify company",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        200
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "8188af90-db38-42fd-873d-64a43f23d83e",
+      "name": "Qualified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f876ace2-8bab-41a9-a4af-da8fd77f002e",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "Qualified",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "bf1ac785-b28e-4c44-9351-cfd23162973d",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "dcafe3f6-49b6-42eb-8298-fcbb5173d745",
+      "name": "Sub \u00b7 20 Find people",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2040,
+        40
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "65abd71f-6bca-45ee-b30e-3708fd9893ab",
+      "name": "Build run log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        340
+      ],
+      "parameters": {
+        "jsCode": "// One row per run in Notion \u203a Runs.\nconst cfg = $('Config').first().json;\nconst r = $input.all().map(i => i.json);\nconst signals = $('Normalize + funding filter').all().length;\nconst tokens = r.reduce((a, x) => a + (x.tokensEst || 0), 0);\nconst created = r.filter(x => x.ok).length;\nconst errors = r.filter(x => !x.ok || x.error).length;\nconst n = s => r.filter(x => x.status === s).length;\nconst injected = r.filter(x => (x.flags || []).includes('Injection pattern')).length;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: cfg.notionRunsDb }, properties: {\n  'Run': { title: t(`Intake ${new Date().toISOString().slice(0,16).replace('T',' ')}`) },\n  'Workflow': { select: { name: 'Intake' } },\n  'Status': { select: { name: errors === 0 ? 'Success' : created > 0 ? 'Partial' : 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: signals },\n  'Items out': { number: created },\n  'Duplicates skipped': { number: signals - r.length },\n  'Errors': { number: errors },\n  'Tokens': { number: tokens },\n  'Cost EUR': { number: Math.round(tokens / 1000 * cfg.eurPer1kTokens * 10000) / 10000 },\n  'Notes': { rich_text: t(`${n('Qualified')} qualified, ${n('Archived')} archived, ${n('Rejected')} rejected (${injected} injection). Tokens estimated. ${cfg.model}, ${cfg.promptVersion}.`) }\n}}}];"
+      }
+    },
+    {
+      "id": "b3d489e8-62a7-4555-a037-93e9e2d5ccd1",
+      "name": "Notion \u00b7 log run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        340
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "99ac12c0-4bfb-4cd7-8159-336a1261a6a3",
+      "name": "Note \u00b7 Orchestrator",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -120
+      ],
+      "parameters": {
+        "content": "## Orchestrator\nOnly plumbing lives here: trigger \u2192 intake \u2192 dedupe \u2192 hand each article to sub-workflows. Every sub-workflow has one job and a small input/output contract, so each can be tested alone with pinned data.",
+        "height": 170,
+        "width": 560,
+        "color": 7
+      }
+    },
+    {
+      "id": "0b2d8855-31dc-4e9c-87d8-fb324760f289",
+      "name": "Note \u00b7 Sub-workflows",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        -180
+      ],
+      "parameters": {
+        "content": "## Sub-workflows\n10 Qualify company \u2192 returns {ok, companyPageId, score, status, flags}.\n20 Find people \u2192 only for Qualified; creates linked Contacts.\nNext (Thu): 30 Enrich contact, 40 Draft + judge, 50 Telegram approval.",
+        "height": 190,
+        "width": 560,
+        "color": 5
+      }
+    }
+  ],
+  "connections": {
+    "Weekdays 07:30": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "RSS \u00b7 EU-Startups funding",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS \u00b7 Tech.eu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS \u00b7 EU-Startups funding": {
+      "main": [
+        [
+          {
+            "node": "Merge feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS \u00b7 Tech.eu": {
+      "main": [
+        [
+          {
+            "node": "Merge feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge feeds": {
+      "main": [
+        [
+          {
+            "node": "Normalize + funding filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize + funding filter": {
+      "main": [
+        [
+          {
+            "node": "Notion \u00b7 known companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion \u00b7 known companies": {
+      "main": [
+        [
+          {
+            "node": "Drop known + cap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drop known + cap": {
+      "main": [
+        [
+          {
+            "node": "Sub \u00b7 10 Qualify company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub \u00b7 10 Qualify company": {
+      "main": [
+        [
+          {
+            "node": "Qualified?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build run log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified?": {
+      "main": [
+        [
+          {
+            "node": "Sub \u00b7 20 Find people",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build run log": {
+      "main": [
+        [
+          {
+            "node": "Notion \u00b7 log run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true
+  },
+  "pinData": {}
+}
