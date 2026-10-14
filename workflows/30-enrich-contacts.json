@@ -1,8 +1,8 @@
 {
-  "name": "30 · Enrich contacts",
+  "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "fffaead5-e7ba-4401-b8a8-638f7fe36f5d",
+      "id": "29071ea0-8a5c-401b-ba13-568897ac6749",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,27 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "8c24f4a0-82c3-4d1f-bd9f-fc884edc708d",
-      "name": "Weekdays 08:00",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        280
-      ],
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 8 * * 1-5"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "eee08f1b-8649-43bf-bd18-2ac35cba3f80",
+      "id": "9061c2a6-d056-484c-9830-04c183cf277c",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -46,7 +26,7 @@
       }
     },
     {
-      "id": "ef508797-a9e5-4531-9264-b3b4abd65bd4",
+      "id": "ba6a73d9-54f8-4855-ba71-2f38883f982d",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -59,7 +39,7 @@
       }
     },
     {
-      "id": "cd21f1bc-f35a-41e6-9937-aef27f32a067",
+      "id": "9ab2ef1b-19c0-476e-8396-1edfe7390f33",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -77,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "220defb5-f1ca-46db-9779-34ead54469a3",
+              "id": "29061e41-1f45-45ca-86bb-a038c3f1ff1c",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -92,7 +72,7 @@
       }
     },
     {
-      "id": "98250bdb-d310-4fda-a53a-f5efe92944b1",
+      "id": "152d8c44-c8ae-493f-80fb-80e028b7343f",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -121,7 +101,7 @@
       }
     },
     {
-      "id": "7a923e89-25fa-4932-a850-c3452147dd1c",
+      "id": "e004ed0c-c57e-4d6c-8bcd-db3648899232",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -134,7 +114,7 @@
       }
     },
     {
-      "id": "6fe7e9b7-55b3-48c6-bebf-bd25db092b7e",
+      "id": "d9251c01-72e4-4c0d-a461-c0c1d97efa0b",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -160,7 +140,7 @@
       }
     },
     {
-      "id": "27fea472-a76c-4a51-bba3-859faefa8973",
+      "id": "af3b20e4-14f5-4749-ad3a-aa5f52e3d455",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -174,7 +154,7 @@
       }
     },
     {
-      "id": "262337c5-f8c9-4522-bf29-4008c35d9689",
+      "id": "54a36e05-3568-466c-a04d-51b290a5cef7",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -236,7 +216,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "09c6d10e-b18a-4fcc-be0a-dfe57fef17f1",
+      "id": "e64f54dc-1691-46ed-ab33-2ef751da3ead",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -250,7 +230,7 @@
       }
     },
     {
-      "id": "e312cec8-38d7-46f5-a4a4-e8e4dc244ab6",
+      "id": "5f4aea8d-0eeb-48ee-9a7e-9dbda7adbde9",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -268,7 +248,7 @@
           },
           "conditions": [
             {
-              "id": "676d18f0-1078-4b3a-8917-d857fe968303",
+              "id": "684b56ae-1085-4ce5-b771-4d78bfa9ba03",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -284,7 +264,7 @@
       }
     },
     {
-      "id": "35caa456-35b2-479a-a3cf-9d88ce29c053",
+      "id": "a7143a78-d690-4c66-8d03-388b168c650d",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -346,7 +326,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "79f82429-c6ba-460f-9788-fa1a5178872a",
+      "id": "1da86686-5c3b-429a-b7c9-ad1befbc9ee4",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -360,7 +340,7 @@
       }
     },
     {
-      "id": "6fea3c4e-c798-44e2-a45e-fecd1f1b8c06",
+      "id": "08e90bca-8849-4190-a393-5c0c52a2a618",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -407,7 +387,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "6239e05c-eed2-4cc2-b08f-93b77cc386db",
+      "id": "97e805d6-c21a-47ca-a688-b98e6fe54ff9",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -421,7 +401,7 @@
       }
     },
     {
-      "id": "14868c09-bef2-4816-becf-04d61d03a561",
+      "id": "fcb5d22e-2a22-4bb6-a89d-a5434d1f9a48",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -439,7 +419,7 @@
           },
           "conditions": [
             {
-              "id": "3e5a0618-ed49-42c6-9e33-20122e24aecd",
+              "id": "dda5fe2e-05e1-4818-bb15-980591a4b72f",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -455,7 +435,7 @@
       }
     },
     {
-      "id": "b39d8864-3ad3-4877-9d82-2750a1fc2711",
+      "id": "08cf8100-642e-43b7-8c4d-c249fa3ed20f",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -494,7 +474,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e5bc94eb-c5f2-48f9-8443-383a322c1a93",
+      "id": "0f9fb350-05be-4bc6-b69f-b2ef67ea9053",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -508,7 +488,7 @@
       }
     },
     {
-      "id": "d32c6d77-4c2c-4368-8dcc-7fe80dcf3209",
+      "id": "d5c69cf0-2d6d-40fe-861d-67cdbcf20a12",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -537,7 +517,7 @@
       }
     },
     {
-      "id": "3f27ed30-ce81-4885-aee9-c208308f6ca1",
+      "id": "260c7672-c3cb-486e-b060-50094bcdf1cc",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -550,7 +530,7 @@
       }
     },
     {
-      "id": "5609e688-b44a-4cf4-8946-75ffa201cfa2",
+      "id": "44136e1c-fba0-4756-80a9-30debd8a914c",
       "name": "Note · 30",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -561,23 +541,12 @@
       "parameters": {
         "width": 620,
         "height": 250,
-        "content": "## 30 · Enrich contacts\nTakes up to 5 contacts with Status **Needs email** (CEO first, then CRO/Sales, then Partnerships/Growth).\n1. **LinkedIn**: Brave search, accepted only if name AND company match (deterministic). 2 attempts max.\n2. **Email**: Hunter finder → Hunter verifier (SMTP check, **no email is sent**).\n3. `valid` (or `accept_all` ≥ 90) → **Ready to draft**, else **No email found**.\n\n**Budget guard:** 300 Brave searches + 40 Hunter credits per month, counted on active runs. Free tiers: ~1,000 / 50."
+        "content": "## 30 · Enrich contacts\nCalled once per run by WP · 00 (after the run log), or manually. Takes up to 5 contacts with Status **Needs email** (CEO first, then CRO/Sales, then Partnerships/Growth).\n1. **LinkedIn**: Brave search, accepted only if name AND company match (deterministic). 2 attempts max.\n2. **Email**: Hunter finder → Hunter verifier (SMTP check, **no email is sent**).\n3. `valid` (or `accept_all` ≥ 90) → **Ready to draft**, else **No email found**.\n\n**Budget guard:** 300 Brave searches + 40 Hunter credits per month, counted on active runs. Free tiers: ~1,000 / 50."
       }
     }
   ],
   "connections": {
     "Run manually": {
-      "main": [
-        [
-          {
-            "node": "Config + budget",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Weekdays 08:00": {
       "main": [
         [
           {

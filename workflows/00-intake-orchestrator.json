@@ -1,5 +1,5 @@
 {
-  "name": "WP \u00b7 00 Intake (orchestrator)",
+  "name": "WP · 00 Intake (orchestrator)",
   "nodes": [
     {
       "id": "5eaa23ca-49e5-4262-90a1-692a2bafe15c",
@@ -47,7 +47,7 @@
     },
     {
       "id": "4023ea96-cd83-405c-9f0e-c6a97ac071b0",
-      "name": "RSS \u00b7 EU-Startups funding",
+      "name": "RSS · EU-Startups funding",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1,
       "position": [
@@ -65,7 +65,7 @@
     },
     {
       "id": "d958c6a5-56a6-46c1-9be4-c4d5a759ba72",
-      "name": "RSS \u00b7 Tech.eu",
+      "name": "RSS · Tech.eu",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1,
       "position": [
@@ -107,7 +107,7 @@
     },
     {
       "id": "00f26a63-6b9c-427d-b02b-efa88311bdfe",
-      "name": "Notion \u00b7 known companies",
+      "name": "Notion · known companies",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -153,7 +153,7 @@
     },
     {
       "id": "013d1b40-9e90-4ee9-8c0e-f7a784788c84",
-      "name": "Sub \u00b7 10 Qualify company",
+      "name": "Sub · 10 Qualify company",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
@@ -218,7 +218,7 @@
     },
     {
       "id": "dcafe3f6-49b6-42eb-8298-fcbb5173d745",
-      "name": "Sub \u00b7 20 Find people",
+      "name": "Sub · 20 Find people",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
@@ -248,12 +248,12 @@
         340
       ],
       "parameters": {
-        "jsCode": "// One row per run in Notion \u203a Runs.\nconst cfg = $('Config').first().json;\nconst r = $input.all().map(i => i.json);\nconst signals = $('Normalize + funding filter').all().length;\nconst tokens = r.reduce((a, x) => a + (x.tokensEst || 0), 0);\nconst created = r.filter(x => x.ok).length;\nconst errors = r.filter(x => !x.ok || x.error).length;\nconst n = s => r.filter(x => x.status === s).length;\nconst injected = r.filter(x => (x.flags || []).includes('Injection pattern')).length;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: cfg.notionRunsDb }, properties: {\n  'Run': { title: t(`Intake ${new Date().toISOString().slice(0,16).replace('T',' ')}`) },\n  'Workflow': { select: { name: 'Intake' } },\n  'Status': { select: { name: errors === 0 ? 'Success' : created > 0 ? 'Partial' : 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: signals },\n  'Items out': { number: created },\n  'Duplicates skipped': { number: signals - r.length },\n  'Errors': { number: errors },\n  'Tokens': { number: tokens },\n  'Cost EUR': { number: Math.round(tokens / 1000 * cfg.eurPer1kTokens * 10000) / 10000 },\n  'Notes': { rich_text: t(`${n('Qualified')} qualified, ${n('Archived')} archived, ${n('Rejected')} rejected (${injected} injection). Tokens estimated. ${cfg.model}, ${cfg.promptVersion}.`) }\n}}}];"
+        "jsCode": "// One row per run in Notion › Runs.\nconst cfg = $('Config').first().json;\nconst r = $input.all().map(i => i.json);\nconst signals = $('Normalize + funding filter').all().length;\nconst tokens = r.reduce((a, x) => a + (x.tokensEst || 0), 0);\nconst created = r.filter(x => x.ok).length;\nconst errors = r.filter(x => !x.ok || x.error).length;\nconst n = s => r.filter(x => x.status === s).length;\nconst injected = r.filter(x => (x.flags || []).includes('Injection pattern')).length;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: cfg.notionRunsDb }, properties: {\n  'Run': { title: t(`Intake ${new Date().toISOString().slice(0,16).replace('T',' ')}`) },\n  'Workflow': { select: { name: 'Intake' } },\n  'Status': { select: { name: errors === 0 ? 'Success' : created > 0 ? 'Partial' : 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: signals },\n  'Items out': { number: created },\n  'Duplicates skipped': { number: signals - r.length },\n  'Errors': { number: errors },\n  'Tokens': { number: tokens },\n  'Cost EUR': { number: Math.round(tokens / 1000 * cfg.eurPer1kTokens * 10000) / 10000 },\n  'Notes': { rich_text: t(`${n('Qualified')} qualified, ${n('Archived')} archived, ${n('Rejected')} rejected (${injected} injection). Tokens estimated. ${cfg.model}, ${cfg.promptVersion}.`) }\n}}}];"
       }
     },
     {
       "id": "b3d489e8-62a7-4555-a037-93e9e2d5ccd1",
-      "name": "Notion \u00b7 log run",
+      "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -285,7 +285,7 @@
     },
     {
       "id": "99ac12c0-4bfb-4cd7-8159-336a1261a6a3",
-      "name": "Note \u00b7 Orchestrator",
+      "name": "Note · Orchestrator",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -293,7 +293,7 @@
         -120
       ],
       "parameters": {
-        "content": "## Orchestrator\nOnly plumbing lives here: trigger \u2192 intake \u2192 dedupe \u2192 hand each article to sub-workflows. Every sub-workflow has one job and a small input/output contract, so each can be tested alone with pinned data.",
+        "content": "## Orchestrator\nOnly plumbing lives here: trigger → intake → dedupe → hand each article to sub-workflows. Every sub-workflow has one job and a small input/output contract, so each can be tested alone with pinned data.",
         "height": 170,
         "width": 560,
         "color": 7
@@ -301,7 +301,7 @@
     },
     {
       "id": "0b2d8855-31dc-4e9c-87d8-fb324760f289",
-      "name": "Note \u00b7 Sub-workflows",
+      "name": "Note · Sub-workflows",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -309,11 +309,34 @@
         -180
       ],
       "parameters": {
-        "content": "## Sub-workflows\n10 Qualify company \u2192 returns {ok, companyPageId, score, status, flags}.\n20 Find people \u2192 only for Qualified; creates linked Contacts.\nNext (Thu): 30 Enrich contact, 40 Draft + judge, 50 Telegram approval.",
+        "content": "## Sub-workflows\n10 Qualify company → returns {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → runs once at the end (after the run log), works through every contact with Status 'Needs email', incl. leftovers from earlier runs.\nNext: 40 Draft + judge, 50 Telegram approval.",
         "height": 190,
         "width": 560,
         "color": 5
       }
+    },
+    {
+      "id": "72418c9b-7d5a-49d1-a0aa-221919d7796e",
+      "name": "Sub · 30 Enrich contacts",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2280,
+        340
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -343,19 +366,19 @@
       "main": [
         [
           {
-            "node": "RSS \u00b7 EU-Startups funding",
+            "node": "RSS · EU-Startups funding",
             "type": "main",
             "index": 0
           },
           {
-            "node": "RSS \u00b7 Tech.eu",
+            "node": "RSS · Tech.eu",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "RSS \u00b7 EU-Startups funding": {
+    "RSS · EU-Startups funding": {
       "main": [
         [
           {
@@ -366,7 +389,7 @@
         ]
       ]
     },
-    "RSS \u00b7 Tech.eu": {
+    "RSS · Tech.eu": {
       "main": [
         [
           {
@@ -392,14 +415,14 @@
       "main": [
         [
           {
-            "node": "Notion \u00b7 known companies",
+            "node": "Notion · known companies",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Notion \u00b7 known companies": {
+    "Notion · known companies": {
       "main": [
         [
           {
@@ -414,14 +437,14 @@
       "main": [
         [
           {
-            "node": "Sub \u00b7 10 Qualify company",
+            "node": "Sub · 10 Qualify company",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sub \u00b7 10 Qualify company": {
+    "Sub · 10 Qualify company": {
       "main": [
         [
           {
@@ -441,7 +464,7 @@
       "main": [
         [
           {
-            "node": "Sub \u00b7 20 Find people",
+            "node": "Sub · 20 Find people",
             "type": "main",
             "index": 0
           }
@@ -452,7 +475,18 @@
       "main": [
         [
           {
-            "node": "Notion \u00b7 log run",
+            "node": "Notion · log run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · log run": {
+      "main": [
+        [
+          {
+            "node": "Sub · 30 Enrich contacts",
             "type": "main",
             "index": 0
           }
