@@ -10,7 +10,7 @@ Outbound research-and-draft engine for **Waypoint** (Noah Hofmann's GTM advisory
 | Workflow | Job | AI? |
 |---|---|---|
 | `00 Intake (orchestrator)` | RSS intake, cleaning, dedupe, cost cap, calls sub-workflows, run log | No |
-| `10 Qualify company` | Injection pre-check → LLM scores ICP 0–3 → rule guardrails → Notion › Companies | Yes (1 call) |
+| `10 Qualify company` | Fetch full article → injection pre-check → LLM extracts facts with verbatim evidence (qualify-v2) → code scores 100 points against icp-v2 (hard gates, ≥60 Qualified) → company-level dedupe → Notion › Companies (incl. domain from article links) | Yes (1 call, facts only) |
 | `20 Find people` | LLM extracts founders named in the article → verbatim check → Notion › Contacts | Yes (1 call) |
 | `90 Error handler` | Any failure → email + Telegram + Notion › Runs | No |
 | 30 Enrich contacts | Built | Brave LinkedIn search (2 attempts, deterministic name+company match), Hunter finder + verifier (no email sent), monthly budget guard (300 Brave / 40 Hunter) |
