@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "29071ea0-8a5c-401b-ba13-568897ac6749",
+      "id": "3d27f16a-b7e8-4a99-bb2e-a55301726618",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "9061c2a6-d056-484c-9830-04c183cf277c",
+      "id": "9e7f2a78-ce76-40f1-b588-0e2acb35d48b",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "ba6a73d9-54f8-4855-ba71-2f38883f982d",
+      "id": "6c437b29-c144-4950-ab3c-a0493444fc11",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "9ab2ef1b-19c0-476e-8396-1edfe7390f33",
+      "id": "00decf76-179d-4a91-9ff8-12bbe456e736",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "29061e41-1f45-45ca-86bb-a038c3f1ff1c",
+              "id": "73c75068-8366-4909-a6fa-3e4868aba3cc",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "152d8c44-c8ae-493f-80fb-80e028b7343f",
+      "id": "a1bc0df2-4869-4eee-b66c-dd2d9df7e296",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "e004ed0c-c57e-4d6c-8bcd-db3648899232",
+      "id": "ac5f3c2c-56a4-4436-b817-2ef46d090fcf",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -110,11 +110,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const parts = name.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\nreturn rows.slice(0, cfg.allowed).map(r => ({ json: r }));"
+        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($input.first().json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const parts = name.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\nreturn rows.slice(0, cfg.allowed).map(r => ({ json: r }));"
       }
     },
     {
-      "id": "d9251c01-72e4-4c0d-a461-c0c1d97efa0b",
+      "id": "60bf8c56-eb66-42ad-97c7-41cf9635a7d7",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "af3b20e4-14f5-4749-ad3a-aa5f52e3d455",
+      "id": "9556822e-b531-49c6-bb87-cfa57d0caeca",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "54a36e05-3568-466c-a04d-51b290a5cef7",
+      "id": "fa8b2db4-9d4c-4b91-b62c-92c5332d22d8",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -216,7 +216,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e64f54dc-1691-46ed-ab33-2ef751da3ead",
+      "id": "f237d344-96e3-4fe9-a248-0f7f579a47bf",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -230,7 +230,7 @@
       }
     },
     {
-      "id": "5f4aea8d-0eeb-48ee-9a7e-9dbda7adbde9",
+      "id": "c345eeb7-b587-4c2f-9da9-f854ceee8fb7",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -248,7 +248,7 @@
           },
           "conditions": [
             {
-              "id": "684b56ae-1085-4ce5-b771-4d78bfa9ba03",
+              "id": "95fa2cbf-c18a-4d78-b6f3-989b3d9cd2e8",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -264,7 +264,7 @@
       }
     },
     {
-      "id": "a7143a78-d690-4c66-8d03-388b168c650d",
+      "id": "24d4e620-59ef-4c37-9bcf-90999c3a92f3",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -326,7 +326,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "1da86686-5c3b-429a-b7c9-ad1befbc9ee4",
+      "id": "2b99ef2c-833b-4b0e-bafd-14b47e583e0e",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -340,7 +340,7 @@
       }
     },
     {
-      "id": "08e90bca-8849-4190-a393-5c0c52a2a618",
+      "id": "4f8c43bc-95c2-445c-bb43-30a89c2a697e",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -387,7 +387,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "97e805d6-c21a-47ca-a688-b98e6fe54ff9",
+      "id": "21262b2e-2991-4652-9827-1f6a92a84023",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -401,7 +401,7 @@
       }
     },
     {
-      "id": "fcb5d22e-2a22-4bb6-a89d-a5434d1f9a48",
+      "id": "875b0d27-676b-4d17-8970-13334c2b6f65",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -419,7 +419,7 @@
           },
           "conditions": [
             {
-              "id": "dda5fe2e-05e1-4818-bb15-980591a4b72f",
+              "id": "d571dfa4-d0e7-420a-8f53-560003c80d56",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -435,7 +435,7 @@
       }
     },
     {
-      "id": "08cf8100-642e-43b7-8c4d-c249fa3ed20f",
+      "id": "43be0d80-043a-458d-bf9b-3afd4c238ce5",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -474,7 +474,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "0f9fb350-05be-4bc6-b69f-b2ef67ea9053",
+      "id": "4e8a08ec-5ed3-46f5-ad85-0c145397b979",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -488,7 +488,7 @@
       }
     },
     {
-      "id": "d5c69cf0-2d6d-40fe-861d-67cdbcf20a12",
+      "id": "29ed8046-f5ee-44dc-9fd7-21dddfdad0e8",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -517,7 +517,7 @@
       }
     },
     {
-      "id": "260c7672-c3cb-486e-b060-50094bcdf1cc",
+      "id": "677310e8-3064-4f70-89f3-22a0ba4a98e7",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -530,7 +530,7 @@
       }
     },
     {
-      "id": "44136e1c-fba0-4756-80a9-30debd8a914c",
+      "id": "bec94744-ed9b-4e3e-b5cf-398c81bad51d",
       "name": "Note · 30",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

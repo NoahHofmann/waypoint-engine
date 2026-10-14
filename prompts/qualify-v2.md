@@ -13,8 +13,9 @@ Your only job is to EXTRACT FACTS about the company that is the subject of the a
 - `business_model`: B2B if it sells to businesses, B2C to consumers, B2B2C if through businesses to consumers, Mixed if both. Unknown if unclear.
 - `tech_core`: core_tech if software, data, AI, hardware or a platform is the product; tech_assisted_service if it is mainly a service using tech; no_tech otherwise.
 - `use_of_funds`: commercial if the money goes to sales, GTM, hiring commercial staff, expansion or partnerships; rnd_only if only R&D, product or regulatory; mixed if both.
-- `senior_commercial_lead_named`: true only if a CRO, VP/Head of Sales, CCO or similar person is named.
+- `senior_commercial_lead_named`: true only if a person with a dedicated commercial role (CRO, CCO, VP / Head of Sales, Head of Partnerships) is named. Founders and CEOs do NOT count.
 - `mission_flags`: only if the company's core business is in one of these areas.
+- Lists (`decision_makers`, `investors`, `expansion_targets`) may be empty; list at most 5 people.
 - `decision_makers`: founders and C-level people of THIS company named in the text, exactly as written. Never people from investors, journalists or other companies.
 - `investors`: investor names as written.
 - `website`: only if the company's URL or domain appears literally in the text.
