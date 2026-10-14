@@ -13,7 +13,8 @@ Outbound research-and-draft engine for **Waypoint** (Noah Hofmann's GTM advisory
 | `10 Qualify company` | Injection pre-check → LLM scores ICP 0–3 → rule guardrails → Notion › Companies | Yes (1 call) |
 | `20 Find people` | LLM extracts founders named in the article → verbatim check → Notion › Contacts | Yes (1 call) |
 | `90 Error handler` | Any failure → email + Telegram + Notion › Runs | No |
-| 30 Enrich · 40 Draft + judge · 50 Telegram approval | *In progress* | |
+| 30 Enrich contacts | Built | Brave LinkedIn search (2 attempts, deterministic name+company match), Hunter finder + verifier (no email sent), monthly budget guard (300 Brave / 40 Hunter) |
+| 40 Draft + judge · 50 Telegram approval | *In progress* | |
 
 Data lives in Notion: **Companies** (1) ↔ (n) **Contacts**, plus **Runs** (one row per execution) and **Evals** (golden set).
 

@@ -1,0 +1,810 @@
+{
+  "name": "30 · Enrich contacts",
+  "nodes": [
+    {
+      "id": "fffaead5-e7ba-4401-b8a8-638f7fe36f5d",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "8c24f4a0-82c3-4d1f-bd9f-fc884edc708d",
+      "name": "Weekdays 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        280
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "eee08f1b-8649-43bf-bd18-2ac35cba3f80",
+      "name": "When called by orchestrator",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        460
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "ef508797-a9e5-4531-9264-b3b4abd65bd4",
+      "name": "Config + budget",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        280
+      ],
+      "parameters": {
+        "jsCode": "// 30 · Enrich contacts: config + monthly budget guard.\n// Free tiers: Brave $5 credit/month (~1,000 searches), Hunter 50 credits/month.\n// We stay well below both. Counters live in workflow static data and are\n// only persisted on ACTIVE (production) runs, not on manual test runs.\nconst cfg = {\n  notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2',\n  maxContactsPerRun: 5,\n  braveMonthlyCap: 300,     // searches; worst case 2 per contact\n  hunterMonthlyCap: 40,     // credits; finder 1 (only if found) + verifier 0.5\n  personaOrder: [\n    /\\b(ceo|founder|co-founder|cofounder|gründer|geschäftsführer|managing director)\\b/i,\n    /\\b(cro|chief revenue|head of sales|vp sales|sales director)\\b/i,\n    /\\b(partnership|growth|business development|bd)\\b/i\n  ].map(String)\n};\nconst s = $getWorkflowStaticData('global');\nconst month = new Date().toISOString().slice(0, 7);\nif (s.month !== month) { s.month = month; s.brave = 0; s.hunter = 0; }\nconst braveLeft = cfg.braveMonthlyCap - (s.brave || 0);\nconst hunterLeft = cfg.hunterMonthlyCap - (s.hunter || 0);\n// worst case per contact: 2 Brave searches, 1.5 Hunter credits\nconst allowed = Math.max(0, Math.min(cfg.maxContactsPerRun, Math.floor(braveLeft / 2), Math.floor(hunterLeft / 1.5)));\nreturn [{ json: { ...cfg, month, braveUsed: s.brave || 0, hunterUsed: s.hunter || 0, allowed } }];"
+      }
+    },
+    {
+      "id": "cd21f1bc-f35a-41e6-9937-aef27f32a067",
+      "name": "Budget left?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        280
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "220defb5-f1ca-46db-9779-34ead54469a3",
+              "leftValue": "={{ $json.allowed }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "98250bdb-d310-4fda-a53a-f5efe92944b1",
+      "name": "Notion · contacts needing email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Needs email\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: 25 }) }}"
+      }
+    },
+    {
+      "id": "7a923e89-25fa-4932-a850-c3452147dd1c",
+      "name": "Pick contacts (persona order, budget cap)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const parts = name.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\nreturn rows.slice(0, cfg.allowed).map(r => ({ json: r }));"
+      }
+    },
+    {
+      "id": "6fe7e9b7-55b3-48c6-bebf-bd25db092b7e",
+      "name": "Notion · get company",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.companyPageId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "27fea472-a76c-4a51-bba3-859faefa8973",
+      "name": "Prep search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, q1, q2, braveCalls: 0 } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "262337c5-f8c9-4522-bf29-4008c35d9689",
+      "name": "Brave · LinkedIn attempt 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.search.brave.com/res/v1/web/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.q1 }}"
+            },
+            {
+              "name": "count",
+              "value": "5"
+            },
+            {
+              "name": "result_filter",
+              "value": "web"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1100
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Brave Search API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "09c6d10e-b18a-4fcc-be0a-dfe57fef17f1",
+      "name": "Verify attempt 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Prep search').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 0) + 1,\n  braveError: $json.error ? String($json.error.message || $json.error).slice(0, 200) : null };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 1: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = `Attempt 1: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "e312cec8-38d7-46f5-a4a4-e8e4dc244ab6",
+      "name": "LinkedIn found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2020,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "676d18f0-1078-4b3a-8917-d857fe968303",
+              "leftValue": "={{ $json.linkedin }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "35caa456-35b2-479a-a3cf-9d88ce29c053",
+      "name": "Brave · LinkedIn attempt 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        380
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.search.brave.com/res/v1/web/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.q2 }}"
+            },
+            {
+              "name": "count",
+              "value": "5"
+            },
+            {
+              "name": "result_filter",
+              "value": "web"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1100
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Brave Search API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "79f82429-c6ba-460f-9788-fa1a5178872a",
+      "name": "Verify attempt 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        380
+      ],
+      "parameters": {
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Verify attempt 1').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 1) + 1,\n  braveError: $json.error ? String($json.error.message || $json.error).slice(0, 200) : null };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 2: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = prev.linkedinMatch + ` | Attempt 2: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "6fea3c4e-c798-44e2-a45e-fecd1f1b8c06",
+      "name": "Hunter · email finder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2700,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.hunter.io/v2/email-finder",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "={{ $json.domain ? 'domain' : 'company' }}",
+              "value": "={{ $json.domain || $json.company }}"
+            },
+            {
+              "name": "first_name",
+              "value": "={{ $json.first }}"
+            },
+            {
+              "name": "last_name",
+              "value": "={{ $json.last }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "",
+          "name": "Hunter API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "6239e05c-eed2-4cc2-b08f-93b77cc386db",
+      "name": "Decide verify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2920,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Read Hunter finder result. Verify only when the finder isn't already sure.\n// Paired item points back to whichever verify node fed this branch.\nlet prev;\ntry { prev = $('Verify attempt 2').item.json; } catch (e) { prev = null; }\nif (!prev || prev.contactPageId === undefined) prev = $('Verify attempt 1').item.json;\nconst d = $json.data || {};\nconst email = d.email || null;\nconst finderStatus = d.verification?.status || null;\nreturn { json: { ...prev,\n  email, emailScore: d.score ?? null, finderStatus,\n  hunterCredits: email ? 1 : 0,\n  hunterError: $json.errors ? JSON.stringify($json.errors).slice(0, 200) : null,\n  needVerify: !!email && finderStatus !== 'valid' } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "14868c09-bef2-4816-becf-04d61d03a561",
+      "name": "Needs verification?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3140,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3e5a0618-ed49-42c6-9e33-20122e24aecd",
+              "leftValue": "={{ $json.needVerify }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b39d8864-3ad3-4877-9d82-2750a1fc2711",
+      "name": "Hunter · verify (no email sent)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3360,
+        380
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.hunter.io/v2/email-verifier",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "",
+          "name": "Hunter API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "e5bc94eb-c5f2-48f9-8443-383a322c1a93",
+      "name": "Build contact update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3580,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: ok ? 'Ready to draft' : 'No email found' } },\n  'Email status': { select: { name: status } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status, ready: ok,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "d32c6d77-4c2c-4368-8dcc-7fe80dcf3209",
+      "name": "Notion · update contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3800,
+        200
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.notionBody) }}"
+      }
+    },
+    {
+      "id": "3f27ed30-ce81-4885-aee9-c208308f6ca1",
+      "name": "Run summary + budget",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4020,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Book usage against the monthly budget and return a summary to the caller.\nconst rows = $('Build contact update').all().map(i => i.json);\nconst brave = rows.reduce((a, r) => a + (r.braveCalls || 0), 0);\nconst hunter = rows.reduce((a, r) => a + (r.hunterCredits || 0), 0);\nconst s = $getWorkflowStaticData('global');\ns.brave = (s.brave || 0) + brave;\ns.hunter = (s.hunter || 0) + hunter;\nreturn [{ json: {\n  enriched: rows.length,\n  readyToDraft: rows.filter(r => r.ready).length,\n  linkedinFound: rows.filter(r => r.linkedin).length,\n  braveCallsThisRun: brave, hunterCreditsThisRun: hunter,\n  braveUsedThisMonth: s.brave, hunterUsedThisMonth: s.hunter,\n  contacts: rows.map(r => ({ name: r.name, company: r.company, status: r.status, linkedin: !!r.linkedin }))\n} }];"
+      }
+    },
+    {
+      "id": "5609e688-b44a-4cf4-8946-75ffa201cfa2",
+      "name": "Note · 30",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -200
+      ],
+      "parameters": {
+        "width": 620,
+        "height": 250,
+        "content": "## 30 · Enrich contacts\nTakes up to 5 contacts with Status **Needs email** (CEO first, then CRO/Sales, then Partnerships/Growth).\n1. **LinkedIn**: Brave search, accepted only if name AND company match (deterministic). 2 attempts max.\n2. **Email**: Hunter finder → Hunter verifier (SMTP check, **no email is sent**).\n3. `valid` (or `accept_all` ≥ 90) → **Ready to draft**, else **No email found**.\n\n**Budget guard:** 300 Brave searches + 40 Hunter credits per month, counted on active runs. Free tiers: ~1,000 / 50."
+      }
+    }
+  ],
+  "connections": {
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Config + budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekdays 08:00": {
+      "main": [
+        [
+          {
+            "node": "Config + budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When called by orchestrator": {
+      "main": [
+        [
+          {
+            "node": "Config + budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config + budget": {
+      "main": [
+        [
+          {
+            "node": "Budget left?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Budget left?": {
+      "main": [
+        [
+          {
+            "node": "Notion · contacts needing email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · contacts needing email": {
+      "main": [
+        [
+          {
+            "node": "Pick contacts (persona order, budget cap)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick contacts (persona order, budget cap)": {
+      "main": [
+        [
+          {
+            "node": "Notion · get company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · get company": {
+      "main": [
+        [
+          {
+            "node": "Prep search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep search": {
+      "main": [
+        [
+          {
+            "node": "Brave · LinkedIn attempt 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brave · LinkedIn attempt 1": {
+      "main": [
+        [
+          {
+            "node": "Verify attempt 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify attempt 1": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn found?": {
+      "main": [
+        [
+          {
+            "node": "Hunter · email finder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Brave · LinkedIn attempt 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brave · LinkedIn attempt 2": {
+      "main": [
+        [
+          {
+            "node": "Verify attempt 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify attempt 2": {
+      "main": [
+        [
+          {
+            "node": "Hunter · email finder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hunter · email finder": {
+      "main": [
+        [
+          {
+            "node": "Decide verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide verify": {
+      "main": [
+        [
+          {
+            "node": "Needs verification?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs verification?": {
+      "main": [
+        [
+          {
+            "node": "Hunter · verify (no email sent)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build contact update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hunter · verify (no email sent)": {
+      "main": [
+        [
+          {
+            "node": "Build contact update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build contact update": {
+      "main": [
+        [
+          {
+            "node": "Notion · update contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · update contact": {
+      "main": [
+        [
+          {
+            "node": "Run summary + budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true
+  },
+  "pinData": {}
+}
