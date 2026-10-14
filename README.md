@@ -1,5 +1,7 @@
 # Waypoint Engine
 
+> **Documentation:** see [docs/README.md](docs/README.md) for every workflow, the data model and the decision log.
+
 Outbound research-and-draft engine for **Waypoint** (Noah Hofmann's GTM advisory). Built in n8n as the WBS *AI Agents & Automation* final project.
 
 **Problem:** a solo advisor has no SDR and limited weekly hours for prospecting.

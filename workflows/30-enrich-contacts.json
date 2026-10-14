@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "4a9a60da-10d9-4268-b71d-503725ecdc6c",
+      "id": "eb8e89bd-f805-4300-b49c-8f3f1335c348",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "8608e2d3-9440-4f7e-bccf-cd4189a76038",
+      "id": "5da8bb38-7fe1-4853-b789-51df3c1ec299",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "3ae21d24-99dc-4578-b8db-af416806ac9b",
+      "id": "04ad97c8-04fa-4fc1-8dad-e9cd1d695544",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "28c1660a-fd81-4817-90a8-926c82a86fcd",
+      "id": "855aea60-b192-4581-9e56-76b637fe5c50",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "55223694-29cc-4c91-8986-2396da0281da",
+              "id": "a3426257-3ad3-45c4-a51f-f7507424ed3e",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "9c97eb58-7d4e-444e-ba1e-9722c9840814",
+      "id": "d059d82a-acac-40ed-bd32-092a5b4eef57",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "9bf44e1a-58f1-4b86-9a72-45201af99517",
+      "id": "4d68fcc5-58ae-4679-841e-46192f2b5bad",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -114,7 +114,7 @@
       }
     },
     {
-      "id": "5136182e-201f-4205-b472-9f5e4eb69819",
+      "id": "70fc0260-a878-4441-bd00-56d0d2304760",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "729fdffe-0b57-4724-bec6-acab2da613c6",
+      "id": "b48bf40a-ff99-4bd8-98c8-a27e8e9f2d29",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -149,12 +149,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = `\"${company}\" official website`;\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, q1, q2, q3, braveCalls: 0 } };",
+        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = company;  // plain name: the quoted \"official website\" query returned 0 results in every live run\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, q1, q2, q3, braveCalls: 0 } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "1b2000bf-61ff-457b-81bf-4303ef8a1d65",
+      "id": "a7ce30fa-ae8b-4c64-9430-ab23d80fca06",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -214,7 +214,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "4424fde9-9e13-4fda-9f41-f81af6c69df9",
+      "id": "8685d764-cb26-42f3-8574-75a23b3e1f04",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -223,12 +223,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Prep search').item.json;\nconst n = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 0) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 1: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  const cand = cands.find(c => c.nameOk);\n  out.linkedinMatch = `Attempt 1: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)` + (cand ? ` · check manually: ${cand.url}` : '');\n}\nreturn { json: out };",
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Prep search').item.json;\nconst n = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 0) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinCandidate = null;\n  out.linkedinMatch = `Attempt 1: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  const cand = cands.find(c => c.nameOk);\n  out.linkedinCandidate = cand ? cand.url : (prev.linkedinCandidate || null);\n  out.linkedinMatch = `Attempt 1: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)` + (cand ? ` · check manually: ${cand.url}` : '');\n}\nreturn { json: out };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "79d49422-6e75-4097-b958-84e9eb87baae",
+      "id": "de05d692-44c7-478a-997d-9c6badbad06a",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -246,7 +246,7 @@
           },
           "conditions": [
             {
-              "id": "88844aaa-5d72-445c-a514-544c5648151c",
+              "id": "c45da788-9eed-4b64-a79a-06d786203568",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -262,7 +262,7 @@
       }
     },
     {
-      "id": "ea9a0aea-d416-41a2-8b00-e4588f7be4ba",
+      "id": "b0456f81-082a-4e01-9bee-3f8f1f811afb",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -322,7 +322,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "9518c057-70ab-4495-8797-9e496800da18",
+      "id": "ad0e4c8f-1fad-4cb2-80b5-90c90ea401ac",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -331,12 +331,12 @@
         380
       ],
       "parameters": {
-        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Verify attempt 1').item.json;\nconst n = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 1) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 2: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  const cand = cands.find(c => c.nameOk);\n  out.linkedinMatch = prev.linkedinMatch + ` | Attempt 2: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)` + (cand ? ` · check manually: ${cand.url}` : '');\n}\nreturn { json: out };",
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Verify attempt 1').item.json;\nconst n = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 1) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinCandidate = null;\n  out.linkedinMatch = `Attempt 2: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  const cand = cands.find(c => c.nameOk);\n  out.linkedinCandidate = cand ? cand.url : (prev.linkedinCandidate || null);\n  out.linkedinMatch = prev.linkedinMatch + ` | Attempt 2: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)` + (cand ? ` · check manually: ${cand.url}` : '');\n}\nreturn { json: out };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "d9c27a45-baa5-4d52-a107-714fe404b7a4",
+      "id": "00ed1d24-4ef6-4836-8dd0-74fd021887d8",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -383,7 +383,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "20a1e4d7-173f-4f71-804d-6400a431a12c",
+      "id": "1bf478c5-a924-48c0-9253-c3e318f8bdba",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -401,7 +401,7 @@
           },
           "conditions": [
             {
-              "id": "76c0778d-d16e-47ea-89de-1ae4ed7c6aee",
+              "id": "95b564ff-2f6c-4152-82c5-50fe7aa89ce5",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -417,7 +417,7 @@
       }
     },
     {
-      "id": "ac6b4887-b2f3-4e0a-b756-d16c24ed0f96",
+      "id": "ea3b01f3-d1c0-4dc9-9a36-dc4720b436f3",
       "name": "Brave · company website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -477,7 +477,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "c891056e-4bab-4627-9e40-a9400f93f11f",
+      "id": "eeb8108b-0485-429e-9b0b-14dd65109994",
       "name": "Pick company domain",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -486,12 +486,12 @@
         -120
       ],
       "parameters": {
-        "jsCode": "// Company website from search results (rules): first result whose domain matches the company name.\nconst prev = $('Has domain?').item.json;\nconst tr = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\nconst core = tr(prev.companyCore).replace(/[^a-z0-9]/g, '');\nconst SKIP = /(linkedin|crunchbase|wikipedia|facebook|instagram|youtube|twitter|x\\.com|tech\\.eu|eu-startups|techcrunch|sifted|dealroom|pitchbook|glassdoor|zoominfo|apollo|rocketreach|bloomberg|reuters|tracxn|cbinsights|northdata|startupdetector|medium|substack)/i;\nconst hosts = ($json.web?.results || []).map(r => { try { return new URL(r.url).hostname.replace(/^www\\./, '').toLowerCase(); } catch (e) { return null; } })\n  .filter(h => h && !SKIP.test(h));\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nconst domain = core.length >= 3 ? hosts.find(h => stem(h).includes(core) || (stem(h).length >= 4 && core.includes(stem(h)))) || null : null;\nreturn { json: { ...prev, domain: domain || '', domainSource: domain ? 'Brave search' : 'none',\n  braveCalls: (prev.braveCalls || 0) + 1,\n  linkedinMatch: prev.linkedinMatch + (domain ? ` | Website: ${domain}`\n    : $json.error ? ` | Website search error: ${JSON.stringify($json.error).slice(0, 120)}`\n    : ` | Website: no match in ${hosts.length} results (${hosts.slice(0, 3).join(', ')})`) } };",
+        "jsCode": "// Company website from search results (rules): first result whose domain matches the company name.\nconst prev = $('Has domain?').item.json;\nconst tr = s => String(s || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\nconst core = tr(prev.companyCore).replace(/[^a-z0-9]/g, '');\nconst SKIP = /(linkedin|crunchbase|wikipedia|facebook|instagram|youtube|twitter|x\\.com|tech\\.eu|eu-startups|techcrunch|sifted|dealroom|pitchbook|glassdoor|zoominfo|apollo|rocketreach|bloomberg|reuters|tracxn|cbinsights|northdata|startupdetector|medium|substack)/i;\nconst hosts = ($json.web?.results || []).map(r => { try { return new URL(r.url).hostname.replace(/^www\\./, '').toLowerCase(); } catch (e) { return null; } })\n  .filter(h => h && !SKIP.test(h));\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nconst domain = core.length >= 3 ? hosts.find(h => stem(h).includes(core) || (stem(h).length >= 4 && core.includes(stem(h)))) || null : null;\nreturn { json: { ...prev, domain: domain || '', domainSource: domain ? 'Brave search' : 'none',\n  braveCalls: (prev.braveCalls || 0) + 1,\n  linkedinMatch: prev.linkedinMatch + (domain ? ` | Website: ${domain}`\n    : $json.error ? ` | Website search error: ${JSON.stringify($json.error).slice(0, 120)}`\n    : ` | Website: no match in ${hosts.length} results (${hosts.slice(0, 3).join(', ')}; response keys: ${Object.keys($json).slice(0, 6).join(',')})`) } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "8c5eb91f-4269-455d-995a-4aef13e101be",
+      "id": "53fea6fe-2b1f-449f-97e0-c8a207f9f0bc",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -521,7 +521,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "31257390-3c7a-4bda-ae25-570da8be0101",
+      "id": "18804b60-7f65-4521-aa75-d3eb95169ed8",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -535,7 +535,7 @@
       }
     },
     {
-      "id": "d83bc149-ab80-4c4e-8e6f-ca182c207b69",
+      "id": "c9ea587d-3306-4ee7-987c-be63f9165c4a",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -544,12 +544,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Read Hunter finder result. Verify only when the finder isn't already sure.\n// Paired item points back to whichever verify node fed this branch.\nconst prev = $('Ready for Hunter').item.json;\nconst d = $json.data || {};\nconst email = d.email || null;\nconst finderStatus = d.verification?.status || null;\nconst hunterDomain = d.domain || null;\nreturn { json: { ...prev,\n  email, emailScore: d.score ?? null, finderStatus,\n  hunterCredits: email ? 1 : 0, hunterDomain,\n  hunterError: $json.errors ? JSON.stringify($json.errors).slice(0, 200) : null,\n  needVerify: !!email && finderStatus !== 'valid' } };",
+        "jsCode": "// Read Hunter finder result. Verify only when the finder isn't already sure.\n// Paired item points back to whichever verify node fed this branch.\nconst prev = $('Ready for Hunter').item.json;\nconst d = $json.data || {};\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]/g, '');\nconst core = tr(prev.companyCore);\nconst stemOf = h => tr(String(h || '').split('.').slice(0, -1).join(''));\nconst domainOk = h => !!h && core.length >= 3 && (stemOf(h).includes(core) || (stemOf(h).length >= 4 && core.includes(stemOf(h))));\n// If WE gave Hunter the domain, trust it. If Hunter guessed the domain from the company name, it must match.\nconst wrongDomain = !prev.domain && d.domain && !domainOk(d.domain);\nconst email = wrongDomain ? null : (d.email || null);\nconst finderStatus = d.verification?.status || null;\nconst hunterDomain = d.domain || null;\nreturn { json: { ...prev,\n  email, emailScore: d.score ?? null, finderStatus,\n  hunterCredits: d.email ? 1 : 0, hunterDomain, wrongDomain,\n  hunterError: $json.errors ? JSON.stringify($json.errors).slice(0, 200) : null,\n  needVerify: !!email && finderStatus !== 'valid' } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "95586043-9538-45be-a0f3-7ab2b26533c5",
+      "id": "02629870-dc00-404d-90f6-e48d6ed4a2cc",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -567,7 +567,7 @@
           },
           "conditions": [
             {
-              "id": "abdd5379-6b8b-4f04-89c3-97d9ebda2950",
+              "id": "f78878de-b78b-4f10-a848-e3680dbc60c5",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -583,7 +583,7 @@
       }
     },
     {
-      "id": "0760b45a-301f-4e3d-9a8b-a195d987120c",
+      "id": "b751b74e-de87-474a-b113-7c514b56a974",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -622,7 +622,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "bf670d11-f28a-45d1-a943-28ee1ffbdfbc",
+      "id": "ee520767-9835-40df-a344-2338bc89242d",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -631,12 +631,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterError ? 0 : d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\n// Auth / quota / network errors say nothing about the person: keep \"Needs email\" so the next run retries.\nconst apiError = !!d.hunterError || (!!d.braveError && !d.linkedin && !d.email);\nconst nextStatus = ok ? 'Ready to draft' : apiError ? 'Needs email' : 'No email found';\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: nextStatus } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.hunterDomain && !d.domain ? ` | Hunter resolved domain: ${d.hunterDomain}` : '') + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nif (!apiError) props['Email status'] = { select: { name: status } };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status: apiError ? 'api error' : status, ready: ok, apiError,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
+        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterError ? 0 : d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\n// Auth / quota / network errors say nothing about the person: keep \"Needs email\" so the next run retries.\nconst apiError = !!d.hunterError || (!!d.braveError && !d.linkedin && !d.email);\n// Outcome = which VERIFIED channels exist. Never a vague \"no email\": the Reach column in Notion shows the same in words.\n//   verified email            -> Ready to draft (email; LinkedIn may exist too)\n//   verified LinkedIn only    -> LinkedIn only (Thursday: LinkedIn message draft)\n//   unconfirmed lead only     -> Check manually (accept_all email or name-only LinkedIn candidate)\n//   nothing                   -> Not reachable\n//   API / auth error          -> stays Needs email, retried next run\nconst unconfirmed = (status === 'accept_all' && !ok) || !!d.linkedinCandidate;\nconst nextStatus = apiError ? 'Needs email' : ok ? 'Ready to draft' : d.linkedin ? 'LinkedIn only' : unconfirmed ? 'Check manually' : 'Not reachable';\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: nextStatus } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.hunterDomain && !d.domain ? ` | Hunter guessed domain: ${d.hunterDomain}${d.wrongDomain ? ' (does not match company, result discarded)' : ''}` : '') + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.linkedinCandidate && !d.linkedin) props['LinkedIn candidate'] = { url: d.linkedinCandidate };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nif (!apiError) props['Email status'] = { select: { name: status } };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status: apiError ? 'api error' : status, ready: ok, apiError,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "4e110f02-9fc8-4122-92b3-1922b51b5d6e",
+      "id": "202443d5-b1f6-4295-8668-adbe38fb1cec",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -665,7 +665,7 @@
       }
     },
     {
-      "id": "76ffd53a-1169-4400-8cf9-55a05361bc7b",
+      "id": "eb2adf90-81ce-4673-a503-0f2ad5433399",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -678,18 +678,78 @@
       }
     },
     {
-      "id": "daf8cb48-1468-446d-8c72-4be2e7304ebc",
-      "name": "Note · 30",
+      "id": "11e36b6f-2da5-4f07-aefc-2ef9bb3dc5fa",
+      "name": "Note · 30 overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        200,
+        0,
+        -560
+      ],
+      "parameters": {
+        "width": 720,
+        "height": 330,
+        "content": "## WP · 30 Enrich contacts: what and why\n**Job:** turn a named person (from 20) into a reachable contact: verified LinkedIn and/or verified email.\n**Called by:** WP · 00 once per run, after the run log. Can be run alone (Test workflow) to retry.\n**Outcome per contact (Status):** Ready to draft (verified email) · LinkedIn only · Check manually (unconfirmed lead) · Not reachable · stays Needs email on API errors.\n**Design rules:** rules decide, never an LLM (a wrong person is worse than no person) · every accept/reject writes its reason to *LinkedIn match* · budget guard before any paid call.\nFull docs: docs/30-enrich-contacts.md in the GitHub repo."
+      }
+    },
+    {
+      "id": "627a32b3-ca23-4acd-83ab-928fb75eb037",
+      "name": "Note · Selection",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -200
+      ],
+      "parameters": {
+        "width": 560,
+        "height": 240,
+        "content": "### 1 · Selection + budget\nLoads Needs email contacts AND contacts further down the funnel. A company that already has a reachable contact is skipped, so credits go to new companies.\nOrder: CEO/MD → founders → sales → partnerships. One contact per company per run, max 8 per run.\nBudget: monthly counters (300 Brave, 40 Hunter) live in workflow static data; only active (published) runs count."
+      }
+    },
+    {
+      "id": "560b90eb-a5a0-4894-8d63-5220a8316d1e",
+      "name": "Note · LinkedIn",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -200
+      ],
+      "parameters": {
+        "width": 620,
+        "height": 240,
+        "content": "### 2 · LinkedIn (Brave search, 2 attempts)\nAccepted only if the result title has first AND last name AND the company name (or domain) appears in title/snippet. Name-only hits are stored as *LinkedIn candidate* for you to check, never used automatically.\nWhy so strict: two people with the same name are common; a wrong profile poisons the draft."
+      }
+    },
+    {
+      "id": "62ce82d5-ba0c-4e24-a656-a0cbf761c1c3",
+      "name": "Note · Website",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        -480
+      ],
+      "parameters": {
+        "width": 620,
+        "height": 220,
+        "content": "### 3 · Company website (only if the article gave none)\nOne Brave search with the company name. First result whose domain matches the name wins; Crunchbase, LinkedIn, news sites are skipped. Saved back to Companies › Domain so we never search twice."
+      }
+    },
+    {
+      "id": "bf0ba91e-dd52-44d5-93c3-9939e56451d8",
+      "name": "Note · Email",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2900,
         -200
       ],
       "parameters": {
         "width": 620,
         "height": 250,
-        "content": "## 30 · Enrich contacts\nCalled once per run by WP · 00 (after the run log), or manually. Takes up to 5 contacts with Status **Needs email** (CEO first, then CRO/Sales, then Partnerships/Growth).\n1. **LinkedIn**: Brave search, accepted only if name AND company match (deterministic). 2 attempts max.\n2. **Email**: Hunter finder → Hunter verifier (SMTP check, **no email is sent**).\n3. `valid` (or `accept_all` ≥ 90) → **Ready to draft**, else **No email found**.\n\n**Budget guard:** 300 Brave searches + 40 Hunter credits per month, counted on active runs. Free tiers: ~1,000 / 50."
+        "content": "### 4 · Email (Hunter finder → verifier)\nFinder costs 1 credit only when it finds something. Verifier (0.5) only runs if the finder isn't sure. **No email is ever sent**: the verifier checks the mail server.\nIf Hunter had to guess the domain itself, the guess must match the company name, else the email is discarded (live case: FLÆ Robotics → vexrobotics.com).\nAPI/auth errors leave the contact in Needs email so the next run retries; they never count as \"not found\"."
       }
     }
   ],
