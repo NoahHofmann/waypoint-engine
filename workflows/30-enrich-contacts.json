@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "3d27f16a-b7e8-4a99-bb2e-a55301726618",
+      "id": "8c25a3c4-ad24-4559-8f5f-6c6106f7ed05",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "9e7f2a78-ce76-40f1-b588-0e2acb35d48b",
+      "id": "6541851c-6090-4f0c-91ea-194a8c9ccbc3",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "6c437b29-c144-4950-ab3c-a0493444fc11",
+      "id": "8c2679a7-4724-43f9-80ac-bc225335b535",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "00decf76-179d-4a91-9ff8-12bbe456e736",
+      "id": "5381d99f-5bf3-4f29-9d50-5e4f19cd9d6f",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "73c75068-8366-4909-a6fa-3e4868aba3cc",
+              "id": "80965a4b-6f85-4c23-9c21-7c3f316daf31",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "a1bc0df2-4869-4eee-b66c-dd2d9df7e296",
+      "id": "99afb8fb-53be-4291-8051-7a233279c63c",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "ac5f3c2c-56a4-4436-b817-2ef46d090fcf",
+      "id": "433f8497-6f5f-4030-b6fa-17076cb4b94b",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -110,11 +110,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($input.first().json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const parts = name.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\nreturn rows.slice(0, cfg.allowed).map(r => ({ json: r }));"
+        "jsCode": "// Turn Notion rows into clean items, order by persona priority, cap by budget.\nconst cfg = $('Config + budget').first().json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || p.select?.name || '';\n};\nconst rank = role => {\n  const i = cfg.personaOrder.findIndex(r => new RegExp(r.slice(1, r.lastIndexOf('/')), 'i').test(role || ''));\n  return i === -1 ? 9 : i;\n};\nconst rows = ($input.first().json.results || []).map(pg => {\n  const name = txt(pg.properties.Name).replace(/\\s+/g, ' ');\n  const clean = name.replace(/^((dr|prof|ing|mag|dipl)\\.?\\s+)+/i, '').trim();\n  const parts = clean.split(' ');\n  return {\n    contactPageId: pg.id,\n    name, first: parts[0], last: parts[parts.length - 1],\n    role: txt(pg.properties.Role),\n    companyPageId: pg.properties.Company?.relation?.[0]?.id || null,\n  };\n}).filter(r => r.companyPageId && r.first && r.last && r.first !== r.last);\nrows.sort((a, b) => rank(a.role) - rank(b.role));\n// Budget: only the best persona per company is enriched in a run. Others wait (stay \"Needs email\").\nconst perCompany = new Set();\nconst picked = rows.filter(r => !perCompany.has(r.companyPageId) && perCompany.add(r.companyPageId));\nreturn picked.slice(0, cfg.allowed).map(r => ({ json: r }));"
       }
     },
     {
-      "id": "60bf8c56-eb66-42ad-97c7-41cf9635a7d7",
+      "id": "b0650b84-11ab-4430-a384-693bb6aa91c4",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "9556822e-b531-49c6-bb87-cfa57d0caeca",
+      "id": "9029bf3a-15d9-44a7-b980-668f2af5f763",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "fa8b2db4-9d4c-4b91-b62c-92c5332d22d8",
+      "id": "03a335b0-c303-4da6-b41b-915dc5a76ab9",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -216,7 +216,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "f237d344-96e3-4fe9-a248-0f7f579a47bf",
+      "id": "8caa2507-1d29-40a8-adaf-91393e1d01b7",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -225,12 +225,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Prep search').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 0) + 1,\n  braveError: $json.error ? String($json.error.message || $json.error).slice(0, 200) : null };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 1: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = `Attempt 1: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Prep search').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 0) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 1: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = `Attempt 1: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "c345eeb7-b587-4c2f-9da9-f854ceee8fb7",
+      "id": "a8344465-a63c-44b4-9831-0cfed7f0bca7",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -248,7 +248,7 @@
           },
           "conditions": [
             {
-              "id": "95fa2cbf-c18a-4d78-b6f3-989b3d9cd2e8",
+              "id": "1eda5345-410a-4737-a893-c0ee8f538c62",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -264,7 +264,7 @@
       }
     },
     {
-      "id": "24d4e620-59ef-4c37-9bcf-90999c3a92f3",
+      "id": "7d18f090-3e47-4aca-af58-dd083c985195",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -326,7 +326,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2b99ef2c-833b-4b0e-bafd-14b47e583e0e",
+      "id": "e8026fda-96e1-45b3-b8ca-c61ba2b73be5",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -335,12 +335,12 @@
         380
       ],
       "parameters": {
-        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Verify attempt 1').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 1) + 1,\n  braveError: $json.error ? String($json.error.message || $json.error).slice(0, 200) : null };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 2: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = prev.linkedinMatch + ` | Attempt 2: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
+        "jsCode": "// Deterministic LinkedIn verification. Accept only a linkedin.com/in profile whose\n// title contains first AND last name AND whose title/snippet mentions the company.\nconst prev = $('Verify attempt 1').item.json;\nconst n = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/<[^>]+>/g, ' ');\nconst first = n(prev.first), last = n(prev.last);\nconst coTokens = [prev.companyCore, prev.domain ? prev.domain.split('.')[0] : '']\n  .filter(t => t && t.length >= 3).map(n);\nconst results = $json.web?.results || [];\nconst cands = results.filter(r => /linkedin\\.com\\/in\\//.test(r.url || '')).map(r => {\n  const title = n(r.title), hay = title + ' ' + n(r.description);\n  const nameOk = title.includes(first) && title.includes(last);\n  const coOk = coTokens.some(t => hay.includes(t));\n  return { url: r.url.split('?')[0], title: r.title, nameOk, coOk };\n});\nconst hit = cands.find(c => c.nameOk && c.coOk);\nconst out = { ...prev, braveCalls: (prev.braveCalls || 1) + 1,\n  braveError: ($json.error || $json.type === 'ErrorResponse') ? JSON.stringify($json.error || $json).slice(0, 200) : (prev.braveError || null) };\nif (hit) {\n  out.linkedin = hit.url;\n  out.linkedinMatch = `Attempt 2: name + company matched in \"${hit.title}\"`;\n} else {\n  out.linkedin = null;\n  out.linkedinMatch = prev.linkedinMatch + ` | Attempt 2: no verified match (${cands.length} LinkedIn results, ${cands.filter(c => c.nameOk).length} name-only)`;\n}\nreturn { json: out };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "4f8c43bc-95c2-445c-bb43-30a89c2a697e",
+      "id": "d96acdd8-bb83-4a78-a05a-ee6641319fae",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -387,7 +387,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "21262b2e-2991-4652-9827-1f6a92a84023",
+      "id": "03fee1dd-f0ab-40dc-99e2-38ecabdad9a0",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -401,7 +401,7 @@
       }
     },
     {
-      "id": "875b0d27-676b-4d17-8970-13334c2b6f65",
+      "id": "6f4fcf1c-7b44-4f7f-9b3b-1b3a990ba1ff",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -419,7 +419,7 @@
           },
           "conditions": [
             {
-              "id": "d571dfa4-d0e7-420a-8f53-560003c80d56",
+              "id": "e46b87ea-0a24-4662-80d6-5041eb12446c",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -435,7 +435,7 @@
       }
     },
     {
-      "id": "43be0d80-043a-458d-bf9b-3afd4c238ce5",
+      "id": "e62b1286-2017-4e38-9372-114d8b9380e4",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -474,7 +474,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "4e8a08ec-5ed3-46f5-ad85-0c145397b979",
+      "id": "bb6507e3-b82c-4297-9e7e-712a0e7879fe",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -483,12 +483,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: ok ? 'Ready to draft' : 'No email found' } },\n  'Email status': { select: { name: status } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status, ready: ok,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
+        "jsCode": "// Final decision + Notion update. Only 'valid' (or accept_all with score >= 90)\n// becomes 'Ready to draft'. Nothing is ever sent from this workflow.\nconst d = $('Decide verify').item.json;\nconst v = $json.data && $json.data.status && $json.data.email === d.email ? $json.data : null;\nlet status = !d.email ? 'not found' : (v ? v.status : (d.finderStatus || 'unknown'));\nif (!['valid','accept_all','unknown','invalid','not found'].includes(status)) status = 'unknown';\nconst credits = d.hunterError ? 0 : d.hunterCredits + (v ? 0.5 : 0);\nconst ok = status === 'valid' || (status === 'accept_all' && (d.emailScore || 0) >= 90);\n// Auth / quota / network errors say nothing about the person: keep \"Needs email\" so the next run retries.\nconst apiError = !!d.hunterError || (!!d.braveError && !d.linkedin && !d.email);\nconst nextStatus = ok ? 'Ready to draft' : apiError ? 'Needs email' : 'No email found';\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1900) } }];\nconst props = {\n  'Status': { status: { name: nextStatus } },\n  'LinkedIn match': { rich_text: t(d.linkedinMatch + (d.braveError ? ` | Brave error: ${d.braveError}` : '') + (d.hunterError ? ` | Hunter error: ${d.hunterError}` : '')) },\n  'Enriched at': { date: { start: new Date().toISOString() } }\n};\nif (d.linkedin) props['LinkedIn'] = { url: d.linkedin };\nif (d.email && status !== 'invalid') props['Email'] = { email: d.email };\nif (d.emailScore !== null) props['Email score'] = { number: d.emailScore };\nif (!apiError) props['Email status'] = { select: { name: status } };\nreturn { json: { contactPageId: d.contactPageId, name: d.name, company: d.company,\n  linkedin: d.linkedin, email: d.email, status: apiError ? 'api error' : status, ready: ok, apiError,\n  braveCalls: d.braveCalls, hunterCredits: credits,\n  notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "29ed8046-f5ee-44dc-9fd7-21dddfdad0e8",
+      "id": "172a666a-e4d9-43c6-82ec-7b322ceadda1",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -517,7 +517,7 @@
       }
     },
     {
-      "id": "677310e8-3064-4f70-89f3-22a0ba4a98e7",
+      "id": "c9783e6c-49c0-4b52-9b66-23c7bb968184",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -526,11 +526,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Book usage against the monthly budget and return a summary to the caller.\nconst rows = $('Build contact update').all().map(i => i.json);\nconst brave = rows.reduce((a, r) => a + (r.braveCalls || 0), 0);\nconst hunter = rows.reduce((a, r) => a + (r.hunterCredits || 0), 0);\nconst s = $getWorkflowStaticData('global');\ns.brave = (s.brave || 0) + brave;\ns.hunter = (s.hunter || 0) + hunter;\nreturn [{ json: {\n  enriched: rows.length,\n  readyToDraft: rows.filter(r => r.ready).length,\n  linkedinFound: rows.filter(r => r.linkedin).length,\n  braveCallsThisRun: brave, hunterCreditsThisRun: hunter,\n  braveUsedThisMonth: s.brave, hunterUsedThisMonth: s.hunter,\n  contacts: rows.map(r => ({ name: r.name, company: r.company, status: r.status, linkedin: !!r.linkedin }))\n} }];"
+        "jsCode": "// Book usage against the monthly budget and return a summary to the caller.\nconst rows = $('Build contact update').all().map(i => i.json);\nconst brave = rows.reduce((a, r) => a + (r.braveCalls || 0), 0);\nconst hunter = rows.reduce((a, r) => a + (r.hunterCredits || 0), 0);\nconst s = $getWorkflowStaticData('global');\ns.brave = (s.brave || 0) + brave;\ns.hunter = (s.hunter || 0) + hunter;\nreturn [{ json: {\n  enriched: rows.length,\n  readyToDraft: rows.filter(r => r.ready).length,\n  apiErrors: rows.filter(r => r.apiError).length,\n  linkedinFound: rows.filter(r => r.linkedin).length,\n  braveCallsThisRun: brave, hunterCreditsThisRun: hunter,\n  braveUsedThisMonth: s.brave, hunterUsedThisMonth: s.hunter,\n  contacts: rows.map(r => ({ name: r.name, company: r.company, status: r.status, linkedin: !!r.linkedin }))\n} }];"
       }
     },
     {
-      "id": "bec94744-ed9b-4e3e-b5cf-398c81bad51d",
+      "id": "af6d13de-417e-4fe8-bcbe-bd687c15258a",
       "name": "Note · 30",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

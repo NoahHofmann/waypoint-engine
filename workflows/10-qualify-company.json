@@ -2,7 +2,7 @@
   "name": "WP · 10 Qualify company (sub-workflow)",
   "nodes": [
     {
-      "id": "73204411-e98f-42df-8d7c-52b84241417a",
+      "id": "c6e161f6-4727-478b-81ff-dd66e079a93e",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -15,7 +15,7 @@
       }
     },
     {
-      "id": "30e81fde-5076-4e7a-bc72-771036fb053c",
+      "id": "d8f1f4da-d5d5-4f88-aa61-bc841f73dd62",
       "name": "Fetch full article",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -49,7 +49,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "bb6a9171-2162-42a7-bed1-cf3fe1a8a22c",
+      "id": "34b5778a-bb97-44bb-b2da-9b6b4ae88529",
       "name": "Prepare article (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -63,7 +63,7 @@
       }
     },
     {
-      "id": "a93b58c7-5bd5-410f-9300-5378277f3e27",
+      "id": "d2cc5f5a-ece2-456d-bce5-b50b25935b41",
       "name": "Injection pre-check (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -77,7 +77,7 @@
       }
     },
     {
-      "id": "1812cb9b-e8c0-4d73-a155-39180867dd17",
+      "id": "c10e9ae3-30ff-4b2b-b016-7a442228611d",
       "name": "Injection found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -111,7 +111,7 @@
       }
     },
     {
-      "id": "fc34bfac-5f5b-40ed-b902-8cadfe6f09dd",
+      "id": "f76154a5-5189-47bd-bb44-c368641baf2f",
       "name": "Mark as blocked",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -125,7 +125,7 @@
       }
     },
     {
-      "id": "9cc60f5a-c7a5-4783-aa9d-9d6eb1e94f87",
+      "id": "7658b00a-4db7-4ac4-8f69-156b0396c0fd",
       "name": "Extract facts (LLM chain)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.5,
@@ -149,7 +149,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7c2ac3a1-3808-4c42-97c1-cee6671d88fb",
+      "id": "024f123b-d7b8-46c6-bd13-53e1e6ae87ec",
       "name": "OpenAI · gpt-4o-mini",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -173,7 +173,7 @@
       }
     },
     {
-      "id": "05719713-4a9e-4230-b65d-2a8f604964e2",
+      "id": "1af54e99-00c1-43b0-83a6-89ad1d3b90dc",
       "name": "Schema · facts v2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -183,11 +183,11 @@
       ],
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\n    \"company\",\n    \"website\",\n    \"hq_country\",\n    \"expansion_targets\",\n    \"article_type\",\n    \"round\",\n    \"amount\",\n    \"currency\",\n    \"business_model\",\n    \"tech_core\",\n    \"use_of_funds\",\n    \"product_live\",\n    \"customers_or_pilots\",\n    \"senior_commercial_lead_named\",\n    \"sector\",\n    \"mission_flags\",\n    \"decision_makers\",\n    \"investors\",\n    \"evidence\",\n    \"summary\"\n  ],\n  \"properties\": {\n    \"company\": {\n      \"type\": \"string\"\n    },\n    \"website\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"Only if a URL or domain of the company is literally in the text\"\n    },\n    \"hq_country\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"ISO-2 code of HQ if stated\"\n    },\n    \"expansion_targets\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"ISO-2 codes or 'DACH' / 'Europe' explicitly named as expansion targets\"\n    },\n    \"article_type\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"single_company_equity_round\",\n        \"debt_only\",\n        \"fund_close\",\n        \"acquisition\",\n        \"roundup\",\n        \"other\"\n      ]\n    },\n    \"round\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"Pre-seed\",\n        \"Seed\",\n        \"Series A\",\n        \"Series B\",\n        \"Series C+\",\n        \"Unknown\"\n      ]\n    },\n    \"amount\": {\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"description\": \"Round size as a plain number in the stated currency, e.g. 3000000\"\n    },\n    \"currency\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"ISO currency code as stated, e.g. EUR, USD, GBP\"\n    },\n    \"business_model\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"B2B\",\n        \"B2B2C\",\n        \"Mixed\",\n        \"B2C\",\n        \"Unknown\"\n      ]\n    },\n    \"tech_core\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"core_tech\",\n        \"tech_assisted_service\",\n        \"no_tech\",\n        \"unknown\"\n      ]\n    },\n    \"use_of_funds\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"commercial\",\n        \"mixed\",\n        \"rnd_only\",\n        \"unknown\"\n      ]\n    },\n    \"product_live\": {\n      \"type\": [\n        \"boolean\",\n        \"null\"\n      ]\n    },\n    \"customers_or_pilots\": {\n      \"type\": [\n        \"boolean\",\n        \"null\"\n      ]\n    },\n    \"senior_commercial_lead_named\": {\n      \"type\": \"boolean\"\n    },\n    \"sector\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"mission_flags\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\n          \"defense\",\n          \"gambling\",\n          \"tobacco\",\n          \"speculative_crypto\",\n          \"fast_fashion\",\n          \"fossil_energy\"\n        ]\n      }\n    },\n    \"decision_makers\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n          \"name\",\n          \"role\"\n        ],\n        \"properties\": {\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"role\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          }\n        }\n      }\n    },\n    \"investors\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"evidence\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\n        \"round\",\n        \"geography\",\n        \"business_model\",\n        \"use_of_funds\",\n        \"traction\"\n      ],\n      \"properties\": {\n        \"round\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        },\n        \"geography\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        },\n        \"business_model\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        },\n        \"use_of_funds\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        },\n        \"traction\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ]\n        }\n      }\n    },\n    \"summary\": {\n      \"type\": \"string\"\n    }\n  }\n}"
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"company\",\n    \"article_type\",\n    \"round\",\n    \"business_model\",\n    \"tech_core\",\n    \"use_of_funds\",\n    \"evidence\",\n    \"summary\"\n  ],\n  \"properties\": {\n    \"company\": {\n      \"type\": \"string\"\n    },\n    \"website\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"Only if a URL or domain of the company is literally in the text\"\n    },\n    \"hq_country\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"ISO-2 code of HQ if stated\"\n    },\n    \"expansion_targets\": {\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"ISO-2 codes or DACH / Europe explicitly named as expansion targets\"\n    },\n    \"article_type\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"One of: single_company_equity_round, debt_only, fund_close, acquisition, roundup, other\"\n    },\n    \"round\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"One of: Pre-seed, Seed, Series A, Series B, Series C+, Unknown\"\n    },\n    \"amount\": {\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"description\": \"Round size as a plain number in the stated currency, e.g. 3000000\"\n    },\n    \"currency\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"ISO currency code as stated, e.g. EUR, USD, GBP\"\n    },\n    \"business_model\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"One of: B2B, B2B2C, Mixed, B2C, Unknown\"\n    },\n    \"tech_core\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"One of: core_tech, tech_assisted_service, no_tech, unknown\"\n    },\n    \"use_of_funds\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"One of: commercial, mixed, rnd_only, unknown\"\n    },\n    \"product_live\": {\n      \"type\": [\n        \"boolean\",\n        \"null\"\n      ]\n    },\n    \"customers_or_pilots\": {\n      \"type\": [\n        \"boolean\",\n        \"null\"\n      ]\n    },\n    \"senior_commercial_lead_named\": {\n      \"type\": [\n        \"boolean\",\n        \"null\"\n      ]\n    },\n    \"sector\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ],\n      \"description\": \"Short sector label\"\n    },\n    \"mission_flags\": {\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Any of: defense, gambling, tobacco, speculative_crypto, fast_fashion, fossil_energy\"\n    },\n    \"decision_makers\": {\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"role\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          }\n        }\n      }\n    },\n    \"investors\": {\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"evidence\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"round\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ],\n          \"description\": \"Verbatim quote\"\n        },\n        \"geography\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ],\n          \"description\": \"Verbatim quote\"\n        },\n        \"business_model\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ],\n          \"description\": \"Verbatim quote\"\n        },\n        \"use_of_funds\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ],\n          \"description\": \"Verbatim quote\"\n        },\n        \"traction\": {\n          \"type\": [\n            \"string\",\n            \"null\"\n          ],\n          \"description\": \"Verbatim quote\"\n        }\n      }\n    },\n    \"summary\": {\n      \"type\": \"string\"\n    }\n  }\n}"
       }
     },
     {
-      "id": "fc35d220-b221-4197-b6fd-5a775f73f8bc",
+      "id": "a7cdf477-40da-4ed6-b86e-ed2c1f624ffb",
       "name": "Score icp-v2 (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -196,12 +196,12 @@
         300
       ],
       "parameters": {
-        "jsCode": "// icp-v2 scoring IN CODE. The LLM only extracted facts; every fact must be backed by\n// verbatim evidence or it falls back to the neutral/unknown value. Mirrors Notion › ICP & Rules.\nconst ICP_VERSION = 'icp-v2';\nconst src = $('Injection pre-check (rules)').item.json;\nconst f = $json.output || null;\nconst flags = [...(src.prepFlags || [])];\nif (!f) {\n  return { json: { ...src, facts: null, score: null, breakdown: null, gate: null, status: 'New',\n    flags: [...flags, 'Model error'], error: String($json.error?.message || $json.error || 'No valid structured output'),\n    tokensEst: 0, domain: null, dedupeKey: null } };\n}\nconst norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\\s+/g, ' ').trim();\n// Verbatim check ignores punctuation / quote style (’ vs ', – vs -), never words\nconst loose = s => norm(s).replace(/[^\\p{L}\\p{N}]+/gu, ' ').trim();\nconst hay = norm(src.title + ' ' + src.text);\nconst hayL = loose(src.title + ' ' + src.text);\nconst ok = e => !!e && loose(e).length >= 6 && hayL.includes(loose(e));\nconst ev = {}; let dropped = 0;\nfor (const [k, v] of Object.entries(f.evidence || {})) { if (v && !ok(v)) dropped++; ev[k] = ok(v) ? v : null; }\nif (dropped) flags.push('Evidence dropped');\n// Facts without grounded evidence fall back to neutral\nconst bm = ev.business_model ? f.business_model : 'Unknown';\nconst uof = ev.use_of_funds ? f.use_of_funds : 'unknown';\nconst round = ev.round ? f.round : 'Unknown';\nconst traction = ev.traction ? (f.product_live || f.customers_or_pilots) : false;\n// Amount → EUR (fixed, conservative rates; good enough for a 3-band score)\nconst FX = { EUR: 1, USD: 0.92, GBP: 1.17, CHF: 1.05, SEK: 0.087, DKK: 0.134, NOK: 0.085, PLN: 0.23, CZK: 0.04, HUF: 0.0025 };\nconst amountEur = f.amount && FX[(f.currency || '').toUpperCase()] ? Math.round(f.amount * FX[f.currency.toUpperCase()]) : null;\n// Geography\nconst DACH = ['DE','AT','CH'], BENELUX = ['NL','BE','LU'];\nconst EUROPE = ['FR','ES','IT','PT','IE','DK','SE','FI','NO','IS','LI','PL','CZ','EE','LV','LT','SK','SI','HR','RO','BG','HU','GR','CY','MT', ...DACH, ...BENELUX];\nconst hq = (f.hq_country || '').toUpperCase().replace('GB', 'UK');\nconst targets = (f.expansion_targets || []).map(t => t.toUpperCase());\nconst geoOf = c => DACH.includes(c) || c === 'DACH' ? 15 : BENELUX.includes(c) ? 12 : (EUROPE.includes(c) || c === 'EUROPE' || c === 'EU') ? 8 : 0;\nconst geo = Math.max(geoOf(hq), ...targets.map(geoOf), 0);\n// Hard gates (any one = Rejected)\nlet gate = null;\nif (f.article_type !== 'single_company_equity_round') gate = `Not a single-company equity round (${f.article_type})`;\nelse if (['Series B', 'Series C+'].includes(f.round) || (amountEur && amountEur > 20e6)) gate = `Too late / too large (${f.round}, €${amountEur ?? '?'})`;\nelse if ((hq === 'UK' || (hq && !EUROPE.includes(hq))) && geo === 0) gate = `HQ ${hq}, no Europe expansion`;\nelse if ((f.mission_flags || []).length) gate = `Mission gate: ${f.mission_flags.join(', ')}`;\n// Scoring (100)\nconst days = (Date.now() - new Date(src.published).getTime()) / 864e5;\nconst b = {\n  trigger: days <= 30 ? 10 : days <= 60 ? 5 : 0,\n  stage: amountEur == null ? 8 : amountEur < 750e3 ? 3 : amountEur <= 15e6 ? 15 : 8,\n  b2b: { B2B: 15, B2B2C: 8, Mixed: 8, B2C: 0, Unknown: 4 }[bm] ?? 4,\n  geography: hq || targets.length ? geo : 4,\n  useOfFunds: { commercial: 15, mixed: 8, rnd_only: 4, unknown: 4 }[uof] ?? 4,\n  capacityGap: (traction ? 5 : 0) + (f.senior_commercial_lead_named ? 0 : 5),\n  tech: { core_tech: 10, tech_assisted_service: 5, no_tech: 0, unknown: 5 }[f.tech_core] ?? 5,\n  reachability: 0\n};\nconst people = (f.decision_makers || []).slice(0, 5).filter(p => p.name && p.name.split(' ').length >= 2 && hayL.includes(loose(p.name)));\nif (people.length) b.reachability += 6;\nconst NETWORK = /\\b(techstars|antler|ewor|apx|heartfelt|redstone|sigma squared)\\b/i;\nif (NETWORK.test((f.investors || []).filter(x => hayL.includes(loose(x))).join(' '))) { b.reachability += 4; flags.push('Network investor'); }\nconst score = Object.values(b).reduce((a, x) => a + x, 0);\nconst status = gate ? 'Rejected' : score >= 60 ? 'Qualified' : 'Archived';\nif (!gate && score >= 75) flags.push('Strong');\n// Domain: the company's own site from article links (rules), else LLM website if literally in text\nconst tr = x => norm(x).replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l');\nconst core = tr(f.company).replace(/\\b(gmbh|ag|ug|se|kg|bv|nv|sas|sa|srl|ltd|inc|oy|ab|as|aps)\\b/g, '').replace(/[^a-z0-9]/g, '');\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nlet domain = (src.linkHosts || []).find(h => core.length >= 3 && (stem(h).includes(core) || core.includes(stem(h)) && stem(h).length >= 4)) || null;\nif (!domain && f.website && hay.includes(norm(f.website).replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0])) {\n  domain = norm(f.website).replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\n}\nconst dedupeKey = tr(f.company).replace(/\\b(gmbh|ag|ug|se|kg|bv|nv|sas|sa|srl|ltd|inc|oy|ab|as|aps)\\b/g, '').replace(/[^a-z0-9]/g, '');\nconst tokensEst = Math.round((src.title.length + src.text.length + 4500) / 4) + 400;\nreturn { json: { ...src, facts: f, evidence: ev, amountEur, people, score, breakdown: b, gate, status, flags,\n  error: null, tokensEst, droppedEvidence: dropped, domain, dedupeKey, icpVersion: ICP_VERSION } };",
+        "jsCode": "// icp-v2 scoring IN CODE. The LLM only extracted facts; every fact must be backed by\n// verbatim evidence or it falls back to the neutral/unknown value. Mirrors Notion › ICP & Rules.\nconst ICP_VERSION = 'icp-v2';\nconst src = $('Injection pre-check (rules)').item.json;\nconst raw = $json.output || null;\n// Normalise model output (schema is loose on purpose so it never rejects the whole answer)\nconst pick = (v, allowed, dflt) => allowed.find(a => a.toLowerCase() === String(v ?? '').toLowerCase().replace(/[\\s-]+/g, a.includes('_') ? '_' : a.includes(' ') ? ' ' : '-')) || allowed.find(a => a.toLowerCase() === String(v ?? '').toLowerCase()) || dflt;\nconst f = raw ? { ...raw,\n  article_type: pick(raw.article_type, ['single_company_equity_round','debt_only','fund_close','acquisition','roundup','other'], 'other'),\n  round: pick(raw.round, ['Pre-seed','Seed','Series A','Series B','Series C+','Unknown'], 'Unknown'),\n  business_model: pick(raw.business_model, ['B2B','B2B2C','Mixed','B2C','Unknown'], 'Unknown'),\n  tech_core: pick(raw.tech_core, ['core_tech','tech_assisted_service','no_tech','unknown'], 'unknown'),\n  use_of_funds: pick(raw.use_of_funds, ['commercial','mixed','rnd_only','unknown'], 'unknown'),\n  expansion_targets: raw.expansion_targets || [], mission_flags: (raw.mission_flags || []).filter(m => ['defense','gambling','tobacco','speculative_crypto','fast_fashion','fossil_energy'].includes(m)),\n  decision_makers: raw.decision_makers || [], investors: raw.investors || [], evidence: raw.evidence || {},\n  senior_commercial_lead_named: raw.senior_commercial_lead_named === true } : null;\nconst flags = [...(src.prepFlags || [])];\nif (!f) {\n  return { json: { ...src, facts: null, score: null, breakdown: null, gate: null, status: 'New',\n    flags: [...flags, 'Model error'], error: String($json.error?.message || $json.error || 'No valid structured output'),\n    tokensEst: 0, domain: null, dedupeKey: null } };\n}\nconst norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\\s+/g, ' ').trim();\n// Verbatim check ignores punctuation / quote style (’ vs ', – vs -), never words\nconst loose = s => norm(s).replace(/[^\\p{L}\\p{N}]+/gu, ' ').trim();\nconst hay = norm(src.title + ' ' + src.text);\nconst hayL = loose(src.title + ' ' + src.text);\n// Near-verbatim: >= 80% of the quote's word pairs must appear in the article (tolerates a dropped\n// word or changed tense, rejects invented quotes)\nconst pairs = x => { const w = loose(x).split(' '); return w.slice(1).map((t, i) => w[i] + ' ' + t); };\nconst ok = e => { if (!e || loose(e).length < 6) return false; if (hayL.includes(loose(e))) return true;\n  const p = pairs(e); return p.length >= 3 && p.filter(x => hayL.includes(x)).length / p.length >= 0.8; };\nconst ev = {}; let dropped = 0;\nfor (const [k, v] of Object.entries(f.evidence || {})) { if (v && !ok(v)) dropped++; ev[k] = ok(v) ? v : null; }\nif (dropped) flags.push('Evidence dropped');\n// Facts without grounded evidence fall back to neutral\nconst bm = ev.business_model ? f.business_model : 'Unknown';\nconst uof = ev.use_of_funds ? f.use_of_funds : 'unknown';\nconst round = ev.round ? f.round : 'Unknown';\nconst traction = ev.traction ? (f.product_live || f.customers_or_pilots) : false;\n// Amount → EUR (fixed, conservative rates; good enough for a 3-band score)\nconst FX = { EUR: 1, USD: 0.92, GBP: 1.17, CHF: 1.05, SEK: 0.087, DKK: 0.134, NOK: 0.085, PLN: 0.23, CZK: 0.04, HUF: 0.0025 };\nconst amountEur = f.amount && FX[(f.currency || '').toUpperCase()] ? Math.round(f.amount * FX[f.currency.toUpperCase()]) : null;\n// Geography\nconst DACH = ['DE','AT','CH'], BENELUX = ['NL','BE','LU'];\nconst EUROPE = ['FR','ES','IT','PT','IE','DK','SE','FI','NO','IS','LI','PL','CZ','EE','LV','LT','SK','SI','HR','RO','BG','HU','GR','CY','MT', ...DACH, ...BENELUX];\nconst hq = (f.hq_country || '').toUpperCase().replace('GB', 'UK');\nconst targets = (f.expansion_targets || []).map(t => t.toUpperCase());\nconst geoOf = c => DACH.includes(c) || c === 'DACH' ? 15 : BENELUX.includes(c) ? 12 : (EUROPE.includes(c) || c === 'EUROPE' || c === 'EU') ? 8 : 0;\nconst geo = Math.max(geoOf(hq), ...targets.map(geoOf), 0);\n// Hard gates (any one = Rejected)\nlet gate = null;\nif (f.article_type !== 'single_company_equity_round') gate = `Not a single-company equity round (${f.article_type})`;\nelse if (['Series B', 'Series C+'].includes(f.round) || (amountEur && amountEur > 20e6)) gate = `Too late / too large (${f.round}, €${amountEur ?? '?'})`;\nelse if ((hq === 'UK' || (hq && !EUROPE.includes(hq))) && geo === 0) gate = `HQ ${hq}, no Europe expansion`;\nelse if ((f.mission_flags || []).length) gate = `Mission gate: ${f.mission_flags.join(', ')}`;\n// Scoring (100)\nconst days = (Date.now() - new Date(src.published).getTime()) / 864e5;\nconst b = {\n  trigger: days <= 30 ? 10 : days <= 60 ? 5 : 0,\n  stage: amountEur == null ? 8 : amountEur < 750e3 ? 3 : amountEur <= 15e6 ? 15 : 8,\n  b2b: { B2B: 15, B2B2C: 8, Mixed: 8, B2C: 0, Unknown: 4 }[bm] ?? 4,\n  geography: hq || targets.length ? geo : 4,\n  useOfFunds: { commercial: 15, mixed: 8, rnd_only: 4, unknown: 4 }[uof] ?? 4,\n  capacityGap: (traction ? 5 : 0) + (f.senior_commercial_lead_named ? 0 : 5),\n  tech: { core_tech: 10, tech_assisted_service: 5, no_tech: 0, unknown: 5 }[f.tech_core] ?? 5,\n  reachability: 0\n};\nconst people = (f.decision_makers || []).slice(0, 5).filter(p => p.name && p.name.split(' ').length >= 2 && hayL.includes(loose(p.name)));\nif (people.length) b.reachability += 6;\nconst NETWORK = /\\b(techstars|antler|ewor|apx|heartfelt|redstone|sigma squared)\\b/i;\nif (NETWORK.test((f.investors || []).filter(x => hayL.includes(loose(x))).join(' '))) { b.reachability += 4; flags.push('Network investor'); }\nconst score = Object.values(b).reduce((a, x) => a + x, 0);\nconst status = gate ? 'Rejected' : score >= 60 ? 'Qualified' : 'Archived';\nif (!gate && score >= 75) flags.push('Strong');\n// Domain: the company's own site from article links (rules), else LLM website if literally in text\nconst tr = x => norm(x).replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l');\nconst core = tr(f.company).replace(/\\b(gmbh|ag|ug|se|kg|bv|nv|sas|sa|srl|ltd|inc|oy|ab|as|aps)\\b/g, '').replace(/[^a-z0-9]/g, '');\nconst stem = h => h.split('.').slice(0, -1).join('').replace(/[^a-z0-9]/g, '');\nlet domain = (src.linkHosts || []).find(h => core.length >= 3 && (stem(h).includes(core) || core.includes(stem(h)) && stem(h).length >= 4)) || null;\nif (!domain && f.website && hay.includes(norm(f.website).replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0])) {\n  domain = norm(f.website).replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\n}\nconst dedupeKey = tr(f.company).replace(/\\b(gmbh|ag|ug|se|kg|bv|nv|sas|sa|srl|ltd|inc|oy|ab|as|aps)\\b/g, '').replace(/[^a-z0-9]/g, '');\nconst tokensEst = Math.round((src.title.length + src.text.length + 4500) / 4) + 400;\nreturn { json: { ...src, facts: f, evidence: ev, amountEur, people, score, breakdown: b, gate, status, flags,\n  error: null, tokensEst, droppedEvidence: dropped, domain, dedupeKey, icpVersion: ICP_VERSION } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "b9902af0-dfe4-45d7-a199-a36bd56d720e",
+      "id": "bd39e84e-3f0a-45de-b761-4bc4e57ca124",
       "name": "Notion · same company?",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -231,7 +231,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7f99effe-8c99-4cb7-b5a7-5fd18ee7fc31",
+      "id": "8b682a26-031e-4831-b16d-6fcc7ec540fa",
       "name": "Build company page",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -245,7 +245,7 @@
       }
     },
     {
-      "id": "0fe8ece1-740b-4fae-a492-82e26ee737a4",
+      "id": "72945c7b-f564-456d-9d19-a395903405bc",
       "name": "Already in CRM?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -263,7 +263,7 @@
           },
           "conditions": [
             {
-              "id": "5ef51379-cc64-49c6-8459-6b46388f35e8",
+              "id": "4c41e241-17f2-47a5-9ecf-88bf94b5dd33",
               "leftValue": "={{ $json.duplicateOf }}",
               "rightValue": "",
               "operator": {
@@ -279,7 +279,7 @@
       }
     },
     {
-      "id": "67c19957-4405-442d-a825-37507b9a7b22",
+      "id": "dba964c4-28df-453b-b1ed-da2f82a17dc8",
       "name": "Return duplicate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -293,7 +293,7 @@
       }
     },
     {
-      "id": "3849ccb1-a0ff-430b-8f3a-bf27b8719500",
+      "id": "e73f8593-cf08-4223-b988-96b794862e8a",
       "name": "Notion · create company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -325,7 +325,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "d85dbe4b-35d6-4302-a5dd-ff230c9a7bad",
+      "id": "18f172e7-f1e9-4a13-aa87-105c9e15686f",
       "name": "Return result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -339,7 +339,7 @@
       }
     },
     {
-      "id": "3d7222fe-48c9-4afa-ab97-2199148703e3",
+      "id": "123371f7-7280-49c6-833f-a8046b3b38c7",
       "name": "Note · Before the LLM (rules)",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -354,7 +354,7 @@
       }
     },
     {
-      "id": "fd9b462c-7181-4eea-96cd-2c6976eb5cc1",
+      "id": "19d968ac-f3b9-40e9-9ae0-7f00edc3f727",
       "name": "Note · The LLM (extracts facts)",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -369,7 +369,7 @@
       }
     },
     {
-      "id": "a8356f81-219e-44f0-b69a-50c44f9bc97c",
+      "id": "fd3c59fe-aefe-4bf9-9fbd-5996c73b41f2",
       "name": "Note · After the LLM (rules decide)",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
