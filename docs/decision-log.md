@@ -26,3 +26,7 @@
 | 15 Oct | German drafts use "du"; code rejects "Sie" and funding-led openings or subjects | Noah: startup tone, "how can we help" instead of "I saw you raised" |
 | 15 Oct | Judge answers yes/no per criterion, pass computed in code, format left to code | v1 judge wrote "Unsupported: None" and hallucinated a missing opt-out line |
 | 15 Oct | Follow-up engine planned as separate workflow (60), cadence in the playbook | Noah: sequences matter; kept out of 40 so first touch and follow-ups can be tested separately |
+| 15 Oct | 40 v3: article excerpt + homepage in the brief, cliché ban, varied asks, C 30–60 words, LinkedIn ≤ 200 chars | v2 run: drafts correct but generic; judge expression bug ("no verdict" on every variant) |
+| 15 Oct | Draft gpt-5.1, judge gpt-5-mini | Same cost range as gpt-4o, better at following many rules at once; fallback kept |
+| 15 Oct | Playbook adds $100M Offers and Thinking, Fast and Slow; cadence 5 touches / 2 LinkedIn / walk-away email | Noah's request |
+| 15 Oct | 50/51 Telegram approval: 3 variants + Edit + Skip, status as idempotency lock, cold leads become Gmail drafts | Human decides every send; UWG §7 caution for cold B2B email in Germany |

@@ -309,7 +309,7 @@
         -180
       ],
       "parameters": {
-        "content": "## Sub-workflows\n10 Qualify company → {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → once at the end; LinkedIn, website fail-safe, site emails, Hunter.\n40 Draft + judge → once after 30; drafts for every contact with a verified channel.\nNext: 50 Telegram approval → send.",
+        "content": "## Sub-workflows\n10 Qualify company → {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → once at the end; LinkedIn, website fail-safe, site emails, Hunter.\n40 Draft + judge → once after 30; drafts for every contact with a verified channel.\n50 Approval cards → Telegram card per Draft ready contact. Taps are handled by 51 (Telegram trigger, separate, always active).",
         "height": 190,
         "width": 560,
         "color": 5
@@ -345,6 +345,29 @@
       "typeVersion": 1.2,
       "position": [
         2520,
+        340
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "8f3d81c2-f9dd-4f53-9b11-35d252e6d8fb",
+      "name": "Sub · 50 Approval cards",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2760,
         340
       ],
       "parameters": {
@@ -521,6 +544,17 @@
         [
           {
             "node": "Sub · 40 Draft + judge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub · 40 Draft + judge": {
+      "main": [
+        [
+          {
+            "node": "Sub · 50 Approval cards",
             "type": "main",
             "index": 0
           }

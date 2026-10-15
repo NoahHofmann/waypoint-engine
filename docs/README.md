@@ -11,6 +11,7 @@ Start here. Every workflow has its own page that explains **what it does, why it
 | [20-find-people.md](20-find-people.md) | Named people from the article, verbatim checks |
 | [30-enrich-contacts.md](30-enrich-contacts.md) | LinkedIn, company website, email, outcome statuses, budget |
 | [40-draft-judge.md](40-draft-judge.md) | Brief, offer rules, draft, code check, judge, retry |
+| [50-approval.md](50-approval.md) | Telegram cards, taps, legal-basis gate, sending |
 | [90-error-handler.md](90-error-handler.md) | What happens when anything fails |
 | [decision-log.md](decision-log.md) | Dated log of design decisions and the live result that triggered them |
 

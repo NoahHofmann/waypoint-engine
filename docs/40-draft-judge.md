@@ -30,5 +30,11 @@ All 3 drafts (KP Labs, HyLight, Epyr) failed: one variant only, funding-led open
 - **Opt-out line in every email:** respectful, lowers spam complaints, and fits GDPR/UWG caution for cold B2B contact.
 - **Legal basis:** contacts found via articles carry *None - draft only*; 50 shows that on the approval card and never auto-sends them.
 
+## Second live run (15 Oct, v2) and what changed (v3)
+- Every variant showed "Judge returned no verdict": the judge's prompt expression contained real line breaks inside a JavaScript string, so the expression failed before the model was called. Fixed; judge errors now show their message.
+- Variant C failed the 60-word minimum by design: C now has its own range (30–60 words). LinkedIn notes are connection requests: max 200 characters.
+- Drafts were correct but generic ("I help startups like yours…"). v3 gives the model the **article excerpt and the company homepage** to find a real hook, bans the clichés in code, requires a different ask per variant.
+- Models: draft **gpt-5.1**, judge **gpt-5-mini** (see Cost). Fallback: gpt-4o / gpt-4o-mini in the same nodes.
+
 ## Cost
-≈ 3,500 tokens draft + 3,000 judge per contact (three variants plus the playbook in the brief): about €0.02–0.03 per contact, ≈ €0.20 per run at 8 contacts.
+Per contact ≈ 6k input + ~3k output/reasoning tokens for the draft (gpt-5.1: $1.25 / $10 per 1M) ≈ $0.04, judge (gpt-5-mini: $0.25 / $2) ≈ $0.01. ≈ $0.05 per contact, up to 2× with a retry. At ~8 contacts per weekday: **≈ $8–15 per month**. gpt-4o for the draft would cost about the same; the gain comes from better instruction following.

@@ -42,6 +42,16 @@ Fields: Variant A/B/C (subject on first line), Variants passed, Chosen variant (
 - **Domain source:** Article · Website check · Hunter · Manual
 - **Company inbox:** generic address from the company site (fallback only)
 
+### Approval (WP · 50 / 51)
+| Status | Means |
+|---|---|
+| Awaiting approval | Card is in Telegram |
+| Sent | Sent from hello@ (only with a green legal basis) |
+| Gmail draft created | Draft waits in hello@ for Noah to send |
+| Approved | LinkedIn text approved, to paste manually |
+| Skipped | Noah skipped it |
+Fields: Telegram message ID (card id = idempotency key), Chosen variant, Approved at, Sent at, Approval log.
+
 ## Runs
 One row per orchestrator run plus one per error (from WP · 90).
 

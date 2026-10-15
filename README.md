@@ -16,8 +16,8 @@ Outbound research-and-draft engine for **Waypoint** (Noah Hofmann's GTM advisory
 | `20 Find people` | LLM extracts founders named in the article → verbatim check → Notion › Contacts | Yes (1 call) |
 | `90 Error handler` | Any failure → email + Telegram + Notion › Runs | No |
 | 30 Enrich contacts | Built | Brave LinkedIn search (2 attempts, deterministic name+company match), Hunter finder + verifier (no email sent), monthly budget guard (300 Brave / 40 Hunter) |
-| 40 Draft + judge | Built | Rules build the brief and pick the offer; gpt-4o drafts, code checks format and numbers, gpt-4o-mini judges grounding; one retry |
-| 50 Telegram approval | *In progress* | |
+| 40 Draft + judge | Built | Rules build the brief and pick the offer; gpt-5.1 writes 3 variants from article + homepage + Notion Sales Playbook, code checks format/numbers/clichés, gpt-5-mini judges grounding; retry if none passes |
+| 50 Approval cards · 51 Approval handler | Built | Telegram card with 3 variants + Edit/Skip; only Noah's chat; status as idempotency lock; legal-basis gate: green → send, cold → Gmail draft, LinkedIn → text to paste |
 
 Data lives in Notion: **Companies** (1) ↔ (n) **Contacts**, plus **Runs** (one row per execution) and **Evals** (golden set).
 

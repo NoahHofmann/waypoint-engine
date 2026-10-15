@@ -1,0 +1,362 @@
+{
+  "name": "WP · 50 Approval cards (sub-workflow)",
+  "nodes": [
+    {
+      "id": "d066272f-b888-4646-9a4f-eaa19170969b",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "72bae66e-ef2e-44a4-b9f3-03b971050ff5",
+      "name": "When called by orchestrator",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "1a67b878-3fa6-462d-a704-c8be0883a301",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// 50 · Approval cards: config\nreturn [{ json: { chatId: '1170608781', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', maxCardsPerRun: 10 } }];"
+      }
+    },
+    {
+      "id": "50802fb3-17ca-412e-86dd-67b7c59e3541",
+      "name": "Notion · drafts ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Draft ready\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: $json.maxCardsPerRun }) }}"
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "27514ce7-c057-4da4-8051-bfb9e234a194",
+      "name": "Pick drafts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// One item per contact with status Draft ready.\nreturn ($input.first().json.results || []).map(pg => { const P = pg.properties; return { json: {\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }).filter(i => i.json.companyPageId);"
+      }
+    },
+    {
+      "id": "f3435176-4e36-4235-938c-91c196407796",
+      "name": "Notion · get company",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.companyPageId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "54b5e6a2-9e42-4796-8c55-77efe6ea7bd9",
+      "name": "Build card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (plain text, max 4096 chars) and the callback keys.\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? 'Approve = I send you the text to paste into LinkedIn (manual send).'\n  : GREEN.includes(c.legalBasis) ? 'Approve = SENT from hello@ immediately.'\n  : 'Approve = Gmail DRAFT in hello@ (legal basis \"' + c.legalBasis + '\"): you review and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\nconst head = [\n  `📨 ${txt(P.Company)} · ${c.name}${c.role ? ' (' + c.role + ')' : ''}`,\n  `${c.channel} · ${c.language || 'EN'} · ICP ${txt(P['ICP score'])}/100 · Offer: ${c.offer}`,\n  `Signal: ${txt(P['Signal summary'])}`,\n  `To: ${c.channel === 'Email' ? c.email : c.linkedin}`,\n  what,\n  `Passed review: ${c.passed || 'none'}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `— ${id} —\\n${clip(c[id] || '(empty)', 1000)}`).join('\\n\\n');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n✏️ To send your own version: reply to this message with the text (first line \"Subject: …\" for emails).', 4000);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "8fbe9cce-72aa-43be-9ef4-872767ff7639",
+      "name": "Telegram · send card",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.chatId }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Send A",
+                    "additionalFields": {
+                      "callback_data": "={{ 'v|' + $json.key + '|A' }}"
+                    }
+                  },
+                  {
+                    "text": "Send B",
+                    "additionalFields": {
+                      "callback_data": "={{ 'v|' + $json.key + '|B' }}"
+                    }
+                  },
+                  {
+                    "text": "Send C",
+                    "additionalFields": {
+                      "callback_data": "={{ 'v|' + $json.key + '|C' }}"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✏️ Edit",
+                    "additionalFields": {
+                      "callback_data": "={{ 'e|' + $json.key }}"
+                    }
+                  },
+                  {
+                    "text": "⏭ Skip",
+                    "additionalFields": {
+                      "callback_data": "={{ 's|' + $json.key }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "8d63eef4-ee23-4e0a-9806-fe1888efa9a7",
+      "name": "Build Notion update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Awaiting approval + the card's message id (idempotency key: a tap is only acted on while the status is Awaiting approval).\nconst c = $('Build card').item.json;\nconst id = $json.result?.message_id;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nif (!id) return { json: { skip: true, contactPageId: c.contactPageId, error: JSON.stringify($json.error || $json).slice(0, 200) } };\nreturn { json: { contactPageId: c.contactPageId, name: c.name, company: c.company, body: { properties: {\n  'Status': { status: { name: 'Awaiting approval' } },\n  'Telegram message ID': { rich_text: t(String(id)) },\n  'Approval log': { rich_text: t(`${new Date().toISOString().slice(0, 16)} card sent (message ${id})`) } } } } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "dfcb3423-789e-4fea-ac17-d298559561b8",
+      "name": "Notion · awaiting approval",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        200
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}"
+      }
+    },
+    {
+      "id": "83d622ba-4762-4c11-8112-141a559eda14",
+      "name": "Note · 50",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -380
+      ],
+      "parameters": {
+        "width": 900,
+        "height": 300,
+        "content": "## WP · 50 Approval cards: what and why\nSends one Telegram card per contact with Status **Draft ready**: company, person, channel, ICP score, offer, signal, **what Approve will do** (send / Gmail draft / LinkedIn text), which variants passed review, and all three variants. Buttons: **Send A · Send B · Send C · ✏️ Edit · ⏭ Skip**. Replying to the card with your own text sends that version.\nSets Status **Awaiting approval** and stores the card's message id. The taps are handled by **WP · 51** (Telegram trigger).\n**Why Telegram:** approval in seconds from the phone; nothing leaves without a human tap. **Why show the action on the card:** the legal-basis gate is visible before you decide.\nDocs: docs/50-approval.md"
+      }
+    }
+  ],
+  "connections": {
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When called by orchestrator": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Notion · drafts ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · drafts ready": {
+      "main": [
+        [
+          {
+            "node": "Pick drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick drafts": {
+      "main": [
+        [
+          {
+            "node": "Notion · get company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · get company": {
+      "main": [
+        [
+          {
+            "node": "Build card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build card": {
+      "main": [
+        [
+          {
+            "node": "Telegram · send card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram · send card": {
+      "main": [
+        [
+          {
+            "node": "Build Notion update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Notion update": {
+      "main": [
+        [
+          {
+            "node": "Notion · awaiting approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true
+  },
+  "pinData": {}
+}

@@ -13,6 +13,8 @@ Condensed in our own words from widely recommended B2B sales books. The draft an
 - **To Sell Is Human (Daniel Pink):** attunement (see it from their side), clarity (help them see their problem in a new way).
 - **The Sales Development Playbook (Trish Bertuzzi):** multi-touch, multi-channel sequences with a clear end; every touch adds something new.
 - **Founding Sales (Pete Kazanjian):** early-stage buyers buy from people who understand their stage; credibility comes from specifics.
+- **$100M Offers (Alex Hormozi):** value = (dream outcome × perceived likelihood) ÷ (time delay × effort). Describe the outcome they want, make it believable with one proof point, and make the next step feel fast and low-effort for them.
+- **Thinking, Fast and Slow (Daniel Kahneman), supplementary:** people decide with fast, intuitive System 1 first. Make messages easy to process (short sentences, one idea per line, concrete words), use one specific number rather than vague claims, and frame around avoiding a likely loss (time, a missed market window) without fear-mongering.
 
 ## Rules for a first message
 1. **Their world first.** Open with their situation or goal (what they build, where they want to go), not with Noah and not with the funding round.
@@ -33,7 +35,7 @@ Condensed in our own words from widely recommended B2B sales books. The draft an
 
 ## Language and tone
 - **German:** "du", greeting "Hi <Vorname>,", natural startup tone, no stiff phrases ("Sehr geehrte", "Mit freundlichen Grüßen"), keep English terms only where Germans use them (Go-to-Market, Pipeline).
-- **English:** "Hi <first name>,", warm and direct, British/European rather than US hype.
+- **English:** "Hi <first name>,", warm and direct, European rather than US hype.
 - Subject lines: 3–7 words, about their goal or market, lower case allowed, never clickbait.
 
 ## Follow-up principles (for the follow-up engine, built later)
