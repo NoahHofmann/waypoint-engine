@@ -36,7 +36,7 @@ Shows the channels in words, independent of status: **Email + LinkedIn · Email 
 |---|---|
 | Draft ready | Draft passed code check + judge. Goes to Telegram approval (50) |
 | Check manually | Draft failed twice; Judge notes say why |
-Fields: Channel, Offer, Draft language, Draft subject/body/version, Judge result/notes, Booking link, Email source.
+Fields: Variant A/B/C (subject on first line), Variants passed, Chosen variant (A/B/C/Edited, set by Noah), Channel, Offer, Draft language, Draft subject/body (default = first passing variant), Judge result/notes, Booking link, Email source.
 
 ### Companies (added 15 Oct)
 - **Domain source:** Article · Website check · Hunter · Manual
