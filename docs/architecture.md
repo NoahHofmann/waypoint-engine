@@ -11,9 +11,10 @@ WP · 00 Intake (orchestrator)
   │    WP · 10 Qualify company   → Companies row (Qualified / Archived / Rejected)
   │    if Qualified: WP · 20 Find people → Contacts rows (Needs email)
   ├─ Runs row (counts, tokens, cost)
-  └─ WP · 30 Enrich contacts (once)  → LinkedIn + email → outcome status
+  ├─ WP · 30 Enrich contacts (once)  → LinkedIn, website fail-safe, site emails, Hunter → outcome status
+  └─ WP · 40 Draft + judge (once)    → Draft ready / Check manually
 Any failure anywhere → WP · 90 Error handler → Telegram + email + Runs row
-Next (Thu): 40 Draft + judge → 50 Telegram approval → send / booking
+Next: 50 Telegram approval → send / booking
 ```
 
 ## Principles (and why)

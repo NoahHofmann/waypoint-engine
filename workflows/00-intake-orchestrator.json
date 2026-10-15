@@ -309,7 +309,7 @@
         -180
       ],
       "parameters": {
-        "content": "## Sub-workflows\n10 Qualify company → returns {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → runs once at the end (after the run log), works through every contact with Status 'Needs email', incl. leftovers from earlier runs.\nNext: 40 Draft + judge, 50 Telegram approval.",
+        "content": "## Sub-workflows\n10 Qualify company → {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → once at the end; LinkedIn, website fail-safe, site emails, Hunter.\n40 Draft + judge → once after 30; drafts for every contact with a verified channel.\nNext: 50 Telegram approval → send.",
         "height": 190,
         "width": 560,
         "color": 5
@@ -322,6 +322,29 @@
       "typeVersion": 1.2,
       "position": [
         2280,
+        340
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "0a362acb-8f20-423e-bc75-04b43adee5b0",
+      "name": "Sub · 40 Draft + judge",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2520,
         340
       ],
       "parameters": {
@@ -487,6 +510,17 @@
         [
           {
             "node": "Sub · 30 Enrich contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub · 30 Enrich contacts": {
+      "main": [
+        [
+          {
+            "node": "Sub · 40 Draft + judge",
             "type": "main",
             "index": 0
           }

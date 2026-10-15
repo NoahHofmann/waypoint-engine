@@ -17,3 +17,7 @@
 | 14 Oct | Hunter domain guess must match company name | FLÆ Robotics → vexrobotics.com |
 | 14 Oct | Outcome statuses: Ready to draft / LinkedIn only / Check manually / Not reachable + Reach formula | "No email found" hid whether a LinkedIn existed |
 | 14 Oct | Website search with plain company name | Quoted "official website" query returned 0 results in every live run |
+| 15 Oct | Website fail-safe: generate likely domains and verify the homepage shows the company name | Brave website search returned 0 results in every live run; most domains were empty |
+| 15 Oct | Scan Impressum/contact/about pages for published addresses; generic inbox stored on the company only | Free second email source; a company inbox is not a person's consent or address |
+| 15 Oct | 40: brief built by rules, offer chosen by rules, code check + LLM judge, one retry | Drafts must only use verified facts and canonical metrics; invented numbers are caught in code |
+| 15 Oct | Per-contact Cal.com link with metadata | Lets a booking be matched to the contact automatically (T-010) |

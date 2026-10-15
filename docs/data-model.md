@@ -31,6 +31,17 @@ Shows the channels in words, independent of status: **Email + LinkedIn · Email 
 - **LinkedIn match:** the full reasoning of WP · 30 (attempts, website search, Hunter domain checks)
 - **LinkedIn candidate:** name-only match, never used automatically
 
+### After drafting (WP · 40)
+| Status | Means |
+|---|---|
+| Draft ready | Draft passed code check + judge. Goes to Telegram approval (50) |
+| Check manually | Draft failed twice; Judge notes say why |
+Fields: Channel, Offer, Draft language, Draft subject/body/version, Judge result/notes, Booking link, Email source.
+
+### Companies (added 15 Oct)
+- **Domain source:** Article · Website check · Hunter · Manual
+- **Company inbox:** generic address from the company site (fallback only)
+
 ## Runs
 One row per orchestrator run plus one per error (from WP · 90).
 
