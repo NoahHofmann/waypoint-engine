@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "aa4676c6-ce63-43bc-98f2-567f97ed83f3",
+      "id": "7b38b594-e55f-4252-8216-4938c929f186",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "fbd0d719-46d6-48ef-b6fa-6b64bd89e49f",
+      "id": "d7e32d66-8401-4531-8f27-d8bb8ed15141",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "ab316425-08fd-4809-bc11-950053a78ba8",
+      "id": "e3f15085-98b7-4ce2-b687-3b2363369489",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "53995234-bfc9-42d4-884c-20c52ba9e480",
+      "id": "1ce9c17e-2094-463f-ae21-71c356ac5c8b",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "d444a37b-bc53-4722-91f4-55066f98402c",
+              "id": "556b9968-d568-4b0a-934d-d76248189b66",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "02cc7c0d-c8c8-4f12-96b5-abece4bf6e0e",
+      "id": "ec8539ae-00c0-4d53-a0a5-514b1f3de371",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "e303815e-2fe6-4f14-bb91-ab21e1cd4a23",
+      "id": "f5d04ddb-224e-4106-b940-c95a8489de12",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -114,7 +114,7 @@
       }
     },
     {
-      "id": "eaee78cd-0baf-4d9b-98bd-223c0fc40840",
+      "id": "79843d65-c3b3-49dd-b842-81c096afa244",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "268dc98d-9b7c-4afe-8aa7-60c04e07fa60",
+      "id": "16b05e2e-cbcc-4396-8ce7-af65a94445f2",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "a4808928-db3c-4eb2-9cdf-13d85c7127e6",
+      "id": "5b09ee71-41fd-4bb0-b686-a92584a27008",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -214,7 +214,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "39f9aabd-7e2e-49b7-9783-0e35fe994f9f",
+      "id": "12a07b1b-e2df-48f3-869b-3a9c48b00189",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -228,7 +228,7 @@
       }
     },
     {
-      "id": "5cbe903d-3b71-4224-b81c-c4849c1fffdd",
+      "id": "9ee6bada-f2f8-4200-accd-10e533ce4084",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -246,7 +246,7 @@
           },
           "conditions": [
             {
-              "id": "eb7e883f-2387-4dc4-add4-c36f50f09955",
+              "id": "11ab2d32-05a2-49e2-863e-d9bb46f76ca7",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -262,7 +262,7 @@
       }
     },
     {
-      "id": "5d6c3122-e566-4351-8568-fc135eb40416",
+      "id": "632e28c6-d49b-4d6e-8e8f-5dff87857d40",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -322,7 +322,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "64b1e53e-7c14-4b8f-831c-8fd8d3b34f45",
+      "id": "9e0b9c25-b84c-41e7-89a1-cfe483c8f61e",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -336,7 +336,7 @@
       }
     },
     {
-      "id": "479eb6b5-8814-4329-bfa5-cc67664b71ee",
+      "id": "a623b0e4-da53-4e1d-a7c1-025d46bc62e6",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -383,7 +383,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "9b81ff07-9e26-4b48-a77e-c2bb8e6c3be3",
+      "id": "1c715ec3-6aa0-4df2-993d-786ba4c1e891",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -401,7 +401,7 @@
           },
           "conditions": [
             {
-              "id": "02b7784a-f226-4268-aa2d-db53aa68da19",
+              "id": "71af5991-ecde-4893-ae28-3f2ae9b87675",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -417,7 +417,7 @@
       }
     },
     {
-      "id": "8ed483df-ae95-470f-992c-b9a2c6a6d4a3",
+      "id": "8709e3f8-75bd-4434-bf10-34e2f00daede",
       "name": "Website candidates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -426,12 +426,11 @@
         -200
       ],
       "parameters": {
-        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\nconst p = $json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n['get' + joined + '.com', joined + 'hq.com', joined + 'app.com'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nreturn set.slice(0, 24).map((d, i) => ({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: $itemIndex } }));",
-        "mode": "runOnceForEachItem"
+        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\n// Runs once for ALL items: one contact in, up to 24 candidate items out. (Per-item mode can't return\n// several items -> \"A 'json' property isn't an object\", the same bug we fixed in 20.)\nconst out = [];\n$input.all().forEach((it, idx) => {\nconst p = it.json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n['get' + joined + '.com', joined + 'hq.com', joined + 'app.com'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nset.slice(0, 24).forEach((d, i) => out.push({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));\n});\nreturn out;"
       }
     },
     {
-      "id": "dddd2488-1fe2-46b4-a93b-bb92adec36ec",
+      "id": "bada051f-a358-4f55-8149-d675d222d3f4",
       "name": "Fetch candidate homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -477,7 +476,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "24861f67-98fa-4a1c-9cfd-9cd6dd909955",
+      "id": "654b87dc-70bb-490d-9f83-9997a226c5e5",
       "name": "Pick verified website",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -490,7 +489,7 @@
       }
     },
     {
-      "id": "b5438b0a-5f9d-4fe4-81e9-dbb362afa5c0",
+      "id": "9ff063fa-28a0-40ca-a715-4da81f9cf212",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -520,7 +519,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "fbc5525a-ec0a-4ac1-b265-eed7556d966b",
+      "id": "6a2b6285-ad7c-4706-8ae4-ac169095ff0f",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -534,7 +533,7 @@
       }
     },
     {
-      "id": "63905530-6c4b-4d49-a825-414afe83372c",
+      "id": "6b3b34fe-1629-4429-8235-54dea6274a43",
       "name": "Site pages to scan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -543,12 +542,11 @@
         100
       ],
       "parameters": {
-        "jsCode": "// EMAIL FAIL-SAFE, step 1: list the company's own pages that usually publish addresses\n// (Impressum is legally required in DACH). One item per page; homepage HTML is reused if we have it.\nconst p = $json;\nif (!p.domain) return [{ json: { ...p, pageUrl: '' }, pairedItem: { item: $itemIndex } }];\nconst paths = ['', '/impressum', '/imprint', '/legal-notice', '/contact', '/kontakt', '/about', '/team'];\nreturn paths.map(path => ({ json: { ...p, pageUrl: `https://${p.domain}${path}` }, pairedItem: { item: $itemIndex } }));",
-        "mode": "runOnceForEachItem"
+        "jsCode": "// EMAIL FAIL-SAFE, step 1: list the company's own pages that usually publish addresses\n// (Impressum is legally required in DACH). One item per page; homepage HTML is reused if we have it.\n// Runs once for ALL items (several pages per contact).\nconst paths = ['', '/impressum', '/imprint', '/legal-notice', '/contact', '/kontakt', '/about', '/team'];\nconst out = [];\n$input.all().forEach((it, idx) => {\n  const p = it.json;\n  if (!p.domain) out.push({ json: { ...p, pageUrl: '' }, pairedItem: { item: idx } });\n  else paths.forEach(path => out.push({ json: { ...p, pageUrl: `https://${p.domain}${path}` }, pairedItem: { item: idx } }));\n});\nreturn out;"
       }
     },
     {
-      "id": "0c0880e2-dd02-4c5e-b28b-b14ede45643a",
+      "id": "04f63aed-3b22-4ddc-8a27-2f831382b170",
       "name": "Fetch site page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -594,7 +592,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c0e22010-30a8-4e80-b728-50c32b4c0921",
+      "id": "e0b10e07-2760-4999-abc6-606e8550fbec",
       "name": "Extract site emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -607,7 +605,7 @@
       }
     },
     {
-      "id": "0d57de23-456b-4f19-9464-02dbb6a08224",
+      "id": "c798ffb5-06f1-45a1-afa5-868fd01da6c1",
       "name": "Has company inbox?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -625,7 +623,7 @@
           },
           "conditions": [
             {
-              "id": "2e4bde38-5070-464e-93ec-eabe60574be0",
+              "id": "392dbb38-f254-4691-8f03-9655c10961a8",
               "leftValue": "={{ $json.companyInbox }}",
               "rightValue": "",
               "operator": {
@@ -641,7 +639,7 @@
       }
     },
     {
-      "id": "fe983cb5-3945-4816-898f-c9b4ba74b9a3",
+      "id": "039aeea0-6d80-4c18-a255-c3f10305a520",
       "name": "Notion · save company inbox",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -671,7 +669,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "0d98aeb0-ddcc-4086-b81a-f7332c69c788",
+      "id": "a158192e-64c7-42c7-8b9e-996e861dbe14",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -685,7 +683,7 @@
       }
     },
     {
-      "id": "7ac8384f-f679-4c0e-b1bf-877ca3719c5f",
+      "id": "56777624-8f61-4d6f-b6e1-673c1ff679fc",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -703,7 +701,7 @@
           },
           "conditions": [
             {
-              "id": "cd5b76a6-3361-41da-9344-ef58e9ac4aa9",
+              "id": "b68ef1fb-5597-4db5-9687-e15e82395ecf",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -719,7 +717,7 @@
       }
     },
     {
-      "id": "bbeb12e2-c31a-4aac-971b-3d8dfe02c067",
+      "id": "cb4e6113-8f00-496e-84e5-6177d6ef3911",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -758,7 +756,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "5ca20246-fd69-4d32-9e28-03b36602819d",
+      "id": "fa788f22-b020-4e35-a890-29cb1ebcd651",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -772,7 +770,7 @@
       }
     },
     {
-      "id": "f7474d28-4a54-42a6-ab9a-815d4c608e7e",
+      "id": "b0d2faef-6308-4032-93f1-29f62fb0a2bb",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -801,7 +799,7 @@
       }
     },
     {
-      "id": "eb253c99-4af5-456f-98cb-35205c543ee8",
+      "id": "5e217dfa-b180-4e22-9095-ac2d914fa679",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -814,7 +812,7 @@
       }
     },
     {
-      "id": "021af3ba-a196-4004-97a8-8033894d9d4a",
+      "id": "7a6cdb56-5e54-446c-95bb-3efc6538ad2e",
       "name": "Note · 30 overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -829,7 +827,7 @@
       }
     },
     {
-      "id": "b5fd1d48-3cd2-414c-bfd6-070c5d2610eb",
+      "id": "5ca858f8-2e69-4f80-9d3e-b0995cacc801",
       "name": "Note · Selection",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -844,7 +842,7 @@
       }
     },
     {
-      "id": "d5ffaa8c-719a-4b9a-bed1-9126379c0eca",
+      "id": "b3e4a100-3131-444d-8442-7fad14caedd0",
       "name": "Note · LinkedIn",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -859,7 +857,7 @@
       }
     },
     {
-      "id": "a95d8570-af1b-4fd4-aa2b-9a29f66dee9a",
+      "id": "746d09d0-35be-495c-bd8c-419c4594e4c2",
       "name": "Note · Website",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -874,7 +872,7 @@
       }
     },
     {
-      "id": "4fe42783-e818-49bf-b995-4147b84d1711",
+      "id": "d9384992-260e-43b2-82bd-5846d3c999c0",
       "name": "Note · Email",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
