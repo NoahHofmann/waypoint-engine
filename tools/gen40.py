@@ -28,7 +28,7 @@ return [{ json: {
   draftModel: 'gpt-5.1',           // 'OpenAI · draft 1/2', reasoning effort LOW. Interim until the model decision (docs/model-choice.md)
   judgeModel: 'gpt-5-mini',         // 'OpenAI · judge 1/2', reasoning effort low. Why: a different model family grades the draft (no self-grading)
   calLink: 'https://cal.com/book-a-call-with-noah/30min',
-  promptVersion: 'draft-v4 / judge-v4',
+  promptVersion: 'draft-v5 / judge-v4',
   playbookPageId: '3fa64e3c573c81bb9e99da3b6be520c1',   // Notion › Sales Playbook (edit there)
   // NOAH PROFILE: the ONLY facts about Noah a draft may use (canonical metrics, project instructions).
   profile: [
@@ -175,7 +175,11 @@ const variants = ['A', 'B', 'C'].map(id => {
 });
 // The three variants must not all end with the same ask
 const asks = variants.map(v => (v.body.match(/[^.!?\n]*\?/g) || []).pop() || '');
-if (asks.filter(a => /bad idea|crazy/i.test(a)).length >= 3) variants.forEach(v => v.issues.push('All variants use the same no-oriented question; vary the ask'));
+// No-oriented question ("bad idea", "crazy") allowed in at most one variant: in v4 it was in nearly every email
+let noSeen = 0;
+variants.forEach((v, i) => { if (/bad idea|crazy|schlechte idee|verrückt/i.test(asks[i])) { noSeen++; if (noSeen > 1) v.issues.push('Same no-oriented question as another variant ("bad idea"/"crazy"); use a plain, specific question'); } });
+// Template self-intro (was in every v4 email)
+variants.forEach(v => { if (/\bI help (funded |early[- ]stage )?(B2B )?(founders|CEOs|teams|startups)\b/i.test(v.body)) v.issues.push('Generic self-intro "I help funded B2B …"; say what Noah would do for THIS company'); });
 return { json: { ...prev, variants } };"""
 DECIDE=r"""// Combine code checks and judge per variant. A variant passes only if BOTH are clean.
 // The contact is ready if at least one variant passes; Noah picks which one to send in 50.

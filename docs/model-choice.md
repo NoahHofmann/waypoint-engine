@@ -1,38 +1,37 @@
-# Draft model choice (open, decided by a blind bake-off)
+# Draft model choice (to be decided by a blind bake-off)
 
-**Question:** which model writes the most natural 60–110-word B2B emails in German and English, at what price?
+**Question:** which model writes the most natural 60–110-word B2B emails in German and English, and what does it cost at our volume?
 
-## What the public benchmarks say (15 Oct 2026)
-| Model | EQ-Bench Creative Writing v3 (LLM-judged, snapshot 24 Sep) | LMArena Creative Writing (human votes, 15 Oct) | Price per 1M tokens (in / out) | Est. cost per contact* |
-|---|---|---|---|---|
-| GPT-5.1 (current) | not listed (GPT-5: 1640, GPT-5.2: 1783) | not in the top 20 | $1.25 / $10 | ~$0.021 |
-| Gemini 3.8 Flash | not listed | #7 (1487) | $0.75 / $3.75 | ~$0.010 |
-| Claude Sonnet 5.5 | not listed (Sonnet 4.6: 1968, #5) | not listed (Sonnet 4.6: #22) | $2 / $10 | ~$0.026 |
-| Kimi K2.6 | #8 (1782) | not in the top 20 (Kimi K3: #30) | $0.96 / $3.97 | ~$0.011 |
-| Claude Haiku 5.5 | not listed | not listed | $0.10 / $0.50 | ~$0.001 |
-| GPT-5.5 Instant | GPT-5.5: #2 (2035) | #19 in July | $5 / $30 | ~$0.071 |
-| Mistral Medium 3.5 / Large | Mistral Large: 1402 | far below the top 25 | low | – |
+## Current writing benchmarks (checked 15 Oct 2026)
+| Model | Arena Creative Writing (human votes, 15 Oct) | Arena Text overall (15 Oct) | Mazur short-story benchmark | Price per 1M tokens (in / out) | ≈ per month* |
+|---|---|---|---|---|---|
+| **Claude Opus 5.5** | **#1** (1517) | – | 74 (joint #1) | $4 / $20 | ~$14 |
+| Gemini 4 Argon | #2 (1516) | #1 (1524, prelim.) | 50 | $2 / $10 (restricted preview, no public API) | – |
+| **Gemini 3.8 Flash** | **#7** (1487) | #9 (1496, prelim.) | not listed | **$0.75 / $3.75** | **~$3** |
+| GPT-6 Astra | – | #30 (1477) | 73 | $10 / $50 | ~$34 |
+| GLM 5.3 | – | – | 70 | $1.40 / $4.40 | ~$4 |
+| Kimi K3 | #30 | #18 (1487) | 66 | $3 / $15 | ~$10 |
+| GPT-5.6 Sol | #21 | #21 (1485) | 66 | – | – |
+| Claude Sonnet 5.5 | not in the top 20 | #36 (1475) | not listed | $2 / $10 | ~$7 |
+| GPT-5.1 (current) | not listed | not listed | not listed | $1.25 / $10 | ~$5.5 |
+| Mistral Large 4 / Medium 3.5 | – | #111 / #117 | – | low | – |
 
-\*About 7k input + 1.2k output tokens per attempt.
+\*About 176 contacts a month × 1.5 attempts × (7k input + 1.2k output tokens).
 
-The top of both boards is held by expensive flagship models: Claude Opus, GPT-5.5 and Gemini Pro/Argon.
+## Reading
+1. **The model we use (GPT-5.1) is not competitive on any current writing board.** It was chosen for following instructions, not for prose.
+2. **Quality leader: Claude Opus 5.5.** It is #1 on human preference for creative writing and joint #1 on Mazur. It costs about $14/month at our volume, roughly $8/month more than GPT-5.1.
+3. **Value leader: Gemini 3.8 Flash.** It is top 10 on human preference at about 1/5 of Opus's price. Caveat: its arena score is still marked preliminary.
+4. **Not worth it:** GPT-6 Astra (2.5× the price of Opus, no better), Mistral (far behind), Gemini 4 Argon (no public API).
+5. **Limits of the boards:** they measure chat and fiction preferences, not short German sales emails under hard rules. That is why the bake-off decides.
 
-## Why the benchmarks don't settle it
-1. **Wrong task.** Both boards measure fiction and creative writing. Ours is a short German/English sales email under hard rules.
-2. **Missing models.** The newest mid-tier models (Sonnet 5.5, Gemini 3.8 Flash on EQ-Bench, GPT-5.6) are missing from at least one board.
-3. **Cost isn't what decides it.** At ~8 contacts a day, the gap between the cheapest and the priciest candidate is about **$3–5 per month**. The only reason to choose a model is draft quality, plus speed.
+## Bake-off (Friday eval)
+- **Candidates:** Claude Opus 5.5 (quality), Gemini 3.8 Flash (value), GPT-5.1 (baseline). Optional fourth: Claude Sonnet 5.5.
+- **Setup:** 5 real contacts (3 EN, 2 DE), the same brief and prompt (draft-v5) for every model, and one OpenRouter key.
+- **Blind rating:** outputs are labelled X/Y/Z in random order. Noah rates each draft "would send / would edit / would not send" before the key is revealed.
+- **Decision rule:** most "would send" wins. On a tie, the cheaper or faster model wins. Also recorded: code-check pass rate and seconds per contact.
 
-## Decision method: blind bake-off (Friday eval)
-- **Setup:**
-  - 5 real contacts (3 EN, 2 DE).
-  - The same brief and prompt for every model.
-  - 3 candidates: GPT-5.1 (baseline), Gemini 3.8 Flash (best human-vote score per dollar), Claude Sonnet 5.5.
-  - Calls go through **OpenRouter**: one key and one n8n credential cover all three.
-- **Blinding:** the outputs are labelled X/Y/Z in random order, and the key stays hidden in the Evals DB. Noah rates each draft (would send / would edit / would not send) before the key is revealed.
-- **Decision rule:** the most "would send" ratings wins. On a tie, choose the cheaper and faster model.
-- **Also measured:** the code-check pass rate and the run time per model.
-
-## Data location (for the record)
-- US providers (OpenAI, Anthropic, Google) are covered by the EU–US Data Privacy Framework adequacy decision. The EU General Court upheld it in Sept 2025.
-- Chinese providers (DeepSeek, Moonshot/Kimi) have no adequacy decision; Italy's regulator blocked DeepSeek in 2025.
-- For public founders' names and roles the practical risk is low. It matters once this engine is sold to clients (offer: Commercial Automation with a GDPR-aware setup).
+## Data location
+- US providers (OpenAI, Anthropic, Google) are covered by the EU–US Data Privacy Framework (upheld by the EU General Court in Sept 2025).
+- Chinese providers (Moonshot/Kimi, Z.ai/GLM, DeepSeek) have no adequacy decision.
+- Low practical risk for public founders' names and roles. It becomes relevant if the engine is sold to clients.

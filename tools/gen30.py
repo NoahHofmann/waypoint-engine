@@ -46,7 +46,7 @@ node("Budget left?","n8n-nodes-base.if",2.2,[460,280],{"conditions":{"options":{
 link("Config + budget","Budget left?")
 
 notion("Notion · contacts needing email",[700,200],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
- '={{ JSON.stringify({ filter: { property: "Status", or: ["Needs email", "Ready to draft", "Draft ready", "Awaiting approval", "Approved", "Sent", "Replied", "Meeting booked"].map(n => ({ property: "Status", status: { equals: n } })) }, sorts: [{ timestamp: "created_time", direction: "ascending" }], page_size: 100 }) }}')
+ '={{ JSON.stringify({ filter: { property: "Status", or: ["Needs email", "Ready to draft", "LinkedIn only", "Draft ready", "Awaiting approval", "Approved", "Gmail draft created", "Sent", "Replied", "Meeting booked"].map(n => ({ property: "Status", status: { equals: n } })) }, sorts: [{ timestamp: "created_time", direction: "ascending" }], page_size: 100 }) }}')
 link("Budget left?","Notion · contacts needing email",0)
 
 PICK=r"""// Turn Notion rows into clean items, order by persona priority, cap by budget.

@@ -43,7 +43,7 @@ link("Notion · approved in Notion","Notion approvals → 51")
 node("Run WP · 51 for each",'n8n-nodes-base.executeWorkflow',1.2,[880,-160],{"source":"database","workflowId":{"__rl":True,"value":"","mode":"list"},"mode":"each","options":{"waitForSubWorkflow":True}},onError="continueRegularOutput")
 link("Notion approvals → 51","Run WP · 51 for each")
 notion(node,"Notion · cards still open",[440,200],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
-  '={{ JSON.stringify({ filter: { property: "Status", status: { equals: "Awaiting approval" } }, page_size: 100 }) }}',executeOnce=True)
+  '={{ JSON.stringify({ filter: { or: ["Awaiting approval", "Approved", "Gmail draft created", "Sent", "Replied", "Meeting booked"].map(n => ({ property: "Status", status: { equals: n } })) }, page_size: 100 }) }}',executeOnce=True)
 link("Config","Notion · cards still open")  # runs after the Notion-approval branch (canvas order, top first)
 notion(node,"Notion · drafts ready",[660,200],"POST","=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionContactsDb }}/query",
   '={{ JSON.stringify({ filter: { property: "Status", status: { equals: "Draft ready" } }, sorts: [{ timestamp: "created_time", direction: "ascending" }], page_size: 20 }) }}',executeOnce=True)
@@ -52,19 +52,43 @@ node("Pick drafts","n8n-nodes-base.code",2,[880,200],{"jsCode":TXT+"""
 // STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new
 // (the drafts stay 'Draft ready' and go out after you answer the open ones).
 const cfg = $('Config').first().json;
-const open = ($('Notion · cards still open').first().json.results || []).length;
+// ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out
+// (or a second draft for the same company in this batch) is marked duplicate and skipped, not sent.
+const inFlight = $('Notion · cards still open').first().json.results || [];
+const open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;
+const busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });
 const room = Math.max(0, cfg.maxOpenCards - open);
-const ready = ($input.first().json.results || []);
+const all = ($input.first().json.results || []).filter(pg => pg.properties.Company?.relation?.[0]?.id);
+const dups = [], ready = [];
+all.forEach(pg => { const co = pg.properties.Company.relation[0].id;
+  if (busy[co]) dups.push({ pg, other: busy[co] }); else { busy[co] = txt(pg.properties.Name); ready.push(pg); } });
 const take = ready.slice(0, room);
-return take.map((pg, i) => { const P = pg.properties; return { json: {
+const dupItems = dups.map(d => ({ json: { duplicate: true, contactPageId: d.pg.id, name: txt(d.pg.properties.Name), other: d.other } }));
+return dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { json: { duplicate: false,
   cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,
   contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),
   offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',
   passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),
-  companyPageId: P.Company?.relation?.[0]?.id || null } }; }).filter(i => i.json.companyPageId);"""})
+  companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"""})
 link("Notion · drafts ready","Pick drafts")
-notion(node,"Notion · get company",[1100,200],"GET","=https://api.notion.com/v1/pages/{{ $json.companyPageId }}")
-link("Pick drafts","Notion · get company")
+node("Duplicate company?","n8n-nodes-base.if",2.2,[990,200],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"id":str(uuid.uuid4()),"leftValue":"={{ $json.duplicate }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
+link("Pick drafts","Duplicate company?")
+notion(node,"Notion · skip duplicate",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+  '={{ JSON.stringify({ properties: { Status: { status: { name: "Skipped" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " skipped: company already in conversation via " + $json.other } }] } } }) }}',onError="continueRegularOutput")
+link("Duplicate company?","Notion · skip duplicate",0)
+notion(node,"Notion · get company",[1320,200],"GET","=https://api.notion.com/v1/pages/{{ $json.companyPageId }}")
+link("Duplicate company?","Notion · get company",1)
+STACK=TXT+r"""
+// One short notice when drafts are waiting because 5 cards are still unanswered (otherwise this would be silent).
+const cfg = $('Config').first().json;
+const open = ($('Notion · cards still open').first().json.results || []).filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval');
+const ready = ($input.first().json.results || []).length;
+if (open.length < cfg.maxOpenCards || ready === 0) return [];
+return [{ json: { text: `⏸ QUEUE FULL · ${open.length} cards unanswered\n━━━━━━━━━━━━━━━━\n${ready} new draft(s) are waiting. Answer or skip an open card (or use 'Approve in Notion') and they follow on the next run.\nOpen: ` + open.map(pg => txt(pg.properties.Name)).join(', ') } }];"""
+node("Queue full notice","n8n-nodes-base.code",2,[880,420],{"jsCode":STACK})
+link("Notion · drafts ready","Queue full notice")
+node("Telegram · queue full","n8n-nodes-base.telegram",1.2,[1100,420],{"chatId":"={{ $('Config').first().json.chatId }}","text":"={{ $json.text }}","additionalFields":{"appendAttribution":False}},credentials=TG,onError="continueRegularOutput")
+link("Queue full notice","Telegram · queue full")
 CARD=TXT+r"""
 // Build the approval card (plain text, max 4096 chars) and the callback keys.
 const c = $('Pick drafts').item.json;
@@ -88,17 +112,17 @@ const variants = ['A', 'B', 'C'].map(id => `— ${id} —\n${clip(c[id] || '(emp
 const foot = '✏️ Own version: reply to THIS card with the text (first line "Subject: …" for emails).' + (c.waiting ? `\n⏸ ${c.waiting} more draft(s) wait until open cards are answered.` : '');
 const text = clip(head + '\n\n' + variants + '\n\n' + foot, 4000);
 return { json: { ...c, key, text, company: txt(P.Company) } };"""
-node("Build card","n8n-nodes-base.code",2,[1320,200],{"jsCode":CARD,"mode":"runOnceForEachItem"})
+node("Build card","n8n-nodes-base.code",2,[1540,200],{"jsCode":CARD,"mode":"runOnceForEachItem"})
 link("Notion · get company","Build card")
 btn=lambda t,d: {"text":t,"additionalFields":{"callback_data":d}}
-node("Telegram · send card","n8n-nodes-base.telegram",1.2,[1540,200],{
+node("Telegram · send card","n8n-nodes-base.telegram",1.2,[1760,200],{
   "chatId":"={{ $('Config').first().json.chatId }}","text":"={{ $json.text }}",
   "replyMarkup":"inlineKeyboard",
   "inlineKeyboard":{"rows":[{"row":{"buttons":[btn("Send A","={{ 'v|' + $json.key + '|A' }}"),btn("Send B","={{ 'v|' + $json.key + '|B' }}"),btn("Send C","={{ 'v|' + $json.key + '|C' }}")]}},
                             {"row":{"buttons":[btn("✏️ Edit","={{ 'e|' + $json.key }}"),btn("⏭ Skip","={{ 's|' + $json.key }}")]}}]},
   "additionalFields":{"appendAttribution":False,"disable_web_page_preview":True}},credentials=TG,onError="continueRegularOutput")
 link("Build card","Telegram · send card")
-node("Build Notion update","n8n-nodes-base.code",2,[1760,200],{"jsCode":"""// Awaiting approval + the card's message id (idempotency key: a tap is only acted on while the status is Awaiting approval).
+node("Build Notion update","n8n-nodes-base.code",2,[1980,200],{"jsCode":"""// Awaiting approval + the card's message id (idempotency key: a tap is only acted on while the status is Awaiting approval).
 const c = $('Build card').item.json;
 const id = $json.result?.message_id;
 const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];
@@ -108,7 +132,7 @@ return { json: { contactPageId: c.contactPageId, name: c.name, company: c.compan
   'Telegram message ID': { rich_text: t(String(id)) },
   'Approval log': { rich_text: t(`${new Date().toISOString().slice(0, 16)} card sent (message ${id})`) } } } } };""","mode":"runOnceForEachItem"})
 link("Telegram · send card","Build Notion update")
-notion(node,"Notion · awaiting approval",[1980,200],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}","={{ JSON.stringify($json.body) }}")
+notion(node,"Notion · awaiting approval",[2200,200],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}","={{ JSON.stringify($json.body) }}")
 link("Build Notion update","Notion · awaiting approval")
 notion(node,"Notion · companies without website",[440,620],"POST","=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionCompaniesDb }}/query",
   '={{ JSON.stringify({ filter: { property: "Domain source", select: { equals: "Not found" } }, page_size: $("Config").first().json.maxWebsiteQuestions }) }}',executeOnce=True)

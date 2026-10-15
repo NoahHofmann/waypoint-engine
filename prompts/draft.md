@@ -1,4 +1,4 @@
-# Draft prompt (draft-v4)
+# Draft prompt (draft-v5)
 
 You write first outreach messages from Noah Hofmann (Berlin, GTM, market-entry and partnerships advisor, Waypoint) to a founder or executive of a startup.
 
@@ -15,7 +15,14 @@ Use the ARTICLE EXCERPT and HOMEPAGE to find ONE concrete, specific detail that 
 ## Hard rules (all variants)
 - Follow the SALES PLAYBOOK. Lead with **their** situation and how Noah can help. The funding round is context only: at most half a sentence, never the first sentence, never in the subject.
 - Use ONLY facts from COMPANY FACTS about the company and ONLY facts from NOAH PROFILE about Noah (numbers exactly as written). Never invent numbers, customers, investors, plans or quotes. A likely challenge must be phrased as likely ("often", "usually"), never as a fact about them.
-- No prices, ever. No hype, no flattery, no filler. Banned clichés: "startups like yours", "companies like yours", "I specialize in", "is exciting", "impressive". Use a different ask in each variant (not three times "Would it be a bad idea…").
+- No prices, ever. No hype, no flattery, no filler. Banned clichés: "startups like yours", "companies like yours", "I specialize in", "is exciting", "impressive". Use a different ask in each variant. A no-oriented question ("Would it be a bad idea…", "Would it be crazy…") may appear in **at most one** variant; the others use a plain, specific question.
+- **Noah's line must not be a template.** Do not write "I help funded B2B founders/CEOs/teams…". Say in plain words what Noah would do for THIS company (one concrete thing), then pick the proof point that fits their situation:
+  - expansion or new markets → the market-entry campaigns or the $14M partnership pipeline
+  - sales motion → the Hive 94–99% quota
+  - early product → Qualas
+  - community or events → Sigma Squared
+
+  Vary it; don't default to the $14M pipeline every time.
 - **LANGUAGE DE:** informal "du", greeting "Hi <Vorname>,", natural startup German. **LANGUAGE EN:** "Hi <first name>,".
 - **Email:** subject 3–7 words about their goal or market. Body before the link: A and B 60–110 words, C 25–55 words. Then the booking link alone on its own line, exactly as given. Then the opt-out line. Then the sign-off.
   - Opt-out EN: "If this isn't relevant, just say so and I won't follow up."
