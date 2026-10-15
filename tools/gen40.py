@@ -25,7 +25,7 @@ return [{ json: {
   notionOffersDb: '5618b11e453a4704a41fb530812f110a',
   maxDraftsPerRun: 8,
   // Models are preset in the model nodes (sub-nodes under each Draft/Judge chain). These lines document them.
-  draftModel: 'claude-sonnet-5-5',  // 'Claude · draft 1/2' (Anthropic credential). Why: most natural DE/EN prose, no reasoning delay, $2/$10 per M tokens
+  draftModel: 'gpt-5.1',           // 'OpenAI · draft 1/2', reasoning effort LOW. Interim until the model decision (docs/model-choice.md)
   judgeModel: 'gpt-5-mini',         // 'OpenAI · judge 1/2', reasoning effort low. Why: a different model family grades the draft (no self-grading)
   calLink: 'https://cal.com/book-a-call-with-noah/30min',
   promptVersion: 'draft-v4 / judge-v4',
@@ -206,12 +206,13 @@ return { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,
   feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\n') } };"""
 
 def stage(n,x,inp,prev_expr):
-    dn=f"Draft (attempt {n})"; on=f"Claude · draft {n}"; sn=f"Schema · draft {n}"
+    dn=f"Draft (attempt {n})"; on=f"OpenAI · draft {n}"; sn=f"Schema · draft {n}"
     node(dn,"@n8n/n8n-nodes-langchain.chainLlm",1.7,[x,200],{"promptType":"define",
       "text":"={{ $json.briefText }}{{ $json.feedback ? '\\n\\nNONE OF YOUR PREVIOUS VARIANTS PASSED REVIEW. Write three new variants that fix ALL of these:\\n' + $json.feedback : '' }}",
       "hasOutputParser":True,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":DRAFT_SYS}]}},onError="continueRegularOutput")
-    node(on,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x-60,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":2500,"temperature":0.6}},
-         credentials={"anthropicApi":{"id":"","name":"Anthropic API"}})
+    # Interim until the model decision (see docs/model-choice.md): gpt-5.1 with LOW reasoning (v3 used default = slow).
+    node(on,"@n8n/n8n-nodes-langchain.lmChatOpenAi",1.2,[x-60,420],{"model":{"__rl":True,"value":"gpt-5.1","mode":"id"},"options":{"timeout":120000,"maxRetries":2,"reasoningEffort":"low"}},
+         credentials={"openAiApi":{"id":"","name":"OpenAi account"}})
     node(sn,"@n8n/n8n-nodes-langchain.outputParserStructured",1.2,[x+80,420],{"schemaType":"manual","inputSchema":DSCHEMA})
     link(on,dn,kind="ai_languageModel"); link(sn,dn,kind="ai_outputParser")
     link(inp,dn)
@@ -282,7 +283,7 @@ notes=[
 **Output (per contact, in Notion):** Variant A/B/C, Variants passed, Draft subject/body (= first passing variant), Judge result + notes, Channel, Offer, Language, Booking link. Status → *Draft ready* (≥1 passed) or *Check manually* (none passed after 2 attempts).
 
 **Flow:** Config → read Offers + Sales Playbook + contacts (once) → per contact: company, article, homepage → brief → draft → code check → judge → decide → (retry once) → save.
-**Models (preset in the sub-nodes):** draft = Claude Sonnet 5.5 · judge = GPT-5 mini, reasoning low. Only the credentials need selecting after import.
+**Models (preset in the sub-nodes):** draft = GPT-5.1, reasoning low (interim; model decision pending) · judge = GPT-5 mini, reasoning low. Only the credentials need selecting after import.
 **Runtime:** ~2–3 min for 8 contacts (chains run 4 contacts in parallel). v3 took 6:31 with GPT-5.1 reasoning.
 Docs: docs/40-draft-judge.md"""),
 ("Note · 1 Load context",[180,-240],700,220,"""### 1 · Load context (runs once per execution)
@@ -294,7 +295,7 @@ Docs: docs/40-draft-judge.md"""),
 **Logic:** Channel = Email if verified email, else LinkedIn. Language DE (*du*) for DE/AT/CH companies, else EN. Offer by rules (partnerships signal → Fractional Partnerships Lead; DACH → GTM Sprint; others → Market Entry into DACH). Booking link gets ?metadata[contact]=<id> so a booking can be matched back.
 **Why:** the brief is the ONLY source of facts the model may use: article excerpt, homepage text, your canonical profile, the offer and the playbook. Anything else counts as invented."""),
 ("Note · 3 Draft and check",[1520,-240],900,220,"""### 3 · Draft → code check (attempt 1)
-**Draft:** Claude Sonnet 5.5, temperature 0.6, prompts/draft.md. Three variants in one call.
+**Draft:** GPT-5.1 (reasoning low; swap the sub-node to change model), prompts/draft.md. Three variants in one call.
 **Code check per variant:** email subject 3–7 words and not about funding; body A/B 55–120 words, C 25–60; booking link unchanged; opt-out line; sign-off; first name used; DE uses *du*; first sentence not about the round; no hype/congrats; **every number must exist in the brief**. LinkedIn: ≤200 characters, no link, no question.
 **Why code, not the model:** counting and exact matching are deterministic. The model is bad at counting its own words."""),
 ("Note · 4 Judge and decide",[2000,-240],820,220,"""### 4 · Judge → decide

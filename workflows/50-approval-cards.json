@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "6833bf08-7a3e-4b27-9054-401cc49dfacc",
+      "id": "7f56e219-17d0-4c62-ab43-fb76c2245110",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "0e1dcc82-2c25-4f4c-ba60-8bf968c569a7",
+      "id": "301c105b-7a72-49b8-85e8-4d4010ab8d56",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "444ff245-f041-44f7-be16-1385e03dc413",
+      "id": "3073e342-2e22-4a68-b788-4b997b872ff3",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,73 @@
       }
     },
     {
-      "id": "fd0b4fc0-4072-4915-bf31-de8f411946ed",
+      "id": "b1d3bb0c-eabe-47cf-9edd-9f0afe596a20",
+      "name": "Notion · approved in Notion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        -160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { and: [ { property: \"Approve in Notion\", select: { is_not_empty: true } }, { or: [ { property: \"Status\", status: { equals: \"Awaiting approval\" } }, { property: \"Status\", status: { equals: \"Draft ready\" } }, { property: \"Status\", status: { equals: \"Check manually\" } } ] } ] }, page_size: 20 }) }}"
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "fa3ceed6-37c5-4f1e-8ec5-31f1a43816ed",
+      "name": "Notion approvals → 51",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -160
+      ],
+      "parameters": {
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// NOTION FALLBACK: you picked A/B/C/Skip in the column 'Approve in Notion' instead of tapping in Telegram.\n// Each row is handed to WP · 51, which treats it exactly like a Telegram tap (same idempotency + legal-basis gate).\nreturn ($input.first().json.results || []).map(pg => ({ json: {\n  source: 'notion', contactPageId: pg.id, choice: txt(pg.properties['Approve in Notion']),\n  cardMessageId: txt(pg.properties['Telegram message ID']) || null } }));"
+      }
+    },
+    {
+      "id": "4d1b6202-4d7e-48a1-bbdd-8a27983dd9ae",
+      "name": "Run WP · 51 for each",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -160
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "f15a1044-1685-454b-b732-a4dda4e9071d",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -69,7 +135,7 @@
       "executeOnce": true
     },
     {
-      "id": "975bf755-4bea-4b99-abcf-1e7d00cb655b",
+      "id": "c11b3c11-d02e-4953-8458-e8cf368aa86d",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -99,7 +165,7 @@
       "executeOnce": true
     },
     {
-      "id": "8d52b545-99ec-4eba-b897-6b7e1a0c9d65",
+      "id": "2f60adc8-1753-4937-8f8d-3254f2f72bf5",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -112,7 +178,7 @@
       }
     },
     {
-      "id": "66761167-1b2c-4ff0-8384-75531d9dd481",
+      "id": "dddd7a03-13cc-40fd-a854-66d0d19ada2e",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -138,7 +204,7 @@
       }
     },
     {
-      "id": "96181e49-a883-4a0d-975f-59e7247eb604",
+      "id": "37993abf-3d84-4551-bd72-b0f07b270aaa",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -152,7 +218,7 @@
       }
     },
     {
-      "id": "09a42aa2-4b32-4b6f-bdf0-19c1b5fe9652",
+      "id": "7e4ff45b-35d6-46d4-9801-843a32189b9d",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -218,13 +284,13 @@
       "credentials": {
         "telegramApi": {
           "id": "",
-          "name": "Telegram account"
+          "name": "Telegram approvals"
         }
       },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "575bc807-ae0b-488a-b71f-3eed2cda2ec5",
+      "id": "3bb9e149-e6e6-448f-947c-9c942d31f490",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -238,7 +304,7 @@
       }
     },
     {
-      "id": "4a888934-6123-4213-b5c4-313d4dee9fa3",
+      "id": "ba1bdb6a-7323-4bae-875f-4a64200b7f64",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -267,7 +333,7 @@
       }
     },
     {
-      "id": "475801b7-2f24-456e-888d-4db082fdb4ac",
+      "id": "8933fb2a-c31f-4753-95b7-41cc6ec3fd4d",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -297,7 +363,7 @@
       "executeOnce": true
     },
     {
-      "id": "8a6b6056-5083-4a3e-9c68-d63347317e26",
+      "id": "a3d28c1c-617b-47d4-acca-5b41f138e735",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -310,7 +376,7 @@
       }
     },
     {
-      "id": "fd8180e9-f00a-487a-912f-36cd4d6152bb",
+      "id": "7a378677-125d-4010-83ca-7bb0f7b49817",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -352,13 +418,13 @@
       "credentials": {
         "telegramApi": {
           "id": "",
-          "name": "Telegram account"
+          "name": "Telegram approvals"
         }
       },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "ca059e4a-de04-4c48-a14d-08642ab02361",
+      "id": "2e200a30-a0b1-4022-8c17-6c0348102f81",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -388,7 +454,22 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "eae1a009-7a98-405e-b8cb-68c4a4d5a3eb",
+      "id": "9c8523dd-6346-4c35-81fb-0bfc98510f01",
+      "name": "Note · 50 notion",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -420
+      ],
+      "parameters": {
+        "width": 760,
+        "height": 220,
+        "content": "### 0 · Approvals made in Notion (runs first)\n**In:** contacts where you set *Approve in Notion* (A/B/C/Skip) and Status is Awaiting approval, Draft ready or Check manually.\n**Nodes:** Notion · approved in Notion → Notion approvals → 51 → Run WP · 51 for each (**select WP · 51 in this node once after import**).\n**Why:** if you miss a Telegram card you can decide in the dashboard; 51 applies the same lock and legal-basis gate, and confirms in Telegram."
+      }
+    },
+    {
+      "id": "70cbcf37-0ef9-45f5-8942-fe57d056c298",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -403,7 +484,7 @@
       }
     },
     {
-      "id": "454d7609-e915-4a29-afbf-a056f502ca12",
+      "id": "7aa673ba-6c47-42cd-821a-c6072c16f1b2",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -445,12 +526,39 @@
       "main": [
         [
           {
+            "node": "Notion · approved in Notion",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Notion · cards still open",
             "type": "main",
             "index": 0
           },
           {
             "node": "Notion · companies without website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · approved in Notion": {
+      "main": [
+        [
+          {
+            "node": "Notion approvals → 51",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion approvals → 51": {
+      "main": [
+        [
+          {
+            "node": "Run WP · 51 for each",
             "type": "main",
             "index": 0
           }

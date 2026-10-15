@@ -16,7 +16,7 @@ def notion(node,name,pos,method,url,body=None,**kw):
     p={"method":method,"url":url,"authentication":"predefinedCredentialType","nodeCredentialType":"notionApi",**NH,"options":{}}
     if body: p.update({"sendBody":True,"specifyBody":"json","jsonBody":body})
     return node(name,"n8n-nodes-base.httpRequest",4.2,pos,p,**kw)
-TG={"telegramApi":{"id":"","name":"Telegram account"}}
+TG={"telegramApi":{"id":"","name":"Telegram approvals"}}
 GM={"gmailOAuth2":{"id":"","name":"Gmail account"}}
 TXT='const txt = p => { if (!p) return \'\'; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join(\'\').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? \'\') + \'\'; };'
 
@@ -29,9 +29,22 @@ node("Config","n8n-nodes-base.code",2,[220,200],{"jsCode":f"""// 50 · Approval 
 // maxWebsiteQuestions: at most this many 'which website?' questions per run.
 return [{{ json: {{ chatId: '{CHAT}', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', notionCompaniesDb: '1247998a78a8446993afa06d9811c436', maxOpenCards: 5, maxWebsiteQuestions: 3 }} }}];"""})
 link("Run manually","Config"); link("When called by orchestrator","Config")
+notion(node,"Notion · approved in Notion",[440,-160],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
+  '={{ JSON.stringify({ filter: { and: [ { property: "Approve in Notion", select: { is_not_empty: true } }, { or: [ { property: "Status", status: { equals: "Awaiting approval" } }, { property: "Status", status: { equals: "Draft ready" } }, { property: "Status", status: { equals: "Check manually" } } ] } ] }, page_size: 20 }) }}',executeOnce=True)
+link("Config","Notion · approved in Notion")
+NAPP=TXT+r"""
+// NOTION FALLBACK: you picked A/B/C/Skip in the column 'Approve in Notion' instead of tapping in Telegram.
+// Each row is handed to WP · 51, which treats it exactly like a Telegram tap (same idempotency + legal-basis gate).
+return ($input.first().json.results || []).map(pg => ({ json: {
+  source: 'notion', contactPageId: pg.id, choice: txt(pg.properties['Approve in Notion']),
+  cardMessageId: txt(pg.properties['Telegram message ID']) || null } }));"""
+node("Notion approvals → 51",'n8n-nodes-base.code',2,[660,-160],{"jsCode":NAPP})
+link("Notion · approved in Notion","Notion approvals → 51")
+node("Run WP · 51 for each",'n8n-nodes-base.executeWorkflow',1.2,[880,-160],{"source":"database","workflowId":{"__rl":True,"value":"","mode":"list"},"mode":"each","options":{"waitForSubWorkflow":True}},onError="continueRegularOutput")
+link("Notion approvals → 51","Run WP · 51 for each")
 notion(node,"Notion · cards still open",[440,200],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
   '={{ JSON.stringify({ filter: { property: "Status", status: { equals: "Awaiting approval" } }, page_size: 100 }) }}',executeOnce=True)
-link("Config","Notion · cards still open")
+link("Config","Notion · cards still open")  # runs after the Notion-approval branch (canvas order, top first)
 notion(node,"Notion · drafts ready",[660,200],"POST","=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionContactsDb }}/query",
   '={{ JSON.stringify({ filter: { property: "Status", status: { equals: "Draft ready" } }, sorts: [{ timestamp: "created_time", direction: "ascending" }], page_size: 20 }) }}',executeOnce=True)
 link("Notion · cards still open","Notion · drafts ready")
@@ -120,6 +133,10 @@ link("Build website question","Telegram · ask website")
 notion(node,"Notion · mark asked",[1100,620],"PATCH","=https://api.notion.com/v1/pages/{{ $('Build website question').item.json.companyPageId }}",
   '={{ JSON.stringify({ properties: { "Domain source": { select: { name: "Asked in Telegram" } } } }) }}',onError="continueRegularOutput")
 link("Telegram · ask website","Notion · mark asked")
+node("Note · 50 notion",'n8n-nodes-base.stickyNote',1,[400,-420],{"width":760,"height":220,"content":"""### 0 · Approvals made in Notion (runs first)
+**In:** contacts where you set *Approve in Notion* (A/B/C/Skip) and Status is Awaiting approval, Draft ready or Check manually.
+**Nodes:** Notion · approved in Notion → Notion approvals → 51 → Run WP · 51 for each (**select WP · 51 in this node once after import**).
+**Why:** if you miss a Telegram card you can decide in the dashboard; 51 applies the same lock and legal-basis gate, and confirms in Telegram."""})
 node("Note · 50 websites","n8n-nodes-base.stickyNote",1,[400,820],{"width":900,"height":240,"content":"""### Website questions (human fallback, rare by design)
 **In:** companies where WP · 30 rejected every candidate domain (Domain source = *Not found*). Max 3 per run.
 **Out:** one 🌐 WEBSITE? message each (🔎 Search opens Google; 🚫 No website closes it). Domain source → *Asked in Telegram*, so it is asked once.
@@ -137,6 +154,15 @@ n50=len(N)
 
 # ---------------- 51 · Approval handler ----------------
 N,C,node,link=mk()
+node("When called by 50 (Notion approval)","n8n-nodes-base.executeWorkflowTrigger",1.1,[-220,520],{"inputSource":"passthrough"})
+FROMN=f"""// Turn a Notion approval into the same shape as a Telegram tap, so ONE code path decides.
+const k = String($json.contactPageId || '').replace(/-/g, '');
+const c = String($json.choice || '');
+const data = c === 'Skip' ? 's|' + k : 'v|' + k + '|' + c;
+return {{ json: {{ fromNotion: true, callback_query: {{ id: 'notion', data, message: {{ message_id: $json.cardMessageId ? Number($json.cardMessageId) : null, chat: {{ id: {CHAT} }} }} }} }} }};"""
+node("Notion approval as tap","n8n-nodes-base.code",2,[0,520],{"jsCode":FROMN,"mode":"runOnceForEachItem"})
+link("When called by 50 (Notion approval)","Notion approval as tap")
+link("Notion approval as tap","Parse update (rules)")
 node("Telegram trigger","n8n-nodes-base.telegramTrigger",1.1,[0,300],{"updates":["callback_query","message"],"additionalFields":{}},credentials=TG,webhookId=str(uuid.uuid4()))
 PARSE=rf"""// Parse the Telegram update (rules). Only Noah's chat is accepted; everything else is ignored.
 const u = $json; const ALLOWED = '{CHAT}';
@@ -147,7 +173,7 @@ if (cb) {{
   const [k, key, v] = String(cb.data || '').split('|');
   const kind = k === 'v' ? 'choose' : k === 'e' ? 'edit' : k === 's' ? 'skip' : k === 'w' ? 'website_none' : 'unknown';
   const id = key ? key.replace(/(.{{8}})(.{{4}})(.{{4}})(.{{4}})(.{{12}})/, '$1-$2-$3-$4-$5') : null;
-  return {{ json: {{ ok: kind !== 'unknown' && !!id, kind, variant: v || null, contactPageId: kind === 'website_none' ? null : id, companyPageId: kind === 'website_none' ? id : null, callbackId: cb.id, cardMessageId: cb.message?.message_id, chatId }} }};
+  return {{ json: {{ ok: kind !== 'unknown' && !!id, fromNotion: !!u.fromNotion, kind, variant: v || null, contactPageId: kind === 'website_none' ? null : id, companyPageId: kind === 'website_none' ? id : null, callbackId: cb.id, cardMessageId: cb.message?.message_id, chatId }} }};
 }}
 // Reply to a 🌐 WEBSITE? question: the question carries 'ref w|<company key>'
 const ref = String(msg?.reply_to_message?.text || '').match(/ref w\|([0-9a-f]{{32}})/);
@@ -216,7 +242,9 @@ const P = pg.properties;
 const status = txt(P.Status);
 const base = { contactPageId: pg.id, chatId: p.chatId, cardMessageId: p.cardMessageId, name: txt(P.Name), channel: txt(P.Channel) || 'Email',
   email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };
-if (status !== 'Awaiting approval') return { json: { ...base, action: 'notice', notice: `Already handled: ${base.name} is "${status}". Nothing was sent again.` } };
+// From Notion you may also approve a draft before its card went out, or a 'Check manually' draft.
+const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually'] : ['Awaiting approval'];
+if (!allowed.includes(status)) return { json: { ...base, action: 'notice', notice: `Already handled: ${base.name} is "${status}". Nothing was sent again.` } };
 if (p.kind === 'skip') return { json: { ...base, action: 'skip' } };
 if (p.kind === 'edit') return { json: { ...base, action: 'notice', notice: `Reply to the card for ${base.name} with your text (first line "Subject: …" for emails). I'll send that version.` } };
 // The chosen text: a variant, or Noah's own reply
@@ -227,6 +255,7 @@ const m = raw.match(/^subject:\s*(.+)\n+/i);
 if (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }
 if (!body) return { json: { ...base, action: 'notice', notice: 'That variant is empty. Pick another one or reply with your text.' } };
 const chosen = p.kind === 'choose' ? p.variant : 'Edited';
+base.via = p.fromNotion ? ' (approved in Notion)' : '';
 const GREEN = ['Consent', 'Existing relationship', 'Inbound'];
 const action = base.channel === 'LinkedIn' ? 'linkedin' : (GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');
 if (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `No email address for ${base.name}.` } };
@@ -247,8 +276,8 @@ const now = new Date().toISOString();
 const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];
 const err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;
 let status, msg, extra = {};
-if (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent'; msg = err ? `❌ Sending failed for ${d.name}: ${err}` : `✅ Sent to ${d.name} (${d.email}), variant ${d.chosen}.`; if (!err) extra['Sent at'] = { date: { start: now } }; }
-else if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created'; msg = err ? `❌ Gmail draft failed for ${d.name}: ${err}` : `📝 Gmail draft for ${d.name} is ready in hello@ (variant ${d.chosen}). Open Gmail, check it, send it yourself.`; }
+if (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent'; msg = err ? `❌ Sending failed for ${d.name}: ${err}` : `✅ Sent to ${d.name} (${d.email}), variant ${d.chosen}${d.via || ''}.`; if (!err) extra['Sent at'] = { date: { start: now } }; }
+else if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created'; msg = err ? `❌ Gmail draft failed for ${d.name}: ${err}` : `📝 Gmail draft for ${d.name} is ready in hello@ (variant ${d.chosen}${d.via || ''}). Open Gmail, check it, send it yourself.`; }
 else if (d.action === 'linkedin') { status = 'Approved'; msg = `🔗 LinkedIn for ${d.name}: ${d.linkedin}\nCopy and paste (variant ${d.chosen}):\n\n${d.body}`; }
 else if (d.action === 'skip') { status = 'Skipped'; msg = `⏭ Skipped ${d.name}. No message will be sent.`; }
 const props = { 'Status': { status: { name: status } },

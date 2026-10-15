@@ -36,3 +36,5 @@
 | 15 Oct | Telegram: approvals bot only for decisions (📨 APPROVE n/m, 🌐 WEBSITE?), second bot for 🚨 errors, max 5 open cards | Stacked, mixed messages lost context |
 | 15 Oct | Dashboard moved onto the Waypoint Engine main page; chart views removed | Charts need Notion Plus; six named table/board views instead |
 | 15 Oct | Docs follow docs/_template.md (Inputs · nodes · outputs · logic · failure modes · settings · changelog) | Noah: the old docs didn't explain how nodes work together |
+| 15 Oct | Draft model decision reopened: GPT-5.1 (reasoning low) stays for now; a blind bake-off via OpenRouter (GPT-5.1 vs Gemini 3.8 Flash vs Claude Sonnet 5.5) decides on Friday | Noah challenged the Sonnet pick. The public writing benchmarks measure fiction, not sales emails, and miss the newest mid-tier models. The cost gap is about $3–5/month, so quality decides |
+| 15 Oct | Notion: "Action" formula on Contacts/Companies; "Approve in Notion" fallback (handled by 50 → 51 with the same gate); databases and rules moved into one sub-page | Noah: the dashboard should say what to do, and a missed Telegram card must be actionable in Notion |
