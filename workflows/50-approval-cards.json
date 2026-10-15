@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "d066272f-b888-4646-9a4f-eaa19170969b",
+      "id": "6833bf08-7a3e-4b27-9054-401cc49dfacc",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "72bae66e-ef2e-44a4-b9f3-03b971050ff5",
+      "id": "0e1dcc82-2c25-4f4c-ba60-8bf968c569a7",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "1a67b878-3fa6-462d-a704-c8be0883a301",
+      "id": "444ff245-f041-44f7-be16-1385e03dc413",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -35,12 +35,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// 50 · Approval cards: config\nreturn [{ json: { chatId: '1170608781', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', maxCardsPerRun: 10 } }];"
+        "jsCode": "// 50 · Approval cards: config\n// maxOpenCards: never more than this many unanswered approval cards in the chat (prevents stacking).\n// maxWebsiteQuestions: at most this many 'which website?' questions per run.\nreturn [{ json: { chatId: '1170608781', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', notionCompaniesDb: '1247998a78a8446993afa06d9811c436', maxOpenCards: 5, maxWebsiteQuestions: 3 } }];"
       }
     },
     {
-      "id": "50802fb3-17ca-412e-86dd-67b7c59e3541",
-      "name": "Notion · drafts ready",
+      "id": "fd0b4fc0-4072-4915-bf31-de8f411946ed",
+      "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -64,30 +64,60 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Draft ready\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: $json.maxCardsPerRun }) }}"
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Awaiting approval\" } }, page_size: 100 }) }}"
       },
       "executeOnce": true
     },
     {
-      "id": "27514ce7-c057-4da4-8051-bfb9e234a194",
-      "name": "Pick drafts",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "975bf755-4bea-4b99-abcf-1e7d00cb655b",
+      "name": "Notion · drafts ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         660,
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// One item per contact with status Draft ready.\nreturn ($input.first().json.results || []).map(pg => { const P = pg.properties; return { json: {\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }).filter(i => i.json.companyPageId);"
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionContactsDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Draft ready\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: 20 }) }}"
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "8d52b545-99ec-4eba-b897-6b7e1a0c9d65",
+      "name": "Pick drafts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new\n// (the drafts stay 'Draft ready' and go out after you answer the open ones).\nconst cfg = $('Config').first().json;\nconst open = ($('Notion · cards still open').first().json.results || []).length;\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst ready = ($input.first().json.results || []);\nconst take = ready.slice(0, room);\nreturn take.map((pg, i) => { const P = pg.properties; return { json: {\n  cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }).filter(i => i.json.companyPageId);"
       }
     },
     {
-      "id": "f3435176-4e36-4235-938c-91c196407796",
+      "id": "66761167-1b2c-4ff0-8384-75531d9dd481",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        880,
+        1100,
         200
       ],
       "parameters": {
@@ -108,26 +138,26 @@
       }
     },
     {
-      "id": "54b5e6a2-9e42-4796-8c55-77efe6ea7bd9",
+      "id": "96181e49-a883-4a0d-975f-59e7247eb604",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1100,
+        1320,
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (plain text, max 4096 chars) and the callback keys.\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? 'Approve = I send you the text to paste into LinkedIn (manual send).'\n  : GREEN.includes(c.legalBasis) ? 'Approve = SENT from hello@ immediately.'\n  : 'Approve = Gmail DRAFT in hello@ (legal basis \"' + c.legalBasis + '\"): you review and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\nconst head = [\n  `📨 ${txt(P.Company)} · ${c.name}${c.role ? ' (' + c.role + ')' : ''}`,\n  `${c.channel} · ${c.language || 'EN'} · ICP ${txt(P['ICP score'])}/100 · Offer: ${c.offer}`,\n  `Signal: ${txt(P['Signal summary'])}`,\n  `To: ${c.channel === 'Email' ? c.email : c.linkedin}`,\n  what,\n  `Passed review: ${c.passed || 'none'}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `— ${id} —\\n${clip(c[id] || '(empty)', 1000)}`).join('\\n\\n');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n✏️ To send your own version: reply to this message with the text (first line \"Subject: …\" for emails).', 4000);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (plain text, max 4096 chars) and the callback keys.\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? 'Approve = I send you the text to paste into LinkedIn (manual send).'\n  : GREEN.includes(c.legalBasis) ? 'Approve = SENT from hello@ immediately.'\n  : 'Approve = Gmail DRAFT in hello@ (legal basis \"' + c.legalBasis + '\"): you review and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\nconst head = [\n  `📨 APPROVE ${c.cardNo}/${c.cardTotal} · ${txt(P.Company)} · ${c.name}${c.role ? ' (' + c.role + ')' : ''}`,\n  '━━━━━━━━━━━━━━━━',\n  `${c.channel} · ${c.language || 'EN'} · ICP ${txt(P['ICP score'])} · Offer: ${c.offer}`,\n  `Signal: ${txt(P['Signal summary'])}`,\n  `To: ${c.channel === 'Email' ? c.email : c.linkedin}`,\n  what,\n  `Passed review: ${c.passed || 'none'}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `— ${id} —\\n${clip(c[id] || '(empty)', 1000)}`).join('\\n\\n');\nconst foot = '✏️ Own version: reply to THIS card with the text (first line \"Subject: …\" for emails).' + (c.waiting ? `\\n⏸ ${c.waiting} more draft(s) wait until open cards are answered.` : '');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n' + foot, 4000);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "8fbe9cce-72aa-43be-9ef4-872767ff7639",
+      "id": "09a42aa2-4b32-4b6f-bdf0-19c1b5fe9652",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1320,
+        1540,
         200
       ],
       "parameters": {
@@ -194,12 +224,12 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "8d63eef4-ee23-4e0a-9806-fe1888efa9a7",
+      "id": "575bc807-ae0b-488a-b71f-3eed2cda2ec5",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1540,
+        1760,
         200
       ],
       "parameters": {
@@ -208,12 +238,12 @@
       }
     },
     {
-      "id": "dfcb3423-789e-4fea-ac17-d298559561b8",
+      "id": "4a888934-6123-4213-b5c4-313d4dee9fa3",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1760,
+        1980,
         200
       ],
       "parameters": {
@@ -237,7 +267,143 @@
       }
     },
     {
-      "id": "83d622ba-4762-4c11-8112-141a559eda14",
+      "id": "475801b7-2f24-456e-888d-4db082fdb4ac",
+      "name": "Notion · companies without website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        620
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.notion.com/v1/databases/{{ $('Config').first().json.notionCompaniesDb }}/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Domain source\", select: { equals: \"Not found\" } }, page_size: $(\"Config\").first().json.maxWebsiteQuestions }) }}"
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "8a6b6056-5083-4a3e-9c68-d63347317e26",
+      "name": "Build website question",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        620
+      ],
+      "parameters": {
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// HUMAN FALLBACK for the website (last resort, kept rare): 30 tried ~30 likely domains and rejected all.\n// One short question per company; reply with the domain. 'ref w|<key>' lets 51 find the company again.\nreturn ($input.first().json.results || []).map(pg => { const P = pg.properties; const key = pg.id.replace(/-/g, '');\n  const q = encodeURIComponent(txt(P.Company) + ' ' + txt(P['Signal summary']).slice(0, 60));\n  return { json: { companyPageId: pg.id, key, company: txt(P.Company), google: 'https://www.google.com/search?q=' + q,\n    text: [`🌐 WEBSITE? · ${txt(P.Company)}`, '━━━━━━━━━━━━━━━━', txt(P['Signal summary']), `Article: ${txt(P['Signal source'])}`, '',\n      'I could not verify a website (all likely domains were parked, unrelated or empty).',\n      '↩️ Reply to THIS message with the domain (e.g. acme.ai). I save it and re-run email search for its contacts.',\n      `ref w|${key}`].join('\\n') } }; });"
+      }
+    },
+    {
+      "id": "fd8180e9-f00a-487a-912f-36cd4d6152bb",
+      "name": "Telegram · ask website",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        620
+      ],
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.chatId }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔎 Search",
+                    "additionalFields": {
+                      "url": "={{ $json.google }}"
+                    }
+                  },
+                  {
+                    "text": "🚫 No website",
+                    "additionalFields": {
+                      "callback_data": "={{ 'w|' + $json.key + '|none' }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "ca059e4a-de04-4c48-a14d-08642ab02361",
+      "name": "Notion · mark asked",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        620
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/pages/{{ $('Build website question').item.json.companyPageId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: { \"Domain source\": { select: { name: \"Asked in Telegram\" } } } }) }}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "eae1a009-7a98-405e-b8cb-68c4a4d5a3eb",
+      "name": "Note · 50 websites",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        820
+      ],
+      "parameters": {
+        "width": 900,
+        "height": 240,
+        "content": "### Website questions (human fallback, rare by design)\n**In:** companies where WP · 30 rejected every candidate domain (Domain source = *Not found*). Max 3 per run.\n**Out:** one 🌐 WEBSITE? message each (🔎 Search opens Google; 🚫 No website closes it). Domain source → *Asked in Telegram*, so it is asked once.\n**Your reply** (the domain) is handled by WP · 51: Domain saved as *Manual*, and that company's *Not reachable* / *Check manually* contacts go back to *Needs email*, so the next WP · 30 run tries again with the right domain.\n**Why:** a wrong website means emails to the wrong people. One 5-second answer from you beats a guess."
+      }
+    },
+    {
+      "id": "454d7609-e915-4a29-afbf-a056f502ca12",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -248,7 +414,7 @@
       "parameters": {
         "width": 900,
         "height": 300,
-        "content": "## WP · 50 Approval cards: what and why\nSends one Telegram card per contact with Status **Draft ready**: company, person, channel, ICP score, offer, signal, **what Approve will do** (send / Gmail draft / LinkedIn text), which variants passed review, and all three variants. Buttons: **Send A · Send B · Send C · ✏️ Edit · ⏭ Skip**. Replying to the card with your own text sends that version.\nSets Status **Awaiting approval** and stores the card's message id. The taps are handled by **WP · 51** (Telegram trigger).\n**Why Telegram:** approval in seconds from the phone; nothing leaves without a human tap. **Why show the action on the card:** the legal-basis gate is visible before you decide.\nDocs: docs/50-approval.md"
+        "content": "## WP · 50 Approval cards: what and why\n**Input:** contacts with Status *Draft ready* (from WP · 40). **Stack guard:** at most 5 unanswered cards in the chat; extra drafts wait for the next run. Cards are numbered \"APPROVE 2/5\".\nSends one Telegram card per contact with Status **Draft ready**: company, person, channel, ICP score, offer, signal, **what Approve will do** (send / Gmail draft / LinkedIn text), which variants passed review, and all three variants. Buttons: **Send A · Send B · Send C · ✏️ Edit · ⏭ Skip**. Replying to the card with your own text sends that version.\nSets Status **Awaiting approval** and stores the card's message id. The taps are handled by **WP · 51** (Telegram trigger).\n**Why Telegram:** approval in seconds from the phone; nothing leaves without a human tap. **Why show the action on the card:** the legal-basis gate is visible before you decide.\nDocs: docs/50-approval.md"
       }
     }
   ],
@@ -276,6 +442,22 @@
       ]
     },
     "Config": {
+      "main": [
+        [
+          {
+            "node": "Notion · cards still open",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notion · companies without website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · cards still open": {
       "main": [
         [
           {
@@ -346,6 +528,39 @@
         [
           {
             "node": "Notion · awaiting approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · companies without website": {
+      "main": [
+        [
+          {
+            "node": "Build website question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build website question": {
+      "main": [
+        [
+          {
+            "node": "Telegram · ask website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram · ask website": {
+      "main": [
+        [
+          {
+            "node": "Notion · mark asked",
             "type": "main",
             "index": 0
           }

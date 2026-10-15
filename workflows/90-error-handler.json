@@ -1,5 +1,5 @@
 {
-  "name": "WP \u00b7 90 Error handler",
+  "name": "WP · 90 Error handler",
   "nodes": [
     {
       "id": "9f356305-b6fc-4436-8e4d-58fef93b8b6d",
@@ -22,12 +22,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Turn any failed execution into one readable alert.\nconst e = $json.execution || {}, wf = $json.workflow || {};\nconst msg = e.error?.message || 'Unknown error';\nconst node = e.lastNodeExecuted || e.error?.node?.name || 'n/a';\nconst when = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });\nreturn [{ json: {\n  subject: `\u26a0\ufe0f Waypoint engine: \"${wf.name}\" failed`,\n  text: `Workflow: ${wf.name}\\nNode: ${node}\\nError: ${msg}\\nTime: ${when}\\nMode: ${e.mode || 'n/a'}\\nExecution: ${e.url || e.id || 'n/a'}\\n\\nNo action was sent to any contact by this execution.`,\n  workflow: wf.name, node, msg, executionId: String(e.id || '')\n}}];"
+        "jsCode": "// Turn any failed execution into one readable alert.\nconst e = $json.execution || {}, wf = $json.workflow || {};\nconst msg = e.error?.message || 'Unknown error';\nconst node = e.lastNodeExecuted || e.error?.node?.name || 'n/a';\nconst when = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });\nreturn [{ json: {\n  subject: `⚠️ Waypoint engine: \"${wf.name}\" failed`,\n  text: `Workflow: ${wf.name}\\nNode: ${node}\\nError: ${msg}\\nTime: ${when}\\nMode: ${e.mode || 'n/a'}\\nExecution: ${e.url || e.id || 'n/a'}\\n\\nNo action was sent to any contact by this execution.`,\n  workflow: wf.name, node, msg, executionId: String(e.id || '')\n}}];"
       }
     },
     {
       "id": "11557c4c-300b-46c0-9f5d-863b098b4c67",
-      "name": "Email \u00b7 hello@",
+      "name": "Email · hello@",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
@@ -47,7 +47,7 @@
     },
     {
       "id": "dc9de70f-0c5b-49d9-a199-a635a6b65f3f",
-      "name": "Telegram \u00b7 Noah",
+      "name": "Telegram · alerts bot",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
@@ -56,12 +56,18 @@
       ],
       "parameters": {
         "chatId": "1170608781",
-        "text": "={{ $json.subject + '\\n\\n' + $json.text }}",
+        "text": "={{ '🚨 ERROR · ' + $json.workflow + '\\n\\n' + $json.text }}",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram alerts"
+        }
+      }
     },
     {
       "id": "1bad699a-6ab3-4390-a5e5-06702cdddef0",
@@ -73,12 +79,12 @@
         380
       ],
       "parameters": {
-        "jsCode": "const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`ERROR \u00b7 ${$json.workflow}`) },\n  'Workflow': { select: { name: 'Error handler' } },\n  'Status': { select: { name: 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($json.executionId) },\n  'Errors': { number: 1 },\n  'Notes': { rich_text: t(`${$json.node}: ${$json.msg}`) }\n}}}];"
+        "jsCode": "const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`ERROR · ${$json.workflow}`) },\n  'Workflow': { select: { name: 'Error handler' } },\n  'Status': { select: { name: 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($json.executionId) },\n  'Errors': { number: 1 },\n  'Notes': { rich_text: t(`${$json.node}: ${$json.msg}`) }\n}}}];"
       }
     },
     {
       "id": "6693e705-7b6b-4740-8fbf-0791b12da0f9",
-      "name": "Notion \u00b7 log error",
+      "name": "Notion · log error",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -111,7 +117,7 @@
     },
     {
       "id": "115474b7-5c3a-4c3f-ac60-26de288e87a0",
-      "name": "Note \u00b7 Error handler",
+      "name": "Note · Error handler",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -119,7 +125,7 @@
         -80
       ],
       "parameters": {
-        "content": "## Error handler\nSet as Error Workflow in the settings of 00, 10 and 20. Any failure \u2192 email to hello@, Telegram ping, and a Failed row in Notion \u203a Runs. Each channel fails independently, so one broken channel never hides the alert.",
+        "content": "## Error handler\nSet as Error Workflow in the settings of 00, 10 and 20. Any failure → email to hello@, Telegram ping, and a Failed row in Notion › Runs. Each channel fails independently, so one broken channel never hides the alert.\n\n**Telegram separation (v2):** errors go to the second bot *Waypoint alerts* (credential \"Telegram alerts\"), never to the approval bot. The approval chat only holds things that need a decision; the alerts chat can be muted.",
         "height": 170,
         "width": 520,
         "color": 3
@@ -142,12 +148,12 @@
       "main": [
         [
           {
-            "node": "Email \u00b7 hello@",
+            "node": "Email · hello@",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Telegram \u00b7 Noah",
+            "node": "Telegram · alerts bot",
             "type": "main",
             "index": 0
           },
@@ -163,7 +169,7 @@
       "main": [
         [
           {
-            "node": "Notion \u00b7 log error",
+            "node": "Notion · log error",
             "type": "main",
             "index": 0
           }

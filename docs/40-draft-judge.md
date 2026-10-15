@@ -1,40 +1,126 @@
 # WP · 40 Draft + judge (sub-workflow)
 
-**Job:** write **three variants** of a first message for every contact with a verified channel (A problem first, B insight first, C short and direct), check each one, and let Noah pick the one to send.
+> For every contact with a verified channel, writes three draft messages that follow the Notion Sales Playbook. Each draft is checked by code and by a second model, and the contact is handed to WP · 50 for your choice in Telegram. **This workflow never sends anything.**
 
-**Called by:** WP · 00 once per run, after 30. Can be run alone ("Test workflow").
-**Reads:** Contacts with Status *Ready to draft* (verified email → email) or *LinkedIn only* (→ LinkedIn connection note), max 8 per run; the linked Company; active rows in Notion › Offers.
-**Writes:** Variant A/B/C, Variants passed, Draft subject/body (= first passing variant as default), Channel, Offer, Draft language, Booking link, Judge result + notes, Status *Draft ready* (≥1 variant passed) or *Check manually* (none passed after the retry). *Chosen variant* is set by Noah (Telegram in 50, or Notion by hand). **Never sends.**
+Chain position: 00 → 10 → 20 → 30 → **40** → 50 / 51. It can also be run on its own ("Test workflow").
 
-## Flow and reasoning
-1. **Config:** models, caps, Cal.com base link, and **Noah's profile**: the canonical facts (Techstars $14M pipeline, Hive 94–99%, Qualas, Sigma Squared). The draft may use nothing else about Noah. Changing a metric = change it here (and in the project instructions).
-2. **Build brief (rules, no LLM):**
-   - *Channel* from the verified data (30 decides what is verified, 40 never guesses).
-   - *Language:* DE for DACH companies, EN otherwise.
-   - *Offer by rules:* partnerships/channel signal in the article → Fractional Partnerships Lead; DACH company → GTM Strategy & ICP Sprint; everyone else → Market Entry & Expansion (into DACH). Offer text comes live from Notion › Offers. Prices never appear in a first message.
-   - *Facts:* only what 10 extracted and verified (round, amount, summary, verbatim quotes).
-   - *Booking link:* `cal.com/book-a-call-with-noah/30min?metadata[contact]=<contact id>` so a booking can be matched to the contact (T-010).
-3. **Sales Playbook (Notion page, read live):** principles condensed from SPIN Selling, Gap Selling, The Challenger Sale, Predictable Revenue, Fanatical Prospecting, Never Split the Difference, Influence, To Sell Is Human, The Sales Development Playbook and Founding Sales. Edit the page and the next run follows it. Source in the repo: `prompts/sales-playbook.md`.
-4. **Draft (gpt-4o, temp 0.3):** prompt `prompts/draft.md`, three variants in one call. Their world first, "how can we help" framing, the round only as half-sentence context, one proof point, no-oriented question. German = informal *du*. Email 60–110 words, LinkedIn ≤ 280 characters. No prices, ever.
-5. **Code check (per variant):** subject length and not about funding, body length, link unchanged, opt-out line, sign-off, first name, *du* not *Sie*, **does not open with the funding round**, no hype or congratulations, and **every number must appear in the brief** (test: an invented "50 startups" is caught).
-6. **Judge (gpt-4o-mini, temp 0, per variant):** prompt `prompts/judge.md`. Only yes/no questions and lists (unsupported claims, names, language/du, specific opening, tone, playbook violations); the pass decision is computed in code. Format is NOT judged by the LLM: v1 hallucinated a missing opt-out line that was there.
-7. **Decide:** a variant passes if code AND judge find nothing. The contact is ready if at least one variant passes.
-8. **One retry only if no variant passed**, with every issue as feedback, then a human decides.
+## 1. Inputs
+| Source | Filter | Fields read |
+|---|---|---|
+| Notion › Contacts | Status = *Ready to draft* (verified email) or *LinkedIn only*; oldest first; max 8 (Config `maxDraftsPerRun`) | Name, Role, Email, LinkedIn, Status, Draft version, Company |
+| Notion › Companies (linked) | – | Company, Country, Domain, Signal summary/source, Round, Amount, Evidence, Qualify reasons |
+| Funding article (Signal source) | fetched live | first ~3,500 characters of paragraphs |
+| Company homepage (Domain) | fetched live | visible text, capped |
+| Notion › Offers | Active = true, by Priority | name, description, who it is for |
+| Notion › Sales Playbook | page `3fa64e3c…` (Config `playbookPageId`) | headings, paragraphs and bullets, read on every run |
+| Config | – | Noah's canonical profile (the only facts about Noah a draft may use), Cal.com link, models, prompt version |
 
-## First live run (15 Oct, v1) and what changed
-All 3 drafts (KP Labs, HyLight, Epyr) failed: one variant only, funding-led openings ("Epyr's recent €15M Series A round is a significant step…"), and a judge that wrote "Unsupported: None" as a finding and hallucinated a missing opt-out line. v2: three variants, playbook, funding-headline check in code, du-form, yes/no judge, "none" filtered.
+## 2. How the nodes work together
+| # | Section (sticky note) | Nodes | What happens | Why this way |
+|---|---|---|---|---|
+| 1 | Load context | Config → Notion · active offers → Notion · sales playbook → Notion · contacts to draft | Loads offers, playbook and the queue **once** per run | The playbook is read live, so you change the rules in Notion, not in n8n |
+| 2 | Research and brief | Pick contacts → Notion · get company → Fetch article → Fetch homepage → Build brief (rules) | Builds one plain-text BRIEF per contact: channel, language, offer, booking link, facts, profile, playbook | Everything the model may say is in the brief; anything else counts as invented and is caught later |
+| 3 | Draft and check | Draft (attempt 1) + Claude · draft 1 + Schema → Check rules 1 | Claude writes variants A, B and C in one call; code checks each one | Counting and exact matching belong in code; models are bad at counting their own words |
+| 4 | Judge and decide | Judge (attempt 1) + OpenAI · judge 1 + Schema → Decide 1 → Passed? | GPT-5 mini answers yes/no questions per variant; code combines both checks | A different model family grades the draft, so the drafter doesn't grade itself |
+| 5 | Retry and save | Prepare retry → the same chain as attempt 2 → Build draft update → Notion · save draft → Run summary | One retry with concrete feedback, then saves all three variants and the status | One retry fixes most issues; a second retry mostly burns tokens |
 
-## Why
-- **Two different checkers:** code is exact but blind to meaning; an LLM judge understands meaning but can miss arithmetic. Each covers the other's blind spot.
-- **Smaller model judges a bigger one:** the judge only compares text against a short brief, which a small model does well and cheaply.
-- **Opt-out line in every email:** respectful, lowers spam complaints, and fits GDPR/UWG caution for cold B2B contact.
-- **Legal basis:** contacts found via articles carry *None - draft only*; 50 shows that on the approval card and never auto-sends them.
+**Brief rules (Build brief):**
+- **Channel:** Email if the contact has a verified email, otherwise LinkedIn.
+- **Language:** DE with informal *du* for DE/AT/CH companies, EN otherwise.
+- **Offer:**
+  - partnerships, channel or distribution signal → Fractional Partnerships Lead
+  - DACH company → GTM Strategy & ICP Sprint
+  - all others → Market Entry & Expansion into DACH
+- **Booking link:** `…/30min?metadata[contact]=<contact id>`, so a booking can be matched back to the contact.
 
-## Second live run (15 Oct, v2) and what changed (v3)
-- Every variant showed "Judge returned no verdict": the judge's prompt expression contained real line breaks inside a JavaScript string, so the expression failed before the model was called. Fixed; judge errors now show their message.
-- Variant C failed the 60-word minimum by design: C now has its own range (30–60 words). LinkedIn notes are connection requests: max 200 characters.
-- Drafts were correct but generic ("I help startups like yours…"). v3 gives the model the **article excerpt and the company homepage** to find a real hook, bans the clichés in code, requires a different ask per variant.
-- Models: draft **gpt-5.1**, judge **gpt-5-mini** (see Cost). Fallback: gpt-4o / gpt-4o-mini in the same nodes.
+## 3. Outputs
+Written to the contact in Notion:
+- Variant A, Variant B and Variant C (failed ones end with "[did not pass review]").
+- Variants passed.
+- Draft subject and Draft body: the first passing variant, which is the default.
+- Draft version +1.
+- Judge result and Judge notes: per variant, PASS/FAIL with reasons.
+- Channel, Offer, Draft language and Booking link.
+- **Status:**
+  - *Draft ready* when at least one variant passed. WP · 50 picks it up.
+  - *Check manually* when no variant passed after two attempts. It appears in the dashboard.
 
-## Cost
-Per contact ≈ 6k input + ~3k output/reasoning tokens for the draft (gpt-5.1: $1.25 / $10 per 1M) ≈ $0.04, judge (gpt-5-mini: $0.25 / $2) ≈ $0.01. ≈ $0.05 per contact, up to 2× with a retry. At ~8 contacts per weekday: **≈ $8–15 per month**. gpt-4o for the draft would cost about the same; the gain comes from better instruction following.
+Run summary to the orchestrator: drafted, passed, passed on the first try, failed.
+
+## 4. Logic and decisions
+**Three variants instead of one.** You choose the angle; the engine doesn't guess it.
+- A · Problem first.
+- B · Insight first.
+- C · Short and direct, ≤ 55 words.
+
+**Code checks per variant:**
+- Email subject has 3–7 words and doesn't mention funding.
+- Body length before the link: A and B 55–120 words; C 25–60 words (the prompt asks for ≤ 55, and code allows a small buffer).
+- Booking link unchanged, opt-out line present, sign-off present, first name used.
+- German drafts use *du*, never *Sie*.
+- The first sentence is not about the funding round.
+- No hype, flattery or clichés.
+- **Every number must appear in the brief.** This catches invented metrics.
+- LinkedIn notes: ≤ 200 characters (the prompt asks for 180), no link, no question.
+
+**What the judge checks:** unsupported claims, names, language and *du*, a specific opening, tone, and playbook violations about content.
+- The **pass decision is computed in code**, not by the model.
+- Judge remarks about length are dropped, because code owns length. In v3 the judge counted words itself and failed good drafts.
+- For LinkedIn, demands for a proof point, a question or an ask are dropped. A connection note deliberately has none of these: the request itself is the ask, and the pitch follows after they accept.
+
+**Models** (preset in the sub-nodes, so after import you only select the credentials):
+
+| Role | Model | Why | Price per 1M tokens (input / output) |
+|---|---|---|---|
+| Draft | Claude Sonnet 5.5 (`claude-sonnet-5-5`), temperature 0.6 | Most natural German and English prose of the options tested; no reasoning delay | $2 / $10 |
+| Judge | GPT-5 mini, reasoning effort low | Different model family from the drafter; cheap; yes/no checking is easy | $0.25 / $2 |
+
+Options considered and rejected for drafting:
+- **GPT-5.1:** good, but its reasoning made the run take 6:31, and output costs the same $10.
+- **Mistral Large 3:** EU-hosted and cheapest, but stiffer prose.
+- **DeepSeek:** processes EU personal data in China, a GDPR problem.
+- **Perplexity:** a search product, not a writing model.
+
+**Runtime:** both chains process 4 contacts in parallel (`batching.batchSize = 4`). Expected run time is 2–3 minutes for 8 contacts, down from 6:31 in v3.
+
+**Cost:** about $0.03 per contact per attempt for the draft plus under $0.01 for the judge. That is under $0.50 per run, even with retries.
+
+## 5. Failure modes and recovery
+| What breaks | What you see | What the workflow does | What you do |
+|---|---|---|---|
+| Anthropic/OpenAI API error or timeout | Judge notes: "Judge returned no verdict: …" or empty variants | The node continues; the contact ends in *Check manually* | Set Status back to *Ready to draft* and re-run |
+| Credential not selected after import | Red model node | – | Select *Anthropic API* / *OpenAi account* in the two model sub-nodes |
+| Playbook page not shared with the integration | Brief says "playbook not loaded" | Drafts still follow the system prompt rules | Share the page with *waypoint-n8n* |
+| Article or homepage blocked | Thinner hooks, judge flags "Opening not specific" | Retry with feedback | Add facts to Companies › Evidence by hand |
+| Notion save fails | Error in run | Retried 3× after 2 s | Re-run; only contacts still in *Ready to draft* are picked |
+
+Re-running is safe: already drafted contacts have moved to *Draft ready* or later, so they are never drafted twice.
+
+## 6. Settings you can change
+| Config key | Default | Notes |
+|---|---|---|
+| `maxDraftsPerRun` | 8 | Raise once you trust the output; cost scales linearly |
+| `profile` | canonical metrics | The ONLY facts about you a draft may use. Keep in sync with the project instructions |
+| `calLink` | Cal.com 30 min | Per-contact metadata is appended |
+| `playbookPageId` | Sales Playbook | Point to another page to A/B a playbook |
+| Batch size (in the Draft/Judge nodes) | 4 | Lower it if Anthropic returns rate-limit errors |
+
+## Changelog
+- **v4 · 15 Oct:**
+  - Draft model changed to Claude Sonnet 5.5; judge reasoning set to low; 4 contacts processed in parallel.
+  - The judge's length remarks and LinkedIn proof/ask demands are dropped.
+  - LinkedIn notes: ≤ 180 characters, no question. C: ≤ 55 words.
+  - Models are preset by ID.
+  - Six sticky notes.
+- **v3 · 15 Oct:**
+  - The article and homepage are added to the brief as hooks; clichés are banned.
+  - Each variant gets a different ask.
+  - Fixed the judge expression newline bug (every variant showed "no verdict").
+  - Models: GPT-5.1 / GPT-5 mini.
+- **v2 · 15 Oct:**
+  - Three variants and the Notion playbook.
+  - Funding-headline check moved into code; German uses *du*.
+  - The judge answers yes/no and "none" items are filtered out.
+- **v1 · 15 Oct:**
+  - One variant only, and it opened with the funding round.
+  - The judge hallucinated a missing opt-out line.

@@ -30,3 +30,9 @@
 | 15 Oct | Draft gpt-5.1, judge gpt-5-mini | Same cost range as gpt-4o, better at following many rules at once; fallback kept |
 | 15 Oct | Playbook adds $100M Offers and Thinking, Fast and Slow; cadence 5 touches / 2 LinkedIn / walk-away email | Noah's request |
 | 15 Oct | 50/51 Telegram approval: 3 variants + Edit + Skip, status as idempotency lock, cold leads become Gmail drafts | Human decides every send; UWG §7 caution for cold B2B email in Germany |
+| 15 Oct | 30 v3 website check: broker/placeholder phrases, whole-word name, topic-word relevance; *Not found* → one Telegram question | ambio.com (for sale), holo.pl (hologram stickers), miracly.com (coming soon) were accepted by v2. A wrong domain leads to emails to the wrong people |
+| 15 Oct | 40 v4: draft model Claude Sonnet 5.5, judge GPT-5 mini (reasoning low), 4 contacts in parallel | v3 took 6:31 because of GPT-5.1 reasoning. Sonnet 5.5 costs $2/$10 per 1M (same output price as GPT-5.1) and writes more natural DE/EN. Judge from a different family. Rejected: Mistral Large 3 (stiffer prose), DeepSeek (EU personal data to China), Perplexity (search, not writing) |
+| 15 Oct | Judge length remarks and LinkedIn proof/ask demands are dropped in code | Code owns length; a connection note deliberately has no pitch |
+| 15 Oct | Telegram: approvals bot only for decisions (📨 APPROVE n/m, 🌐 WEBSITE?), second bot for 🚨 errors, max 5 open cards | Stacked, mixed messages lost context |
+| 15 Oct | Dashboard moved onto the Waypoint Engine main page; chart views removed | Charts need Notion Plus; six named table/board views instead |
+| 15 Oct | Docs follow docs/_template.md (Inputs · nodes · outputs · logic · failure modes · settings · changelog) | Noah: the old docs didn't explain how nodes work together |

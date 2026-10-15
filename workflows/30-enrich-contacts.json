@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "7b38b594-e55f-4252-8216-4938c929f186",
+      "id": "f67c9a2b-11d1-43c9-8ee7-c26e3df8737c",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "d7e32d66-8401-4531-8f27-d8bb8ed15141",
+      "id": "f6860944-096e-434e-a6cf-96a769d5baad",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "e3f15085-98b7-4ce2-b687-3b2363369489",
+      "id": "91b73541-69aa-4559-9e16-ea1947a436e2",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "1ce9c17e-2094-463f-ae21-71c356ac5c8b",
+      "id": "5b46e0e0-af09-4a30-a217-af6a9f577d58",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "556b9968-d568-4b0a-934d-d76248189b66",
+              "id": "9db6f08f-e19b-493b-8ef9-a03643d4d367",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "ec8539ae-00c0-4d53-a0a5-514b1f3de371",
+      "id": "33df4f14-e53b-489d-9c72-7f016f053f65",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "f5d04ddb-224e-4106-b940-c95a8489de12",
+      "id": "9289ffd6-405d-43a5-b8ed-965680364d6c",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -114,7 +114,7 @@
       }
     },
     {
-      "id": "79843d65-c3b3-49dd-b842-81c096afa244",
+      "id": "14f95f1c-945c-4ae5-919b-55d4e93f1237",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -140,7 +140,7 @@
       }
     },
     {
-      "id": "16b05e2e-cbcc-4396-8ce7-af65a94445f2",
+      "id": "77f9ae80-df41-453e-bfaa-b0e1dc6cf07d",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -149,12 +149,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nconst countryTld = ({ DE: 'de', AT: 'at', CH: 'ch', NL: 'nl', UK: 'co.uk' })[$json.properties?.Country?.select?.name] || null;\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = company;  // plain name: the quoted \"official website\" query returned 0 results in every live run\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\nreturn { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, q1, q2, q3, braveCalls: 0 } };",
+        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nconst countryTld = ({ DE: 'de', AT: 'at', CH: 'ch', NL: 'nl', UK: 'co.uk' })[$json.properties?.Country?.select?.name] || null;\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = company;  // plain name: the quoted \"official website\" query returned 0 results in every live run\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\n// Topic words: what the company does, from the funding article summary + sector. Used by the website\n// fail-safe to check that a candidate homepage is about the SAME business (holo.pl sold hologram stickers).\nconst STOP = new Set(['raises','raise','million','funding','round','seed','series','startup','company','based','launches','launch','scale','scaling','platform','europe','european','first','their','about','with','from','into','that','this','for','the','and','its','new','backed','secures','closes','lands','helps','small','businesses','business','powered','tech','eu-startups','tech.eu','sifted']);\nconst topicWords = [...new Set((txt($json.properties?.['Signal summary']) + ' ' + txt($json.properties?.Sector))\n  .toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\(.*?\\)/g, ' ').split(/[^a-z0-9-]+/)\n  .filter(w => w.length >= 4 && !STOP.has(w) && !/^\\d/.test(w) && !core.split(' ').includes(w)))].slice(0, 12);\nreturn { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, topicWords, q1, q2, q3, braveCalls: 0 } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "5b09ee71-41fd-4bb0-b686-a92584a27008",
+      "id": "f3ec194e-735b-4a62-a91e-8e7208c8e32e",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -214,7 +214,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "12a07b1b-e2df-48f3-869b-3a9c48b00189",
+      "id": "bfb6ce92-e1b5-442f-b915-e6f7d57f39fa",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -228,7 +228,7 @@
       }
     },
     {
-      "id": "9ee6bada-f2f8-4200-accd-10e533ce4084",
+      "id": "cf87aad7-ae48-4217-a6b6-d12c5b6b9c98",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -246,7 +246,7 @@
           },
           "conditions": [
             {
-              "id": "11ab2d32-05a2-49e2-863e-d9bb46f76ca7",
+              "id": "32d85788-8e86-4182-b3c2-de7e090b1c04",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -262,7 +262,7 @@
       }
     },
     {
-      "id": "632e28c6-d49b-4d6e-8e8f-5dff87857d40",
+      "id": "e0fe41d4-27e0-4fa9-b0c5-dc4461ee39be",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -322,7 +322,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "9e0b9c25-b84c-41e7-89a1-cfe483c8f61e",
+      "id": "3dd8ced5-4e56-426f-ab2a-4a15d3bc849d",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -336,7 +336,7 @@
       }
     },
     {
-      "id": "a623b0e4-da53-4e1d-a7c1-025d46bc62e6",
+      "id": "0b0a3c93-3276-467f-ae0b-ca44bf014308",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -383,7 +383,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "1c715ec3-6aa0-4df2-993d-786ba4c1e891",
+      "id": "c352b7b8-ac0b-4732-92fc-d410949cabe7",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -401,7 +401,7 @@
           },
           "conditions": [
             {
-              "id": "71af5991-ecde-4893-ae28-3f2ae9b87675",
+              "id": "160e1f67-9562-49bd-9808-6f20643b5233",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -417,7 +417,7 @@
       }
     },
     {
-      "id": "8709e3f8-75bd-4434-bf10-34e2f00daede",
+      "id": "aca1dcc9-577e-4945-8b52-782a157e5416",
       "name": "Website candidates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -426,11 +426,11 @@
         -200
       ],
       "parameters": {
-        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\n// Runs once for ALL items: one contact in, up to 24 candidate items out. (Per-item mode can't return\n// several items -> \"A 'json' property isn't an object\", the same bug we fixed in 20.)\nconst out = [];\n$input.all().forEach((it, idx) => {\nconst p = it.json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n['get' + joined + '.com', joined + 'hq.com', joined + 'app.com'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nset.slice(0, 24).forEach((d, i) => out.push({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));\n});\nreturn out;"
+        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\n// Runs once for ALL items: one contact in, up to 32 candidate items out. (Per-item mode can't return\n// several items -> \"A 'json' property isn't an object\", the same bug we fixed in 20.)\nconst out = [];\n$input.all().forEach((it, idx) => {\nconst p = it.json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n// (tryholo.ai was the real Holo site; v2 never tried it)\n['try', 'get', 'use'].forEach(pre => ['com', 'ai', 'io'].forEach(t => add(`${pre}${joined}.${t}`)));\n[joined + 'hq.com', joined + 'app.com', joined + 'ai.com', joined + 'labs.com', joined + '.app'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nset.slice(0, 32).forEach((d, i) => out.push({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));\n});\nreturn out;"
       }
     },
     {
-      "id": "bada051f-a358-4f55-8149-d675d222d3f4",
+      "id": "94c9d5eb-a87c-4e59-a717-1b42bfea6b3a",
       "name": "Fetch candidate homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -476,7 +476,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "654b87dc-70bb-490d-9f83-9997a226c5e5",
+      "id": "6a99f920-5793-4362-94e8-404ee4fc4b3a",
       "name": "Pick verified website",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -485,11 +485,11 @@
         -200
       ],
       "parameters": {
-        "jsCode": "// WEBSITE FAIL-SAFE, step 2 (rules): a candidate counts only if its homepage loads, is not a parked /\n// for-sale page, and shows the company name in title, meta or visible text. First match by rank wins.\nconst cands = $('Website candidates').all();\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst compact = x => tr(x).replace(/[^a-z0-9]/g, '');\nconst PARKED = /(domain (is )?for sale|buy this domain|this domain may be for sale|parked (free|domain)|sedo|dan\\.com|afternic|hugedomains|godaddy\\.com\\/domainsearch|domain has expired|coming soon)/i;\nconst byContact = {};\n$input.all().forEach((it, i) => {\n  const c = cands[i].json; const html = typeof it.json.html === 'string' ? it.json.html : '';\n  const k = c.contactPageId; byContact[k] = byContact[k] || { base: c, firstIdx: i, hits: [], tried: 0 };\n  byContact[k].tried++;\n  if (html.length < 300 || PARKED.test(html.slice(0, 20000))) return;\n  const title = (html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i) || [])[1] || '';\n  const meta = [...html.matchAll(/<meta[^>]+(?:og:site_name|og:title|application-name)[^>]+content=[\"']([^\"']+)/gi)].map(m => m[1]).join(' ');\n  const text = html.replace(/<(script|style)[\\s\\S]*?<\\/\\1>/gi, ' ').replace(/<[^>]+>/g, ' ').slice(0, 30000);\n  const name = compact(c.companyCore);\n  if (name.length >= 3 && (compact(title + ' ' + meta).includes(name) || compact(text).includes(name)))\n    byContact[k].hits.push({ rank: c.candidateRank, domain: c.candidate, inTitle: compact(title + ' ' + meta).includes(name), html });\n});\nreturn Object.values(byContact).map(g => {\n  // Prefer a hit with the name in the title/meta, then the lowest rank (.com first)\n  const best = g.hits.sort((a, b) => (b.inTitle - a.inTitle) || (a.rank - b.rank))[0] || null;\n  const { candidate, candidateRank, ...base } = g.base;\n  return { json: { ...base, domain: best ? best.domain : '', domainSource: best ? 'Website check' : null,\n      homepageHtml: best ? best.html.slice(0, 200000) : '',\n      linkedinMatch: base.linkedinMatch + (best ? ` | Website: ${best.domain} (homepage checked, name found)` : ` | Website: none of ${g.tried} likely domains showed the company name`) },\n    pairedItem: { item: g.firstIdx } };\n});"
+        "jsCode": "// WEBSITE FAIL-SAFE, step 2 (rules). INPUT: one fetched homepage per candidate domain (same order as\n// 'Website candidates'). OUTPUT: one item per contact with domain = best verified candidate or ''.\n// A candidate is ACCEPTED only if all three hold:\n//   1. Not parked / for sale / placeholder (broker phrases, \"coming soon\", tiny pages).\n//   2. Company name appears as a WHOLE WORD in title/meta or text (\"holo\" must not match \"holographic\").\n//   3. At least one topic word from the funding article appears on the page (same business, not a namesake).\n// WHY: v2 accepted ambio.com (a for-sale page), holo.pl (a hologram sticker shop) and miracly.com\n// (coming-soon placeholder). A wrong domain is worse than none: Hunter then finds wrong people's emails.\n// If no candidate passes, domainSource = 'Not found' -> the company shows in 'Companies that need a look'\n// and gets one Telegram question (WP · 50) instead of a guess.\nconst cands = $('Website candidates').all();\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst esc = s => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst PARKED = new RegExp([\n  'domain (is )?for sale', 'buy this domain', 'this domain (name )?(may be|is) for sale', 'interested in (buying|purchasing|acquiring) this domain',\n  'contact the (seller|owner)', 'message the seller', 'make (an|me an|a) offer', 'listed by', 'vip seller', 'domain broker',\n  'parked (free|domain|by)', 'sedo', 'dan\\\\.com', 'afternic', 'hugedomains', 'brandbucket', 'squadhelp', 'atom\\\\.com', 'efty', 'undeveloped\\\\.com',\n  'godaddy\\\\.com/domainsearch', 'domain has expired', 'coming soon', 'launching soon', 'under construction', 'website is (currently )?under',\n  'this site can.?t be reached', 'default web page', 'welcome to nginx', 'it works!', 'index of /'].join('|'), 'i');\nconst byContact = {};\n$input.all().forEach((it, i) => {\n  const c = cands[i].json; const html = typeof it.json.html === 'string' ? it.json.html : '';\n  const k = c.contactPageId; byContact[k] = byContact[k] || { base: c, firstIdx: i, hits: [], tried: 0, rejected: [] };\n  const g = byContact[k]; g.tried++;\n  if (html.length < 300) return;\n  const text = html.replace(/<(script|style|noscript)[\\s\\S]*?<\\/\\1>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/g, ' ').replace(/\\s+/g, ' ').slice(0, 40000);\n  if (PARKED.test(text.slice(0, 15000)) || text.trim().length < 200) { g.rejected.push(`${c.candidate} (parked/placeholder)`); return; }\n  const title = (html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i) || [])[1] || '';\n  const meta = [...html.matchAll(/<meta[^>]+(?:og:site_name|og:title|application-name|description)[^>]+content=[\"']([^\"']+)/gi)].map(m => m[1]).join(' ');\n  const name = tr(c.companyCore).trim();\n  if (name.length < 3) return;\n  const nameRe = new RegExp('(^|[^a-z0-9])' + esc(name).replace(/ /g, '[\\\\s-]?') + '($|[^a-z0-9])', 'i');\n  const inTitle = nameRe.test(tr(title + ' ' + meta));\n  const inText = inTitle || nameRe.test(tr(text));\n  if (!inText) return;\n  const page = tr(title + ' ' + meta + ' ' + text);\n  const topicHits = (c.topicWords || []).filter(w => page.includes(w.replace(/s$/, '')));\n  if ((c.topicWords || []).length && topicHits.length === 0) { g.rejected.push(`${c.candidate} (name found, but nothing about: ${(c.topicWords || []).slice(0, 4).join(', ')})`); return; }\n  g.hits.push({ rank: c.candidateRank, domain: c.candidate, inTitle, topicHits: topicHits.length, html });\n});\nreturn Object.values(byContact).map(g => {\n  // Rank: name in title/meta, then more topic words, then candidate order (.com first)\n  const best = g.hits.sort((a, b) => (b.inTitle - a.inTitle) || (b.topicHits - a.topicHits) || (a.rank - b.rank))[0] || null;\n  const { candidate, candidateRank, ...base } = g.base;\n  const why = best ? ` | Website: ${best.domain} (name in ${best.inTitle ? 'title' : 'text'}, ${best.topicHits} topic words)`\n    : ` | Website: not found among ${g.tried} likely domains` + (g.rejected.length ? `; rejected ${g.rejected.slice(0, 3).join('; ')}` : '');\n  return { json: { ...base, domain: best ? best.domain : '', domainSource: best ? 'Website check' : 'Not found',\n      homepageHtml: best ? best.html.slice(0, 200000) : '', websiteRejected: g.rejected, linkedinMatch: base.linkedinMatch + why },\n    pairedItem: { item: g.firstIdx } };\n});"
       }
     },
     {
-      "id": "9ff063fa-28a0-40ca-a715-4da81f9cf212",
+      "id": "ae6ce1aa-bd26-4462-a997-d5e638096339",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -514,12 +514,12 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ properties: { Domain: { url: $json.domain ? \"https://\" + $json.domain : null }, \"Domain source\": $json.domain ? { select: { name: \"Website check\" } } : null } }) }}"
+        "jsonBody": "={{ JSON.stringify({ properties: { Domain: { url: $json.domain ? \"https://\" + $json.domain : null }, \"Domain source\": { select: { name: $json.domainSource } } } }) }}"
       },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "6a2b6285-ad7c-4706-8ae4-ac169095ff0f",
+      "id": "1d984cc3-db28-4101-a829-af96f8a9c327",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -533,7 +533,7 @@
       }
     },
     {
-      "id": "6b3b34fe-1629-4429-8235-54dea6274a43",
+      "id": "6b84052e-d7bc-4e2e-8101-39dc622be3b9",
       "name": "Site pages to scan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -546,7 +546,7 @@
       }
     },
     {
-      "id": "04f63aed-3b22-4ddc-8a27-2f831382b170",
+      "id": "d1a79b6a-265c-4a0d-84a7-842ad6fa54d0",
       "name": "Fetch site page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -592,7 +592,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e0b10e07-2760-4999-abc6-606e8550fbec",
+      "id": "8311aa68-6f88-4471-8372-9bc036d35ce0",
       "name": "Extract site emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -605,7 +605,7 @@
       }
     },
     {
-      "id": "c798ffb5-06f1-45a1-afa5-868fd01da6c1",
+      "id": "f3fc799b-130f-4361-9bea-b2a0566c7511",
       "name": "Has company inbox?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -623,7 +623,7 @@
           },
           "conditions": [
             {
-              "id": "392dbb38-f254-4691-8f03-9655c10961a8",
+              "id": "c59165da-51f4-4284-bfe0-3f43ba4551f1",
               "leftValue": "={{ $json.companyInbox }}",
               "rightValue": "",
               "operator": {
@@ -639,7 +639,7 @@
       }
     },
     {
-      "id": "039aeea0-6d80-4c18-a255-c3f10305a520",
+      "id": "576676a4-aa44-4f95-a010-39c1152da485",
       "name": "Notion · save company inbox",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -669,7 +669,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a158192e-64c7-42c7-8b9e-996e861dbe14",
+      "id": "aaacf780-4470-4386-ae0d-2f1e2a62426f",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "56777624-8f61-4d6f-b6e1-673c1ff679fc",
+      "id": "6bad0bcc-55c6-4d99-a29c-9a8b630d4bba",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -701,7 +701,7 @@
           },
           "conditions": [
             {
-              "id": "b68ef1fb-5597-4db5-9687-e15e82395ecf",
+              "id": "a4033def-b395-42f0-8ef7-e562e1e01e29",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -717,7 +717,7 @@
       }
     },
     {
-      "id": "cb4e6113-8f00-496e-84e5-6177d6ef3911",
+      "id": "7abe3ff5-3c8c-456b-9cb2-cb206295e7b2",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -756,7 +756,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "fa788f22-b020-4e35-a890-29cb1ebcd651",
+      "id": "6a40d4a7-2937-4558-8421-633398b0f95f",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -770,7 +770,7 @@
       }
     },
     {
-      "id": "b0d2faef-6308-4032-93f1-29f62fb0a2bb",
+      "id": "f8a4682f-7482-491e-a3e9-6f36b9f60b10",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -799,7 +799,7 @@
       }
     },
     {
-      "id": "5e217dfa-b180-4e22-9095-ac2d914fa679",
+      "id": "c7750195-03d3-4c3f-98e9-c650de85d92b",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -812,7 +812,7 @@
       }
     },
     {
-      "id": "7a6cdb56-5e54-446c-95bb-3efc6538ad2e",
+      "id": "a5fe5391-83b6-41d8-b3ca-304a19d7a820",
       "name": "Note · 30 overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -827,7 +827,7 @@
       }
     },
     {
-      "id": "5ca858f8-2e69-4f80-9d3e-b0995cacc801",
+      "id": "fab2a9eb-1af9-4f4c-96c6-95427ee68351",
       "name": "Note · Selection",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -842,7 +842,7 @@
       }
     },
     {
-      "id": "b3e4a100-3131-444d-8442-7fad14caedd0",
+      "id": "71beaf21-5b0e-43cb-8d9f-dbe918c914ec",
       "name": "Note · LinkedIn",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -857,22 +857,22 @@
       }
     },
     {
-      "id": "746d09d0-35be-495c-bd8c-419c4594e4c2",
+      "id": "2352a003-bec3-4200-8783-bc73232911e8",
       "name": "Note · Website",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         2440,
-        -620
+        -680
       ],
       "parameters": {
-        "width": 760,
-        "height": 300,
-        "content": "### 3 · Website fail-safe (only if the article gave no website)\nSearch APIs returned nothing for company names, so we **check the web directly**: generate up to 24 likely domains from the name (name.com/.ai/.io/.co/.eu/.de/… , country TLD, hyphenated, get<name>.com …), open each homepage, and accept one only if it loads, is not a parked/for-sale page, and shows the company name in title, meta or text.\nPrefers name-in-title, then .com. Saved to Companies › Domain with Domain source = Website check. Free: no API credits."
+        "width": 820,
+        "height": 360,
+        "content": "### 3 · Website fail-safe v3 (only if the article gave no website)\n**In:** contact + company core name + topic words from the funding article. **Nodes:** Website candidates → Fetch candidate homepage → Pick verified website → Notion · save company domain.\n**Logic:** ~30 likely domains (name.com/.ai/.io…, country TLD, try/get/use<name>, <name>ai.com, EU ccTLDs). Each homepage must pass ALL of: **(1)** not parked / for sale / placeholder (\"contact the seller\", \"make an offer\", \"coming soon\"…), **(2)** company name as a WHOLE word, **(3)** ≥1 topic word from the article on the page (same business, not a namesake).\n**Out:** Domain + Domain source *Website check*, or *Not found* → you get one 🌐 question in Telegram (WP · 50).\n**Why:** v2 accepted ambio.com (for sale), holo.pl (hologram stickers) and miracly.com (coming soon). A wrong domain means emails to the wrong people."
       }
     },
     {
-      "id": "d9384992-260e-43b2-82bd-5846d3c999c0",
+      "id": "c9afd82f-fa82-4ed5-946f-4248334b822e",
       "name": "Note · Email",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
