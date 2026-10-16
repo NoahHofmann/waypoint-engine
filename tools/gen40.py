@@ -141,7 +141,30 @@ CHECK=r"""// Code checks for EACH variant before the judge: format, link, opt-ou
 // and Noah's rule that the funding round is never the headline.
 const b = $('Build brief (rules)').item.json;
 const prev = %PREV%;
-const raw = ($json.output?.variants || []).filter(v => v && v.body);
+// Tolerant JSON parse: Claude often writes real line breaks inside JSON strings (valid prose, invalid JSON).
+// v6 used n8n's structured parser -> every multi-paragraph email failed to parse -> 'Variant missing' (16 Oct).
+function parseLoose(t) {
+  if (t && typeof t === 'object') return t;
+  t = String(t || ''); const a = t.indexOf('{'), z = t.lastIndexOf('}');
+  if (a < 0 || z < a) return {};
+  const j = t.slice(a, z + 1);
+  try { return JSON.parse(j); } catch (e) {}
+  let out = '', inStr = false, esc = false;
+  for (const ch of j) {
+    if (inStr) {
+      if (esc) { esc = false; out += ch; continue; }
+      if (ch === '\\') { esc = true; out += ch; continue; }
+      if (ch === '"') { inStr = false; out += ch; continue; }
+      if (ch === '\n') { out += '\\n'; continue; }
+      if (ch === '\r') continue;
+      if (ch === '\t') { out += '\\t'; continue; }
+      out += ch;
+    } else { if (ch === '"') inStr = true; out += ch; }
+  }
+  try { return JSON.parse(out); } catch (e) { return {}; }
+}
+const parsed = $json.output?.variants ? $json.output : parseLoose($json.text ?? $json.output ?? $json.response);
+const raw = (parsed.variants || []).filter(v => v && v.body);
 const words = s => String(s).trim().split(/\s+/).filter(Boolean).length;
 const HYPE = /(revolutionary|game[- ]changing|synergy|leverage|unlock|skyrocket|hope this (email )?finds you|congratulations|congrats|herzlichen glückwunsch|gratuliere|startups like yours|companies like yours|teams like yours|i specialize in|is exciting|impressive)/i;
 const FUNDING = /(rais|funding|round|series [a-c]|seed|investment|finanzierung|runde|investor|€|\$|million|mio)/i;
@@ -185,7 +208,7 @@ let noSeen = 0;
 variants.forEach((v, i) => { if (/bad idea|crazy|schlechte idee|verrückt/i.test(asks[i])) { noSeen++; if (noSeen > 1) v.issues.push('Same no-oriented question as another variant ("bad idea"/"crazy"); use a plain, specific question'); } });
 // Template self-intro (was in every v4 email)
 variants.forEach(v => { if (/\bI help (funded |early[- ]stage )?(B2B )?(founders|CEOs|teams|startups)\b/i.test(v.body)) v.issues.push('Generic self-intro "I help funded B2B …"; say what Noah would do for THIS company'); });
-return { json: { ...prev, variants, oneLiner: String($json.output?.company_one_liner || '').slice(0, 200) } };"""
+return { json: { ...prev, variants, parseFailed: raw.length === 0, oneLiner: String(parsed.company_one_liner || '').slice(0, 200) } };"""
 DECIDE=r"""// Combine code checks and judge per variant. A variant passes only if BOTH are clean.
 // The contact is ready if at least one variant passes; Noah picks which one to send in 50.
 const p = $('%CHECK%').item.json;
@@ -207,7 +230,8 @@ const variants = p.variants.map(v => {
     ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];
   // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.
   const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));
-  const quality = j ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;
+  const missing = v.issues.includes('Variant missing');
+  const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;
   return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };
 });
 const passed = variants.filter(v => v.pass).map(v => v.id);
@@ -221,12 +245,12 @@ def stage(n,x,inp,prev_expr):
     dn=f"Draft (attempt {n})"; on=f"Claude · draft {n}"; sn=f"Schema · draft {n}"
     node(dn,"@n8n/n8n-nodes-langchain.chainLlm",1.7,[x,200],{"promptType":"define",
       "text":"={{ $json.briefText }}{{ $json.feedback ? '\\n\\nNONE OF YOUR PREVIOUS VARIANTS PASSED REVIEW. Write three new variants that fix ALL of these:\\n' + $json.feedback : '' }}",
-      "hasOutputParser":True,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":DRAFT_SYS}]}},onError="continueRegularOutput")
+      "hasOutputParser":False,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":DRAFT_SYS}]}},onError="continueRegularOutput")
     # Draft model: Claude Sonnet 5.5 (16 Oct, docs/model-choice.md). Mid-price tier: ~$0.026 per attempt.
     # To compare models later: swap this sub-node; the judge stays GPT-5 mini so Quality scores stay comparable.
     node(on,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x-60,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":2500,"temperature":0.6}})
-    node(sn,"@n8n/n8n-nodes-langchain.outputParserStructured",1.2,[x+80,420],{"schemaType":"manual","inputSchema":DSCHEMA})
-    link(on,dn,kind="ai_languageModel"); link(sn,dn,kind="ai_outputParser")
+    # No output-parser sub-node for the draft: 'Check rules' parses the JSON tolerantly (see parseLoose).
+    link(on,dn,kind="ai_languageModel")
     link(inp,dn)
     cn=f"Check rules {n}"
     node(cn,"n8n-nodes-base.code",2,[x+240,200],{"jsCode":CHECK.replace("%PREV%",prev_expr),"mode":"runOnceForEachItem"})

@@ -39,6 +39,6 @@ Use the ARTICLE EXCERPT and HOMEPAGE to find ONE concrete, specific detail that 
 Greeting line, blank line, 2–3 short paragraphs separated by blank lines, the ask, blank line, link. Never one block of text.
 
 ## Output
-JSON with:
+Return ONLY one JSON object (no code fences, no text before or after). Write line breaks inside strings as \n. Fields:
 - `company_one_liner`: one plain sentence (max 20 words) on what the company does, from COMPANY FACTS only. It is shown to Noah, not sent.
 - `variants`: exactly three objects `{ "id": "A"|"B"|"C", "subject": string, "body": string }`.

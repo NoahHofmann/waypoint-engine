@@ -57,3 +57,5 @@
 | 16 Oct | docs/STATE.md (+ Project doc) is the handover page for new sessions; decision-log keeps the why | Context compaction can drop details; one page restores the state |
 | 16 Oct | Status "Backlog" renamed to **Second contact**; card tag 📥 BACKLOG = came from the queue | The same word was used for two things |
 | 16 Oct | 3 more RSS feeds (Tech Funding News, Silicon Canals, Trending Topics) with a source priority 1–5 before the per-run cap | Need more fresh funded companies; the best-fit, non-paywalled sources come first. Sifted/Gründerszene excluded (paywall breaks hooks and link extraction) |
+| 16 Oct | 40: draft output parsed in code (tolerant JSON), n8n structured parser removed for the draft | First Claude run: both emails came back empty. Claude writes real line breaks inside JSON strings, the parser rejected them, and every email variant counted as "missing" (LinkedIn notes have one line, so they passed at 9.7/10) |
+| 16 Oct | Missing variants are not scored | The empty drafts pulled Quality avg down to 3.2; only real drafts count |
