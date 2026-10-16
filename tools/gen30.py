@@ -1,4 +1,6 @@
-import json, uuid
+import json, uuid, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from runlog import runlog_code
 N=[]; C={}
 def node(name,typ,ver,pos,params,**kw):
     n={"id":str(uuid.uuid4()),"name":name,"type":typ,"typeVersion":ver,"position":pos,"parameters":params}; n.update(kw); N.append(n); return name
@@ -38,7 +40,7 @@ const braveLeft = cfg.braveMonthlyCap - (s.brave || 0);
 const hunterLeft = cfg.hunterMonthlyCap - (s.hunter || 0);
 // worst case per contact: 2 Brave searches, 1.5 Hunter credits
 const allowed = Math.max(0, Math.min(cfg.maxContactsPerRun, Math.floor(braveLeft / 3), Math.floor(hunterLeft / 1.5)));
-return [{ json: { ...cfg, month, braveUsed: s.brave || 0, hunterUsed: s.hunter || 0, allowed } }];"""
+return [{ json: { ...cfg, startedAt: new Date().toISOString(), month, braveUsed: s.brave || 0, hunterUsed: s.hunter || 0, allowed } }];"""
 node("Config + budget","n8n-nodes-base.code",2,[240,280],{"jsCode":CONFIG})
 for t in ["Run manually","When called by orchestrator"]: link(t,"Config + budget")
 
@@ -419,6 +421,14 @@ return [{ json: {
 } }];"""
 node("Run summary + budget","n8n-nodes-base.code",2,[5580,200],{"jsCode":SUMMARY})
 link("Notion · update contact","Run summary + budget")
+
+M30=r"""const r = $json;
+const m = { in: r.enriched, out: r.readyToDraft + r.linkedinFound, errors: r.apiErrors, costEur: 0,
+  notes: `${r.readyToDraft} ready to draft, ${r.linkedinFound} with LinkedIn, ${r.apiErrors} API errors. Brave ${r.braveCallsThisRun} (month ${r.braveUsedThisMonth}/300), Hunter ${r.hunterCreditsThisRun} (month ${r.hunterUsedThisMonth}/40). Free tiers: cost 0.`, skip: false };"""
+node("Build run log","n8n-nodes-base.code",2,[5800,200],{"jsCode":runlog_code("Config + budget","Enrich","Enrich",M30)})
+link("Run summary + budget","Build run log")
+notion("Notion · log run",[6020,200],"POST","https://api.notion.com/v1/pages","={{ JSON.stringify($json) }}",onError="continueRegularOutput")
+link("Build run log","Notion · log run")
 
 STICKIES=[
 ("Note · 30 overview",[0,-560],720,330,"""## WP · 30 Enrich contacts: what and why

@@ -1,4 +1,6 @@
-import json, uuid
+import json, uuid, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from runlog import runlog_code
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 N=[]; C={}
@@ -21,6 +23,7 @@ node("Run manually","n8n-nodes-base.manualTrigger",1,[0,100],{})
 node("When called by orchestrator","n8n-nodes-base.executeWorkflowTrigger",1.1,[0,300],{"inputSource":"passthrough"})
 CONFIG=r"""// 40 · Draft + judge: configuration. Everything a reviewer may want to change lives here.
 return [{ json: {
+  startedAt: new Date().toISOString(),
   notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2',
   notionOffersDb: '5618b11e453a4704a41fb530812f110a',
   maxDraftsPerRun: 8,
@@ -263,7 +266,10 @@ const props = {
   'Channel': { select: { name: r.channel } },
   'Offer': { rich_text: t(r.offer) },
   'Draft language': { select: { name: r.language } },
-  'Angle': { select: { name: 'Funding trigger' } }
+  'Angle': { select: { name: 'Funding trigger' } },
+  // For the later analytics agent: which model + prompt wrote this, so reply rates can be compared per model/variant
+  'Draft model': { rich_text: t($('Config').first().json.draftModel) },
+  'Prompt version': { rich_text: t($('Config').first().json.promptVersion) }
 };
 if (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };
 return { json: { contactPageId: r.contactPageId, name: r.name, company: r.company, channel: r.channel, pass: r.pass,
@@ -278,6 +284,14 @@ return [{ json: { drafted: rows.length, passed: rows.filter(r => r.pass).length,
   firstTry: rows.filter(r => r.pass && r.attempts === 1).length, failed: rows.filter(r => !r.pass).length,
   drafts: rows.map(r => ({ name: r.name, company: r.company, channel: r.channel, passed: r.passed, attempts: r.attempts })) } }];"""})
 link("Notion · save draft","Run summary")
+M40=r"""const r = $json;
+const att = (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0);
+const m = { in: r.drafted, out: r.passed, errors: 0, costEur: Math.round(att * 0.019 * 1000) / 1000,
+  notes: `${r.passed}/${r.drafted} passed (${r.firstTry} on the first try), ${r.failed} to Check manually. ${att} draft attempts. Model ${$('Config').first().json.draftModel}, ${$('Config').first().json.promptVersion}. Cost estimated (~€0.019 per attempt).`, skip: !r.drafted };"""
+node("Build run log","n8n-nodes-base.code",2,[4660,100],{"jsCode":runlog_code("Config","Draft","Draft",M40)})
+link("Run summary","Build run log")
+notion("Notion · log run",[4880,100],"POST","https://api.notion.com/v1/pages","={{ JSON.stringify($json) }}",onError="continueRegularOutput")
+link("Build run log","Notion · log run")
 
 notes=[
 ("Note · 0 Overview",[-40,-820],900,560,"""## WP · 40 Draft + judge

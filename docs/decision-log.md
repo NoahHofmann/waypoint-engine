@@ -41,3 +41,8 @@
 | 15 Oct | 50: one company, one conversation (duplicates → Skipped with a reason); ⏸ QUEUE FULL notice instead of silent waiting | Run 3: Dawid (Coding Giants) drafted while Radosław was already in Gmail; 4 drafts waited silently behind 5 unanswered cards |
 | 15 Oct | 30: Gmail draft created / LinkedIn only count as "company covered" | Coding Giants was enriched twice |
 | 15 Oct | draft-v5: no-oriented question in at most 1 variant; no template self-intro; proof point chosen per situation | Run 3: "Would it be a bad idea/crazy" and "I help funded B2B CEOs…" in nearly every email |
+| 16 Oct | Second person at the same company → **Backlog** (not Skipped) | Noah: Skipped implies an error; Backlog = second contact if the first doesn't reply |
+| 16 Oct | One out, one in: each decided card triggers WP · 50 immediately | Noah: cards must not wait for the next scheduled run; the pipeline should drain as fast as he answers |
+| 16 Oct | Run log rows for 30, 40, 50 (Runs.Duration s added) | System health showed only Intake. Measured: 40 = 46 s (was 6:31), 50 = 6.5 s |
+| 16 Oct | Telegram routing rule: needs an answer → approvals bot; info only → alerts bot | Clear rule instead of a per-message call |
+| 16 Oct | Contacts store Draft model + Prompt version | Groundwork for the response-rate analytics agent (docs/roadmap.md) |

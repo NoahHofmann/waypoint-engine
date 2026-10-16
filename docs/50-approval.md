@@ -15,7 +15,12 @@ Every message starts with a fixed type tag and a divider, so you can see the typ
 - **🌐 WEBSITE? · Company:** reply with the domain or tap 🚫 No website.
 - **✅ / 📝 / 🔗 / ⏭:** confirmations. These are always a *reply to* the card they belong to, so they never float around without context.
 
-**Stack guard:** at most **5 unanswered approval cards** exist at a time. New drafts wait in Notion (*Draft ready*) and are sent as soon as you clear cards. Each card's footer says how many are waiting.
+**Stack guard:** at most **5 unanswered approval cards** exist at a time.
+- **One out, one in:** each time you decide a card (Send / Skip / Edit), WP · 51 immediately runs WP · 50, so the next waiting draft arrives within seconds. No need to wait for the next scheduled run.
+- **Queue full:** when 5 cards are open and drafts are waiting, the run sends one ⏸ QUEUE FULL message naming the open cards. The 07:30 run repeats it each morning until you clear them.
+- **One company, one conversation:** a second person at a company that is already in conversation goes to **Backlog**, not to Telegram. Their drafts are kept. Use them if the first contact doesn't reply: set *Approve in Notion*.
+
+**Which bot gets what:** if a message needs your answer or tap → **approvals** (📨 cards, 🌐 website questions, ⏸ queue full). If it's for information only → **alerts** (🚨 errors; daily summaries later). The 🌐 question needs a reply, so it belongs with the approvals.
 
 ## 1. Inputs
 | Workflow | Source | Filter |
@@ -90,6 +95,7 @@ Why the design looks like this:
 | 50 / 51 Parse | allowed chat id | 1170608781 |
 
 ## Changelog
+- **v3 · 16 Oct:** duplicates go to Backlog (not Skipped); one-out-one-in refill from 51; run log row per 50 run in Notion › Runs; Notion approval can also promote a Backlog contact; credential IDs preset.
 - **v2 · 15 Oct:**
   - Stack guard (max 5 open cards); cards numbered "APPROVE n/m" with type tag and divider.
   - 🌐 website questions, with replies handled in 51; contacts are re-queued for 30.

@@ -1,4 +1,6 @@
-import json, uuid
+import json, uuid, sys
+sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+from runlog import runlog_code
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 CHAT='1170608781'
@@ -16,7 +18,7 @@ def notion(node,name,pos,method,url,body=None,**kw):
     p={"method":method,"url":url,"authentication":"predefinedCredentialType","nodeCredentialType":"notionApi",**NH,"options":{}}
     if body: p.update({"sendBody":True,"specifyBody":"json","jsonBody":body})
     return node(name,"n8n-nodes-base.httpRequest",4.2,pos,p,**kw)
-TG={"telegramApi":{"id":"","name":"Telegram approvals"}}
+TG={"telegramApi":{"id":"x17tu5yr5xFWMSsZ","name":"Telegram approvals"}}   # IDs from n8n credentials (Noah, 16 Oct)
 GM={"gmailOAuth2":{"id":"","name":"Gmail account"}}
 TXT='const txt = p => { if (!p) return \'\'; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join(\'\').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? \'\') + \'\'; };'
 
@@ -27,10 +29,10 @@ node("When called by orchestrator","n8n-nodes-base.executeWorkflowTrigger",1.1,[
 node("Config","n8n-nodes-base.code",2,[220,200],{"jsCode":f"""// 50 · Approval cards: config
 // maxOpenCards: never more than this many unanswered approval cards in the chat (prevents stacking).
 // maxWebsiteQuestions: at most this many 'which website?' questions per run.
-return [{{ json: {{ chatId: '{CHAT}', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', notionCompaniesDb: '1247998a78a8446993afa06d9811c436', maxOpenCards: 5, maxWebsiteQuestions: 3 }} }}];"""})
+return [{{ json: {{ chatId: '{CHAT}', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', notionCompaniesDb: '1247998a78a8446993afa06d9811c436', maxOpenCards: 5, maxWebsiteQuestions: 3, startedAt: new Date().toISOString() }} }}];"""})
 link("Run manually","Config"); link("When called by orchestrator","Config")
 notion(node,"Notion · approved in Notion",[440,-160],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
-  '={{ JSON.stringify({ filter: { and: [ { property: "Approve in Notion", select: { is_not_empty: true } }, { or: [ { property: "Status", status: { equals: "Awaiting approval" } }, { property: "Status", status: { equals: "Draft ready" } }, { property: "Status", status: { equals: "Check manually" } } ] } ] }, page_size: 20 }) }}',executeOnce=True)
+  '={{ JSON.stringify({ filter: { and: [ { property: "Approve in Notion", select: { is_not_empty: true } }, { or: [ { property: "Status", status: { equals: "Awaiting approval" } }, { property: "Status", status: { equals: "Draft ready" } }, { property: "Status", status: { equals: "Check manually" } }, { property: "Status", status: { equals: "Backlog" } } ] } ] }, page_size: 20 }) }}',executeOnce=True)
 link("Config","Notion · approved in Notion")
 NAPP=TXT+r"""
 // NOTION FALLBACK: you picked A/B/C/Skip in the column 'Approve in Notion' instead of tapping in Telegram.
@@ -53,7 +55,8 @@ node("Pick drafts","n8n-nodes-base.code",2,[880,200],{"jsCode":TXT+"""
 // (the drafts stay 'Draft ready' and go out after you answer the open ones).
 const cfg = $('Config').first().json;
 // ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out
-// (or a second draft for the same company in this batch) is marked duplicate and skipped, not sent.
+// (or a second draft for the same company in this batch) goes to BACKLOG: kept with its drafts as the
+// second contact if the first doesn't reply. Not an error; nothing is sent.
 const inFlight = $('Notion · cards still open').first().json.results || [];
 const open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;
 const busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });
@@ -73,9 +76,9 @@ return dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { j
 link("Notion · drafts ready","Pick drafts")
 node("Duplicate company?","n8n-nodes-base.if",2.2,[990,200],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"id":str(uuid.uuid4()),"leftValue":"={{ $json.duplicate }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
 link("Pick drafts","Duplicate company?")
-notion(node,"Notion · skip duplicate",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
-  '={{ JSON.stringify({ properties: { Status: { status: { name: "Skipped" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " skipped: company already in conversation via " + $json.other } }] } } }) }}',onError="continueRegularOutput")
-link("Duplicate company?","Notion · skip duplicate",0)
+notion(node,"Notion · move to Backlog",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+  '={{ JSON.stringify({ properties: { Status: { status: { name: "Backlog" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " backlog: " + $json.other + " at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now)." } }] } } }) }}',onError="continueRegularOutput")
+link("Duplicate company?","Notion · move to Backlog",0)
 notion(node,"Notion · get company",[1320,200],"GET","=https://api.notion.com/v1/pages/{{ $json.companyPageId }}")
 link("Duplicate company?","Notion · get company",1)
 STACK=TXT+r"""
@@ -87,6 +90,19 @@ if (open.length < cfg.maxOpenCards || ready === 0) return [];
 return [{ json: { text: `⏸ QUEUE FULL · ${open.length} cards unanswered\n━━━━━━━━━━━━━━━━\n${ready} new draft(s) are waiting. Answer or skip an open card (or use 'Approve in Notion') and they follow on the next run.\nOpen: ` + open.map(pg => txt(pg.properties.Name)).join(', ') } }];"""
 node("Queue full notice","n8n-nodes-base.code",2,[880,420],{"jsCode":STACK})
 link("Notion · drafts ready","Queue full notice")
+M50=r"""const inFlight = $('Notion · cards still open').first().json.results || [];
+const open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;
+const ready = ($input.first().json.results || []).length;
+let nApp = 0; try { nApp = ($('Notion · approved in Notion').first().json.results || []).length; } catch (e) {}
+const cfg = $('Config').first().json;
+const room = Math.max(0, cfg.maxOpenCards - open);
+const m = { in: ready + nApp, out: Math.min(room, ready) + nApp, errors: 0, costEur: 0,
+  notes: `${open} cards open before this run, ${ready} drafts ready, up to ${Math.min(room, ready)} new card(s) (duplicates go to Backlog), ${nApp} approval(s) from Notion handed to 51.` + (room === 0 && ready ? ' QUEUE FULL.' : ''),
+  skip: ready === 0 && nApp === 0 };"""
+node("Build run log","n8n-nodes-base.code",2,[880,640],{"jsCode":runlog_code("Config","Approval cards","Approval",M50)})
+link("Notion · drafts ready","Build run log")
+notion(node,"Notion · log run",[1100,640],"POST","https://api.notion.com/v1/pages","={{ JSON.stringify($json) }}",onError="continueRegularOutput")
+link("Build run log","Notion · log run")
 node("Telegram · queue full","n8n-nodes-base.telegram",1.2,[1100,420],{"chatId":"={{ $('Config').first().json.chatId }}","text":"={{ $json.text }}","additionalFields":{"appendAttribution":False}},credentials=TG,onError="continueRegularOutput")
 link("Queue full notice","Telegram · queue full")
 CARD=TXT+r"""
@@ -267,7 +283,7 @@ const status = txt(P.Status);
 const base = { contactPageId: pg.id, chatId: p.chatId, cardMessageId: p.cardMessageId, name: txt(P.Name), channel: txt(P.Channel) || 'Email',
   email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };
 // From Notion you may also approve a draft before its card went out, or a 'Check manually' draft.
-const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually'] : ['Awaiting approval'];
+const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Backlog'] : ['Awaiting approval'];
 if (!allowed.includes(status)) return { json: { ...base, action: 'notice', notice: `Already handled: ${base.name} is "${status}". Nothing was sent again.` } };
 if (p.kind === 'skip') return { json: { ...base, action: 'skip' } };
 if (p.kind === 'edit') return { json: { ...base, action: 'notice', notice: `Reply to the card for ${base.name} with your text (first line "Subject: …" for emails). I'll send that version.` } };
@@ -319,6 +335,16 @@ def tgsend(name,pos,textexpr,src_chat):
     node(name,"n8n-nodes-base.telegram",1.2,pos,{"chatId":src_chat,"text":textexpr,"additionalFields":{"appendAttribution":False,"disable_web_page_preview":True,"reply_to_message_id":"={{ $json.cardMessageId }}"}},credentials=TG,onError="continueRegularOutput")
 tgsend("Telegram · confirm",[2460,200],"={{ $('Build outcome').item.json.message }}","={{ $('Build outcome').item.json.chatId }}")
 link("Notion · save outcome","Telegram · confirm")
+REFILL=r"""// ONE OUT, ONE IN: after you decided a card in Telegram, top up the queue right away (runs WP · 50).
+// Not after Notion approvals (those come FROM 50: no loop) and not after notices.
+// (One Telegram update = one execution = one item, so index 0 lines up across nodes.)
+const d = $('Decide action (rules)').first().json;
+const p = $('Parse update (rules)').first().json;
+return (!p.fromNotion && ['send', 'gmail_draft', 'linkedin', 'skip'].includes(d.action)) ? [{ json: { refill: true } }] : [];"""
+node("Refill queue?","n8n-nodes-base.code",2,[2680,200],{"jsCode":REFILL})
+link("Telegram · confirm","Refill queue?")
+node("Run WP · 50 (next card)","n8n-nodes-base.executeWorkflow",1.2,[2900,200],{"source":"database","workflowId":{"__rl":True,"value":"","mode":"list"},"mode":"once","options":{"waitForSubWorkflow":False}},onError="continueRegularOutput")
+link("Refill queue?","Run WP · 50 (next card)")
 tgsend("Telegram · notice",[1780,480],"={{ $json.notice }}","={{ $json.chatId }}")
 link("Route","Telegram · notice",4)
 node("Note · 51","n8n-nodes-base.stickyNote",1,[0,-380],{"width":1100,"height":330,"content":"""## WP · 51 Approval handler (Telegram trigger): what and why
