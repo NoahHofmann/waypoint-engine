@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 15:55 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 16 Oct 2026, 16:10 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -56,7 +56,7 @@ This is the single page a new session (or a new Claude context) reads to continu
 - Contacts: *Action* formula (to-do text) · *Approve in Notion* (A/B/C/Skip fallback) · *Backlog* status (second person at a company already in conversation) · *Quality score* (own benchmark) · *Draft model* · *Prompt version*.
 
 ## Models
-- **Draft:** Claude Sonnet 5.5 (since 16 Oct; before: gpt-5.1).
+- **Draft:** Claude Sonnet 5.5 on attempt 1; GPT-5.1 fallback on attempt 2 (since 16 Oct, 16:10).
 - **Judge:** GPT-5 mini, reasoning low. **The judge stays fixed**, so *Quality score* stays comparable across draft models: that is our own benchmark. Runs › *Quality avg* + *Model* per run.
 - **Qualify / find people:** gpt-4o-mini.
 
@@ -85,7 +85,7 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 - Tommi, Filip and Victor were re-queued for re-drafting with Claude. Their GPT-5.1 baseline is in `docs/evals/gpt51-baseline-16oct.md`.
 
 ## Open issues (in priority order)
-1. **Claude emails arrived empty** (15:42 run: Tommi, Filip → Check manually). Cause: Claude's JSON output didn't parse. Fix: 40 v5 / draft-v7 uses plain-text sections; on failure Judge notes show the raw output. Tommi + Filip reset to Ready to draft. T2 is blocked until this runs.
+1. **Claude emails arrived empty** (runs 15:42 and 15:52). Not a parse bug: Notion showed "model output: empty" with no API error, so the 2500-token budget ran out before any text. 40 v6: max tokens 8000, and attempt 2 drafts with GPT-5.1 as a fallback. Tommi + Filip reset to Ready to draft. T2 is waiting on this run.
 1b. Intake: Normalize 71 → 20, all 20 already known. Tech Funding News returns 403 (blocks n8n). Planned: TFN via HTTP Request with a browser User-Agent, maxAgeDays 7 → 14, German funding terms.
 2. Stress tests not yet run (`docs/test-plan.md`).
 3. README, architecture diagram and demo script for Monday.
