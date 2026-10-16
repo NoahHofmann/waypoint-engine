@@ -220,11 +220,11 @@ const u = $json; const ALLOWED = '{CHAT}';
 const cb = u.callback_query; const msg = u.message;
 const chatId = String(cb?.message?.chat?.id ?? msg?.chat?.id ?? '');
 const uuidOf = key => key ? key.replace(/(.{{8}})(.{{4}})(.{{4}})(.{{4}})(.{{12}})/, '$1-$2-$3-$4-$5') : null;
-const titleOf = t => String(t || '').split('\n')[0].replace(/^📨 APPROVE \d+\/\d+ · /, '').replace(/^🌐 WEBSITE\? · /, '');
+const titleOf = t => String(t || '').split('\n')[0].replace(/^📨 APPROVE \d+\/\d+ · /, '').replace(/^🌐 WEBSITE\? · /, '').replace(/^🔗 LINKEDIN TO SEND · /, '');
 if (chatId !== ALLOWED) return {{ json: {{ ok: false, kind: 'ignore', reason: 'unauthorized chat ' + chatId }} }};
 if (cb) {{
   const [k, key, v] = String(cb.data || '').split('|');
-  const kind = k === 'v' ? 'choose' : k === 'e' ? 'edit' : k === 's' ? 'skip' : k === 'w' ? 'website_none' : 'unmatched';
+  const kind = k === 'v' ? 'choose' : k === 'e' ? 'edit' : k === 's' ? 'skip' : k === 'w' ? 'website_none' : k === 'l' ? 'li_sent' : 'unmatched';
   return {{ json: {{ ok: true, fromNotion: !!u.fromNotion, kind, variant: v || null,
     contactPageId: k === 'w' ? null : uuidOf(key), companyPageId: k === 'w' ? uuidOf(key) : null,
     callbackId: cb.id, cardMessageId: cb.message?.message_id ?? null, cardTitle: titleOf(cb.message?.text), chatId }} }};
@@ -253,7 +253,7 @@ node("Telegram · answer tap","n8n-nodes-base.telegram",1.2,[660,300],{"resource
 link("Authorized?","Telegram · answer tap",0)
 node("Route update","n8n-nodes-base.switch",3.2,[880,300],{"mode":"rules","rules":{"values":[
   {"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"leftValue":"={{ "+P_+".kind }}","rightValue":rv,"operator":{"type":"string","operation":op}}],"combinator":"and"},"renameOutput":True,"outputKey":key}
-  for key,op,rv in [("website","startsWith","website"),("reply","equals","reply"),("tap","regex","^(choose|edit|skip)$"),("unmatched","equals","unmatched")]]},"options":{}})
+  for key,op,rv in [("website","startsWith","website"),("reply","equals","reply"),("tap","regex","^(choose|edit|skip|li_sent)$"),("unmatched","equals","unmatched")]]},"options":{}})
 link("Telegram · answer tap","Route update")
 # --- unmatched: never silent
 UNM=H_JS+r"""
@@ -324,6 +324,10 @@ const status = txt(P.Status);
 const company = (p.cardTitle || '').split(' · ')[0] || '';
 const base = { ...base0, contactPageId: pg.id, name: txt(P.Name), company, channel: txt(P.Channel) || 'Email',
   email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };
+// '✅ Sent on LinkedIn' tap: you pasted the note on LinkedIn. Only valid while the contact is Approved (LinkedIn).
+if (p.kind === 'li_sent') return { json: status === 'Approved'
+  ? { ...base, action: 'li_sent' }
+  : { ...base, action: 'closed', closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\nStatus: ${h(status)}.` } };
 const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Backlog'] : ['Awaiting approval'];
 // Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.
 if (!allowed.includes(status)) return { json: { ...base, action: 'closed',
@@ -346,7 +350,7 @@ node("Decide action (rules)","n8n-nodes-base.code",2,[1540,300],{"jsCode":DECIDE
 link("Notion · get contact","Decide action (rules)"); link("First match","Decide action (rules)")
 node("Route","n8n-nodes-base.switch",3.2,[1760,300],{"mode":"rules","rules":{"values":[
   {"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"leftValue":"={{ $json.action }}","rightValue":v,"operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"renameOutput":True,"outputKey":v}
-  for v in ["send","gmail_draft","linkedin","skip","notice","closed"]]},"options":{}})
+  for v in ["send","gmail_draft","linkedin","skip","notice","closed","li_sent"]]},"options":{}})
 link("Decide action (rules)","Route")
 node("Gmail · send","n8n-nodes-base.gmail",2.1,[2000,60],{"resource":"message","operation":"send","sendTo":"={{ $json.email }}","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"appendAttribution":False,"senderName":"Noah Hofmann"}},credentials=GM,onError="continueRegularOutput")
 link("Route","Gmail · send",0)
@@ -362,7 +366,7 @@ const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];
 const err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;
 const who = `${h(d.name)}${d.company ? ' · ' + h(d.company) : ''}`;
 const via = d.fromNotion ? ' · approved in Notion' : '';
-let status, closeText = null, replyText = null, extra = {};
+let status, closeText = null, replyText = null, extra = {}, liKey = null, liUrl = null;
 if (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent';
   if (err) replyText = `❌ <b>Sending failed · ${who}</b>\n${h(err)}\nThe card stays open: tap again later.`;
   else { closeText = `✅ <b>SENT · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via} · from hello@`; extra['Sent at'] = { date: { start: now } }; } }
@@ -370,8 +374,12 @@ else if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gma
   if (err) replyText = `❌ <b>Gmail draft failed · ${who}</b>\n${h(err)}\nThe card stays open: tap again later.`;
   else closeText = `📝 <b>GMAIL DRAFT · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via}\n👉 Open Gmail drafts (hello@), check, send.`; }
 else if (d.action === 'linkedin') { status = 'Approved';
-  closeText = `🔗 <b>LINKEDIN · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via} · text below 👇`;
-  replyText = `🔗 <b>Paste into LinkedIn</b> (${h(d.linkedin)})\n\n${h(d.body)}`; }
+  closeText = `🔗 <b>LINKEDIN · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via} · the note to send is the next message 👇`;
+  // Separate, OPEN message (with buttons) = the LinkedIn to-do. It stays open until you tap '✅ Sent on LinkedIn'.
+  replyText = `🔗 <b>LINKEDIN TO SEND · ${d.company ? h(d.company) + ' · ' : ''}${h(d.name)}</b>\n━━━━━━━━━━━━━━━━\n1. Tap <b>Open profile</b> → Connect → Add a note\n2. Long-press the text below → Copy → paste\n3. Tap <b>✅ Sent on LinkedIn</b>\n\n<code>${h(d.body)}</code>`;
+  liKey = String(d.contactPageId).replace(/-/g, ''); liUrl = d.linkedin || ''; }
+else if (d.action === 'li_sent') { status = 'Sent';
+  closeText = `✅ <b>SENT ON LINKEDIN · ${who}</b>\n${hhmm} · connection request with note.`; extra['Sent at'] = { date: { start: now } }; }
 else if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\n${hhmm}${via} · nothing will be sent.`; }
 const props = { 'Status': { status: { name: status } },
   'Approval log': { rich_text: t(`${d.log ? d.log + '\n' : ''}${now.slice(0, 16)} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };
@@ -379,10 +387,10 @@ if (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name:
   'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });
 Object.assign(props, extra);
 return { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, replyTo: d.replyTo,
-  closeText, replyText, ok: !err, notionBody: { properties: props } } };"""
+  closeText, replyText, liKey, liUrl, ok: !err, notionBody: { properties: props } } };"""
 node("Build outcome","n8n-nodes-base.code",2,[2240,260],{"jsCode":OUT,"mode":"runOnceForEachItem"})
 for src in ["Gmail · send","Gmail · create draft"]: link(src,"Build outcome")
-link("Route","Build outcome",2); link("Route","Build outcome",3)
+link("Route","Build outcome",2); link("Route","Build outcome",3); link("Route","Build outcome",6)
 notion(node,"Notion · save outcome",[2460,260],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}","={{ JSON.stringify($json.notionBody) }}",retryOnFail=True,maxTries=3,waitBetweenTries=2000)
 link("Build outcome","Notion · save outcome")
 B_ = "$('Build outcome').item.json"
@@ -392,8 +400,16 @@ tgedit("Telegram · close card",[2900,120],"={{ "+B_+".closeText }}","={{ "+B_+"
 link("Close card?","Telegram · close card",0)
 node("Extra message?","n8n-nodes-base.if",2.2,[2680,380],cond("={{ "+B_+".replyText || '' }}","notEmpty"))
 link("Notion · save outcome","Extra message?")
-tgsend("Telegram · extra message",[2900,380],"={{ "+B_+".replyText }}","={{ "+B_+".chatId }}","={{ "+B_+".replyTo }}")
-link("Extra message?","Telegram · extra message",0)
+node("LinkedIn to-do?","n8n-nodes-base.if",2.2,[2900,380],cond("={{ "+B_+".liKey || '' }}","notEmpty"))
+link("Extra message?","LinkedIn to-do?",0)
+node("Telegram · LinkedIn to send","n8n-nodes-base.telegram",1.2,[3120,320],{"chatId":"={{ "+B_+".chatId }}","text":"={{ "+B_+".replyText }}",
+  "replyMarkup":"inlineKeyboard","inlineKeyboard":{"rows":[{"row":{"buttons":[
+    {"text":"🔗 Open profile","additionalFields":{"url":"={{ "+B_+".liUrl || 'https://www.linkedin.com' }}"}},
+    {"text":"✅ Sent on LinkedIn","additionalFields":{"callback_data":"={{ 'l|' + "+B_+".liKey }}"}}]}}]},
+  "additionalFields":{"appendAttribution":False,"disable_web_page_preview":True,"parse_mode":"HTML"}},credentials=TG,onError="continueRegularOutput")
+link("LinkedIn to-do?","Telegram · LinkedIn to send",0)
+tgsend("Telegram · extra message",[3120,460],"={{ "+B_+".replyText }}","={{ "+B_+".chatId }}","={{ "+B_+".replyTo }}")
+link("LinkedIn to-do?","Telegram · extra message",1)
 REFILL=r"""// ONE OUT, ONE IN: after you decided a card in Telegram, top up the queue right away (runs WP · 50).
 // Not after Notion approvals (those come FROM 50: no loop), not after notices or errors.
 const d = $('Decide action (rules)').first().json;

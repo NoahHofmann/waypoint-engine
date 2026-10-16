@@ -49,3 +49,6 @@
 | 16 Oct | 51 v4: every tap/reply answered; decided cards are edited closed (buttons removed); unmatched messages get a help note; HTML bold formatting | Noah: no response left him unsure whether a tap was recorded; open vs. done must be visible at a glance |
 | 16 Oct | Run log is an upsert per execution ($execution.customData) | v1 wrote 2–3 rows per run, because 30/40 summaries run once per arriving branch |
 | 16 Oct | All credential + workflow IDs preset in the generators (tools/runlog.py) | Zero-click imports |
+| 16 Oct | Orchestrator: Always Output Data on Sub · 30/40/50 | A sub-workflow with nothing to do returns 0 items and n8n stops the chain: 40 and 50 never ran at 12:46 |
+| 16 Oct | 30: only decision-maker roles are enriched (CEO/MD, founder, sales, partnerships); a missing role is skipped | Holo's "Founding UX Designer" got a Gmail draft when the CEO was unreachable |
+| 16 Oct | LinkedIn approvals become an open "🔗 LINKEDIN TO SEND" message with Open profile + ✅ Sent on LinkedIn buttons | Noah: "copy and send" texts get lost in the chat; the to-do must stay visibly open until done |

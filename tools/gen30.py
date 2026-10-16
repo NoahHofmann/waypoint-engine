@@ -79,6 +79,11 @@ const rows = all.filter(pg => statusOf(pg) === 'Needs email').map(pg => {
     companyPageId: pg.properties.Company?.relation?.[0]?.id || null,
   };
 }).filter(r => r.companyPageId && !covered.has(r.companyPageId) && r.first && r.last && r.first !== r.last);
+// Only decision makers: CEO/MD, founders, sales, partnerships. Anyone else (e.g. 'Founding UX Designer',
+// or a missing role) is not enriched: on 16 Oct Holo's UX designer got a draft because the CEO was unreachable.
+rows.forEach(r => { if (/^(null|undefined|n\/a|-)?$/i.test(String(r.role || '').trim())) r.role = ''; });
+const eligible = rows.filter(r => rank(r.role) < 9);
+rows.length = 0; eligible.forEach(r => rows.push(r));
 rows.sort((a, b) => rank(a.role) - rank(b.role));
 // Budget: only the best persona per company is enriched in a run. Others wait (stay "Needs email").
 const perCompany = new Set();

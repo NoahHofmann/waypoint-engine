@@ -309,7 +309,7 @@
         -180
       ],
       "parameters": {
-        "content": "## Sub-workflows\n10 Qualify company → {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → once at the end; LinkedIn, website fail-safe, site emails, Hunter.\n40 Draft + judge → once after 30; drafts for every contact with a verified channel.\n50 Approval cards → Telegram card per Draft ready contact. Taps are handled by 51 (Telegram trigger, separate, always active).",
+        "content": "## Sub-workflows\n10 Qualify company → {ok, companyPageId, score, status, flags}.\n20 Find people → only for Qualified; creates linked Contacts.\n30 Enrich contacts → once at the end; LinkedIn, website fail-safe, site emails, Hunter.\n40 Draft + judge → once after 30; drafts for every contact with a verified channel.\n50 Approval cards → Telegram card per Draft ready contact. Taps are handled by 51 (Telegram trigger, separate, always active).\n\n**Always Output Data = on** for Sub · 30/40/50: a sub-workflow with nothing to do returns no items, which used to stop the chain (16 Oct: 30 found no new contacts → 40 and 50 never ran, so queued drafts never got cards).",
         "height": 190,
         "width": 560,
         "color": 5
@@ -336,7 +336,8 @@
         }
       },
       "executeOnce": true,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "id": "0a362acb-8f20-423e-bc75-04b43adee5b0",
@@ -359,7 +360,8 @@
         }
       },
       "executeOnce": true,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "id": "8f3d81c2-f9dd-4f53-9b11-35d252e6d8fb",
@@ -382,7 +384,8 @@
         }
       },
       "executeOnce": true,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     }
   ],
   "connections": {
