@@ -22,7 +22,7 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Turn any failed execution into one readable alert.\nconst e = $json.execution || {}, wf = $json.workflow || {};\nconst msg = e.error?.message || 'Unknown error';\nconst node = e.lastNodeExecuted || e.error?.node?.name || 'n/a';\nconst when = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });\nreturn [{ json: {\n  subject: `⚠️ Waypoint engine: \"${wf.name}\" failed`,\n  text: `Workflow: ${wf.name}\\nNode: ${node}\\nError: ${msg}\\nTime: ${when}\\nMode: ${e.mode || 'n/a'}\\nExecution: ${e.url || e.id || 'n/a'}\\n\\nNo action was sent to any contact by this execution.`,\n  workflow: wf.name, node, msg, executionId: String(e.id || '')\n}}];"
+        "jsCode": "// Turn any failed execution into one readable alert.\nconst e = $json.execution || {}, wf = $json.workflow || {};\nconst msg = e.error?.message || 'Unknown error';\nconst node = e.lastNodeExecuted || e.error?.node?.name || 'n/a';\nconst when = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nreturn [{ json: {\n  html: `🚨 <b>ERROR · ${h(wf.name)}</b>\\n━━━━━━━━━━━━━━━━\\n<b>Node:</b> ${h(node)}\\n<b>Error:</b> ${h(msg)}\\n<b>Time:</b> ${when}\\n<b>Execution:</b> ${h(e.url || e.id || 'n/a')}\\n\\nNo message was sent to any contact by this execution.`,\n  subject: `⚠️ Waypoint engine: \"${wf.name}\" failed`,\n  text: `Workflow: ${wf.name}\\nNode: ${node}\\nError: ${msg}\\nTime: ${when}\\nMode: ${e.mode || 'n/a'}\\nExecution: ${e.url || e.id || 'n/a'}\\n\\nNo action was sent to any contact by this execution.`,\n  workflow: wf.name, node, msg, executionId: String(e.id || '')\n}}];"
       }
     },
     {
@@ -43,7 +43,13 @@
           "appendAttribution": false
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SZBYk0OCrdNe1W56",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "id": "dc9de70f-0c5b-49d9-a199-a635a6b65f3f",
@@ -56,9 +62,10 @@
       ],
       "parameters": {
         "chatId": "1170608781",
-        "text": "={{ '🚨 ERROR · ' + $json.workflow + '\\n\\n' + $json.text }}",
+        "text": "={{ $json.html }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "onError": "continueRegularOutput",
@@ -113,7 +120,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "115474b7-5c3a-4c3f-ac60-26de288e87a0",

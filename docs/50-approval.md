@@ -22,6 +22,17 @@ Every message starts with a fixed type tag and a divider, so you can see the typ
 
 **Which bot gets what:** if a message needs your answer or tap → **approvals** (📨 cards, 🌐 website questions, ⏸ queue full). If it's for information only → **alerts** (🚨 errors; daily summaries later). The 🌐 question needs a reply, so it belongs with the approvals.
 
+
+## Answer rule (v4, 16 Oct)
+**Every tap or message from you gets a visible answer. No answer means a bug.**
+- **Tap a button:** a short "Got it ✔" toast. The card is then **closed**: edited into a one-line result (✅ SENT / 📝 GMAIL DRAFT / 🔗 LINKEDIN / ⏭ SKIPPED · name · company · time) and its buttons removed. **A card that still has buttons always needs you.**
+- **Reply to a card with your own text:** same result; the card closes.
+- **🌐 website reply:** the question closes as "✅ WEBSITE SAVED · company · domain". If the text isn't a domain, you get a ⚠️ reply asking again.
+- **Late or double tap:** the card closes as "☑️ ALREADY HANDLED"; nothing is sent twice.
+- **Any message not tied to a card:** a 🤔 help note ("swipe left on the card to reply").
+- **Error:** the card stays open and a ❌ reply says what failed.
+- All messages use Telegram HTML, with bold headers and escaped content.
+
 ## 1. Inputs
 | Workflow | Source | Filter |
 |---|---|---|

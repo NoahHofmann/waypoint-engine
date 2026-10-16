@@ -1,6 +1,6 @@
 import json, uuid, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from runlog import runlog_code
+from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids
 N=[]; C={}
 def node(name,typ,ver,pos,params,**kw):
     n={"id":str(uuid.uuid4()),"name":name,"type":typ,"typeVersion":ver,"position":pos,"parameters":params}; n.update(kw); N.append(n); return name
@@ -423,12 +423,16 @@ node("Run summary + budget","n8n-nodes-base.code",2,[5580,200],{"jsCode":SUMMARY
 link("Notion · update contact","Run summary + budget")
 
 M30=r"""const r = $json;
-const m = { in: r.enriched, out: r.readyToDraft + r.linkedinFound, errors: r.apiErrors, costEur: 0,
-  notes: `${r.readyToDraft} ready to draft, ${r.linkedinFound} with LinkedIn, ${r.apiErrors} API errors. Brave ${r.braveCallsThisRun} (month ${r.braveUsedThisMonth}/300), Hunter ${r.hunterCreditsThisRun} (month ${r.hunterUsedThisMonth}/40). Free tiers: cost 0.`, skip: false };"""
+const c = { in: r.enriched, ready: r.readyToDraft, li: r.linkedinFound, apiErr: r.apiErrors, brave: r.braveCallsThisRun, hunter: r.hunterCreditsThisRun };
+const x = { braveMonth: r.braveUsedThisMonth, hunterMonth: r.hunterUsedThisMonth };
+const view = (c, x) => ({ in: c.in, out: c.ready + c.li, errors: c.apiErr, costEur: 0, skip: !c.in,
+  notes: `${c.ready} ready to draft, ${c.li} with LinkedIn, ${c.apiErr} API errors. Brave ${c.brave} (month ${x.braveMonth}/300), Hunter ${c.hunter} (month ${x.hunterMonth}/40). Free tiers: cost 0.` });"""
 node("Build run log","n8n-nodes-base.code",2,[5800,200],{"jsCode":runlog_code("Config + budget","Enrich","Enrich",M30)})
 link("Run summary + budget","Build run log")
-notion("Notion · log run",[6020,200],"POST","https://api.notion.com/v1/pages","={{ JSON.stringify($json) }}",onError="continueRegularOutput")
+node("Notion · log run","n8n-nodes-base.httpRequest",4.2,[6020,200],runlog_http_params(),onError="continueRegularOutput")
 link("Build run log","Notion · log run")
+node("Remember run log","n8n-nodes-base.code",2,[6240,200],{"jsCode":REMEMBER})
+link("Notion · log run","Remember run log")
 
 STICKIES=[
 ("Note · 30 overview",[0,-560],720,330,"""## WP · 30 Enrich contacts: what and why
@@ -454,6 +458,6 @@ Why so strict: two people with the same name are common; a wrong profile poisons
 **Hunter:** finder (1 credit, only when found) → verifier (0.5) unless already sure. Website-found addresses are **always** verified. **No email is ever sent.** If Hunter guessed the domain itself, it must match the company name. API errors keep Needs email for a retry.""")]
 for nm,pos,wd,ht,txt in STICKIES: node(nm,"n8n-nodes-base.stickyNote",1,pos,{"width":wd,"height":ht,"content":txt})
 
-wf={"name":"WP · 30 Enrich contacts (sub-workflow)","nodes":N,"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf={"name":"WP · 30 Enrich contacts (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
 json.dump(wf,open("/home/claude/waypoint-engine/workflows/30-enrich-contacts.json","w"),indent=2,ensure_ascii=False)
 print(len(N),"nodes")

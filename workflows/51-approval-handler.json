@@ -2,34 +2,34 @@
   "name": "WP · 51 Approval handler (Telegram trigger)",
   "nodes": [
     {
-      "id": "5fd491e6-5d18-4908-bf1f-cce5ad7b7032",
+      "id": "d0c46117-f9af-4823-8af6-0a20ee84435c",
       "name": "When called by 50 (Notion approval)",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
         -220,
-        520
+        620
       ],
       "parameters": {
         "inputSource": "passthrough"
       }
     },
     {
-      "id": "f00dac98-3cbc-4175-8225-d63d9e518158",
+      "id": "89bec65b-c774-4f77-ab72-986bb52bbc8e",
       "name": "Notion approval as tap",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         0,
-        520
+        620
       ],
       "parameters": {
-        "jsCode": "// Turn a Notion approval into the same shape as a Telegram tap, so ONE code path decides.\nconst k = String($json.contactPageId || '').replace(/-/g, '');\nconst c = String($json.choice || '');\nconst data = c === 'Skip' ? 's|' + k : 'v|' + k + '|' + c;\nreturn { json: { fromNotion: true, callback_query: { id: 'notion', data, message: { message_id: $json.cardMessageId ? Number($json.cardMessageId) : null, chat: { id: 1170608781 } } } } };",
+        "jsCode": "// Turn a Notion approval into the same shape as a Telegram tap, so ONE code path decides.\nconst k = String($json.contactPageId || '').replace(/-/g, '');\nconst c = String($json.choice || '');\nconst data = c === 'Skip' ? 's|' + k : 'v|' + k + '|' + c;\nreturn { json: { fromNotion: true, callback_query: { id: 'notion', data, message: { message_id: $json.cardMessageId ? Number($json.cardMessageId) : null, chat: { id: 1170608781 }, text: '' } } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "b944761d-2d66-4cf7-a73c-19d183271377",
+      "id": "dd6eea0f-f345-4389-a352-8ab18e10e571",
       "name": "Telegram trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
@@ -50,10 +50,10 @@
           "name": "Telegram approvals"
         }
       },
-      "webhookId": "5484d8f9-40be-48fc-85a6-e66141fd9687"
+      "webhookId": "d42d2378-3b2b-4a74-bcc0-d118fecd3f0e"
     },
     {
-      "id": "9cb3ae94-8f03-46c9-9c6a-d7182be51015",
+      "id": "4851c34b-f0e6-4534-8dc8-28058802b472",
       "name": "Parse update (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -62,12 +62,12 @@
         300
       ],
       "parameters": {
-        "jsCode": "// Parse the Telegram update (rules). Only Noah's chat is accepted; everything else is ignored.\nconst u = $json; const ALLOWED = '1170608781';\nconst cb = u.callback_query; const msg = u.message;\nconst chatId = String(cb?.message?.chat?.id ?? msg?.chat?.id ?? '');\nif (chatId !== ALLOWED) return { json: { ok: false, reason: 'unauthorized chat ' + chatId } };\nif (cb) {\n  const [k, key, v] = String(cb.data || '').split('|');\n  const kind = k === 'v' ? 'choose' : k === 'e' ? 'edit' : k === 's' ? 'skip' : k === 'w' ? 'website_none' : 'unknown';\n  const id = key ? key.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5') : null;\n  return { json: { ok: kind !== 'unknown' && !!id, fromNotion: !!u.fromNotion, kind, variant: v || null, contactPageId: kind === 'website_none' ? null : id, companyPageId: kind === 'website_none' ? id : null, callbackId: cb.id, cardMessageId: cb.message?.message_id, chatId } };\n}\n// Reply to a 🌐 WEBSITE? question: the question carries 'ref w|<company key>'\nconst ref = String(msg?.reply_to_message?.text || '').match(/ref w\\|([0-9a-f]{32})/);\nif (msg && ref && msg.text) {\n  const dom = String(msg.text).trim().toLowerCase().replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split(/[\\/\\s]/)[0];\n  const okDom = /^[a-z0-9-]+(\\.[a-z0-9-]+)*\\.[a-z]{2,}$/.test(dom);\n  return { json: { ok: true, kind: okDom ? 'website' : 'website_bad', domain: dom, companyPageId: ref[1].replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5'), cardMessageId: msg.message_id, chatId } };\n}\nif (msg && msg.reply_to_message && msg.text) {\n  return { json: { ok: true, kind: 'reply', text: msg.text, cardMessageId: msg.reply_to_message.message_id, chatId } };\n}\nreturn { json: { ok: false, reason: 'not a button tap or a reply to a card' } };",
+        "jsCode": "// Parse the Telegram update (rules). Only Noah's chat is accepted; everything else is ignored silently (security).\n// Every message FROM Noah gets an answer: tap, reply to a card, reply to a 🌐 question, or a help note ('unmatched').\nconst u = $json; const ALLOWED = '1170608781';\nconst cb = u.callback_query; const msg = u.message;\nconst chatId = String(cb?.message?.chat?.id ?? msg?.chat?.id ?? '');\nconst uuidOf = key => key ? key.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5') : null;\nconst titleOf = t => String(t || '').split('\\n')[0].replace(/^📨 APPROVE \\d+\\/\\d+ · /, '').replace(/^🌐 WEBSITE\\? · /, '');\nif (chatId !== ALLOWED) return { json: { ok: false, kind: 'ignore', reason: 'unauthorized chat ' + chatId } };\nif (cb) {\n  const [k, key, v] = String(cb.data || '').split('|');\n  const kind = k === 'v' ? 'choose' : k === 'e' ? 'edit' : k === 's' ? 'skip' : k === 'w' ? 'website_none' : 'unmatched';\n  return { json: { ok: true, fromNotion: !!u.fromNotion, kind, variant: v || null,\n    contactPageId: k === 'w' ? null : uuidOf(key), companyPageId: k === 'w' ? uuidOf(key) : null,\n    callbackId: cb.id, cardMessageId: cb.message?.message_id ?? null, cardTitle: titleOf(cb.message?.text), chatId } };\n}\nconst replyTo = msg?.reply_to_message;\nconst ref = String(replyTo?.text || '').match(/ref w\\|([0-9a-f]{32})/);\nif (msg && ref && msg.text) {\n  const dom = String(msg.text).trim().toLowerCase().replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split(/[\\/\\s]/)[0];\n  const okDom = /^[a-z0-9-]+(\\.[a-z0-9-]+)*\\.[a-z]{2,}$/.test(dom);\n  return { json: { ok: true, kind: okDom ? 'website' : 'website_bad', domain: dom, companyPageId: uuidOf(ref[1]),\n    cardMessageId: replyTo.message_id, replyMessageId: msg.message_id, cardTitle: titleOf(replyTo.text), chatId } };\n}\nif (msg && replyTo && msg.text) {\n  return { json: { ok: true, kind: 'reply', text: msg.text, cardMessageId: replyTo.message_id, replyMessageId: msg.message_id, cardTitle: titleOf(replyTo.text), chatId } };\n}\nreturn { json: { ok: true, kind: 'unmatched', replyMessageId: msg?.message_id ?? null, chatId } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "43b5990f-ec5e-459c-b21a-35cc44090be6",
+      "id": "362494de-c818-47da-ac7e-bfcdcb24332e",
       "name": "Authorized?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -85,9 +85,9 @@
           },
           "conditions": [
             {
-              "id": "132cda4a-435d-4153-a05a-4c7ccce08398",
+              "id": "0c9339ed-257b-40cf-a5b5-1f086604bccc",
               "leftValue": "={{ $json.ok }}",
-              "rightValue": true,
+              "rightValue": "",
               "operator": {
                 "type": "boolean",
                 "operation": "true",
@@ -101,45 +101,203 @@
       }
     },
     {
-      "id": "b9fba903-ab69-4579-a74f-85469db5e46c",
-      "name": "Button or reply?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "id": "4491a8ca-b14e-4429-83c4-39c42b273d6d",
+      "name": "Telegram · answer tap",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
         660,
         300
       ],
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callbackId || 'none' }}",
+        "additionalFields": {
+          "text": "Got it ✔"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "x17tu5yr5xFWMSsZ",
+          "name": "Telegram approvals"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "b40287d7-829b-4a1e-b69a-087e93761e73",
+      "name": "Route update",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
             {
-              "id": "38f282ab-2aef-4bb7-8c38-495ac7cd5a1f",
-              "leftValue": "={{ $json.kind }}",
-              "rightValue": "reply",
-              "operator": {
-                "type": "string",
-                "operation": "notEquals"
-              }
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Parse update (rules)').item.json.kind }}",
+                    "rightValue": "website",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "website"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Parse update (rules)').item.json.kind }}",
+                    "rightValue": "reply",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reply"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Parse update (rules)').item.json.kind }}",
+                    "rightValue": "^(choose|edit|skip)$",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "tap"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Parse update (rules)').item.json.kind }}",
+                    "rightValue": "unmatched",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unmatched"
             }
-          ],
-          "combinator": "and"
+          ]
         },
         "options": {}
       }
     },
     {
-      "id": "7faa5220-fcb9-4971-9eeb-db2454ecc03e",
-      "name": "Website answer?",
+      "id": "432a9707-b779-444c-a780-ff719ff12c91",
+      "name": "Help text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        820
+      ],
+      "parameters": {
+        "jsCode": "const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nreturn { json: { chatId: $('Parse update (rules)').item.json.chatId, replyTo: $('Parse update (rules)').item.json.replyMessageId,\n  text: '🤔 <b>Not matched to a card.</b>\\nTo answer a card: <b>swipe left on it (Reply)</b> and send your text, or tap its buttons.\\nTo give a website: reply to the 🌐 question.' } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "68998b89-7de7-4c60-a531-c23b84b9d654",
+      "name": "Telegram · help",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1320,
+        820
+      ],
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML",
+          "reply_to_message_id": "={{ $json.replyTo }}"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "x17tu5yr5xFWMSsZ",
+          "name": "Telegram approvals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "cf6939d7-5763-4802-ad34-d90dc4b4ea01",
+      "name": "Build website update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        560
+      ],
+      "parameters": {
+        "jsCode": "const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Website answer from Noah -> what to write to the company + how to close the 🌐 question.\nconst p = $('Parse update (rules)').item.json;\nconst co = h(p.cardTitle || 'Company');\nif (p.kind === 'website_bad') return { json: { ...p, valid: false,\n  notice: `⚠️ <b>\"${h(p.domain)}\" doesn't look like a domain.</b>\\nReply to the 🌐 question again, e.g. <code>acme.ai</code>` } };\nconst props = p.kind === 'website'\n  ? { 'Domain': { url: 'https://' + p.domain }, 'Domain source': { select: { name: 'Manual' } } }\n  : { 'Domain source': { select: { name: 'No website' } } };\nreturn { json: { ...p, valid: true, notionBody: { properties: props },\n  closeText: p.kind === 'website'\n    ? `✅ <b>WEBSITE SAVED · ${co}</b>\\n${h(p.domain)} · its contacts go back to email search on the next run.`\n    : `🚫 <b>NO WEBSITE · ${co}</b>\\nContacts stay LinkedIn-only.` } };",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "8fb9dc01-2295-409c-a51c-7f753df482c3",
+      "name": "Valid domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        550,
+        1320,
         560
       ],
       "parameters": {
@@ -152,56 +310,9 @@
           },
           "conditions": [
             {
-              "id": "07a82d3f-3e6c-48ba-9011-ebdd8e2ce12d",
-              "leftValue": "={{ $json.kind }}",
-              "rightValue": "website",
-              "operator": {
-                "type": "string",
-                "operation": "startsWith"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      }
-    },
-    {
-      "id": "cbd3f7a6-ef77-4ccf-942d-d6cfab7abc28",
-      "name": "Build website update",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        770,
-        620
-      ],
-      "parameters": {
-        "jsCode": "// Website answer from Noah -> what to write to the company.\nconst p = $json;\nif (p.kind === 'website_bad') return { json: { ...p, valid: false, notice: `\"${p.domain}\" doesn't look like a domain. Reply again with e.g. acme.ai` } };\nconst props = p.kind === 'website'\n  ? { 'Domain': { url: 'https://' + p.domain }, 'Domain source': { select: { name: 'Manual' } } }\n  : { 'Domain source': { select: { name: 'No website' } } };\nreturn { json: { ...p, valid: true, notionBody: { properties: props },\n  notice: p.kind === 'website' ? `✅ Saved ${p.domain}. Its contacts go back to email search on the next run.` : '🚫 Noted: no website. Contacts stay LinkedIn-only.' } };",
-        "mode": "runOnceForEachItem"
-      }
-    },
-    {
-      "id": "b9226b2e-051c-4722-82c5-d4c7d00f1689",
-      "name": "Valid domain?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        990,
-        620
-      ],
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "28894b38-94ef-4279-b896-02c0d20cca9c",
+              "id": "1d8bbf89-377b-4212-b4e4-a1f4561c1a98",
               "leftValue": "={{ $json.valid }}",
-              "rightValue": true,
+              "rightValue": "",
               "operator": {
                 "type": "boolean",
                 "operation": "true",
@@ -215,13 +326,13 @@
       }
     },
     {
-      "id": "9923ed0e-4ec0-473b-9d39-cce7f7f384bb",
+      "id": "4e4eac88-00dc-484a-805d-32988bbac68a",
       "name": "Notion · save website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1210,
-        560
+        1540,
+        500
       ],
       "parameters": {
         "method": "PATCH",
@@ -242,16 +353,54 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.notionBody) }}"
       },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "id": "36bca4d9-7896-4b95-98f1-823f26db8645",
+      "name": "Telegram · close website question",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        440
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "editMessageText",
+        "messageType": "message",
+        "chatId": "={{ $('Build website update').item.json.chatId }}",
+        "messageId": "={{ $('Build website update').item.json.cardMessageId }}",
+        "text": "={{ $('Build website update').item.json.closeText }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "x17tu5yr5xFWMSsZ",
+          "name": "Telegram approvals"
+        }
+      },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "32d09a50-416b-4663-a26d-2290cff5a2e2",
+      "id": "8cad5332-aa59-4475-83d6-893df307ad1a",
       "name": "Notion · contacts of company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1430,
-        560
+        1760,
+        620
       ],
       "parameters": {
         "method": "POST",
@@ -272,29 +421,35 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { and: [ { property: \"Company\", relation: { contains: $(\"Build website update\").item.json.companyPageId } }, { or: [ { property: \"Status\", status: { equals: \"Not reachable\" } }, { property: \"Status\", status: { equals: \"Check manually\" } } ] } ] }, page_size: 20 }) }}"
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "3f68a3b1-13fc-4cef-b8a3-09933746dea2",
+      "id": "697fdba7-e11d-4b56-83fc-215bfc6aba84",
       "name": "Contacts to retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1650,
-        560
+        1980,
+        620
       ],
       "parameters": {
         "jsCode": "// Only when a domain was given: send this company's stuck contacts back to WP · 30 (Status Needs email).\nconst w = $('Build website update').item.json;\nconst rows = w.kind === 'website' ? ($input.first().json.results || []) : [];\nreturn rows.map(pg => ({ json: { contactPageId: pg.id } }));"
       }
     },
     {
-      "id": "6a098d1d-dcc4-4b82-ac76-951e84e5da60",
+      "id": "fdbc163e-ca27-4d62-89b7-210d11e096c2",
       "name": "Notion · back to Needs email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1870,
-        560
+        2200,
+        620
       ],
       "parameters": {
         "method": "PATCH",
@@ -315,24 +470,31 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Needs email\" } } } }) }}"
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "8d4ce0b6-6f52-4600-b005-981c63ac2cfc",
-      "name": "Telegram · website reply",
+      "id": "2630e03f-f3a4-4ad6-9a60-209cfafe33c4",
+      "name": "Telegram · website retry",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1430,
-        760
+        1540,
+        680
       ],
       "parameters": {
-        "chatId": "={{ $('Build website update').item.json.chatId }}",
-        "text": "={{ $('Build website update').item.json.notice }}",
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.notice }}",
         "additionalFields": {
           "appendAttribution": false,
           "disable_web_page_preview": true,
-          "reply_to_message_id": "={{ $('Build website update').item.json.cardMessageId }}"
+          "parse_mode": "HTML",
+          "reply_to_message_id": "={{ $json.replyMessageId }}"
         }
       },
       "credentials": {
@@ -344,32 +506,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "6e3c2c13-02b9-498d-978c-6e14c50aeccd",
-      "name": "Telegram · answer tap",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        880,
-        200
-      ],
-      "parameters": {
-        "resource": "callback",
-        "operation": "answerQuery",
-        "queryId": "={{ $json.callbackId }}",
-        "additionalFields": {
-          "text": "Got it"
-        }
-      },
-      "credentials": {
-        "telegramApi": {
-          "id": "x17tu5yr5xFWMSsZ",
-          "name": "Telegram approvals"
-        }
-      },
-      "onError": "continueRegularOutput"
-    },
-    {
-      "id": "4677e1fd-98e5-467a-babe-4d159f4853b3",
+      "id": "690dc5a5-d71b-4760-9648-ba9885ed1947",
       "name": "Notion · get contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -392,16 +529,23 @@
           ]
         },
         "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
       }
     },
     {
-      "id": "c13604e3-46be-4d29-ad42-f1fd3340474f",
+      "id": "43614226-325f-4bcf-ab1d-59a24ff095d0",
       "name": "Notion · find contact by card",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        880,
-        420
+        1100,
+        380
       ],
       "parameters": {
         "method": "POST",
@@ -420,17 +564,24 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Telegram message ID\", rich_text: { equals: String($json.cardMessageId) } }, page_size: 1 }) }}"
+        "jsonBody": "={{ JSON.stringify({ filter: { property: \"Telegram message ID\", rich_text: { equals: String($('Parse update (rules)').item.json.cardMessageId) } }, page_size: 1 }) }}"
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
       }
     },
     {
-      "id": "48340a70-9c9a-4fdf-96aa-e0434287e625",
+      "id": "36787bbb-9f27-43e8-8407-bf174023aba7",
       "name": "First match",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1100,
-        420
+        1320,
+        380
       ],
       "parameters": {
         "jsCode": "// Reply path: the replied-to card identifies the contact.\nconst pg = ($json.results || [])[0];\nreturn { json: pg || { notFound: true } };",
@@ -438,26 +589,26 @@
       }
     },
     {
-      "id": "4608ac77-a6c6-4d8d-8e82-9733727e808f",
+      "id": "5b70cc84-e1cc-480e-9c2a-8c7ed680a506",
       "name": "Decide action (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1320,
+        1540,
         300
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Decide what to do (rules). Idempotent: acts only while Status is \"Awaiting approval\".\n// Legal-basis gate: only Consent / Existing relationship / Inbound may be sent automatically.\nconst p = $('Parse update (rules)').item.json;\nconst pg = $json;\nif (pg.notFound || !pg.properties) return { json: { action: 'notice', chatId: p.chatId, cardMessageId: p.cardMessageId, notice: 'Could not find the contact for this card.' } };\nconst P = pg.properties;\nconst status = txt(P.Status);\nconst base = { contactPageId: pg.id, chatId: p.chatId, cardMessageId: p.cardMessageId, name: txt(P.Name), channel: txt(P.Channel) || 'Email',\n  email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };\n// From Notion you may also approve a draft before its card went out, or a 'Check manually' draft.\nconst allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Backlog'] : ['Awaiting approval'];\nif (!allowed.includes(status)) return { json: { ...base, action: 'notice', notice: `Already handled: ${base.name} is \"${status}\". Nothing was sent again.` } };\nif (p.kind === 'skip') return { json: { ...base, action: 'skip' } };\nif (p.kind === 'edit') return { json: { ...base, action: 'notice', notice: `Reply to the card for ${base.name} with your text (first line \"Subject: …\" for emails). I'll send that version.` } };\n// The chosen text: a variant, or Noah's own reply\nlet raw = p.kind === 'choose' ? txt(P['Variant ' + p.variant]) : p.text;\nraw = String(raw || '').replace(/\\n*\\[did not pass review\\]\\s*$/, '').trim();\nlet subject = txt(P['Draft subject']), body = raw;\nconst m = raw.match(/^subject:\\s*(.+)\\n+/i);\nif (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }\nif (!body) return { json: { ...base, action: 'notice', notice: 'That variant is empty. Pick another one or reply with your text.' } };\nconst chosen = p.kind === 'choose' ? p.variant : 'Edited';\nbase.via = p.fromNotion ? ' (approved in Notion)' : '';\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst action = base.channel === 'LinkedIn' ? 'linkedin' : (GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');\nif (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `No email address for ${base.name}.` } };\nreturn { json: { ...base, action, chosen, subject, body } };",
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Decide what to do (rules). Idempotent: acts only while Status is \"Awaiting approval\".\n// Legal-basis gate: only Consent / Existing relationship / Inbound may be sent automatically.\nconst p = $('Parse update (rules)').item.json;\nconst pg = $json;\nconst base0 = { chatId: p.chatId, cardMessageId: p.cardMessageId, replyTo: p.replyMessageId || p.cardMessageId, cardTitle: p.cardTitle, fromNotion: !!p.fromNotion };\nif (pg.notFound || !pg.properties) return { json: { ...base0, action: 'notice',\n  notice: '🤔 <b>No contact found for this message.</b>\\nReply directly to a 📨 card (not to a confirmation).' } };\nconst P = pg.properties;\nconst status = txt(P.Status);\nconst company = (p.cardTitle || '').split(' · ')[0] || '';\nconst base = { ...base0, contactPageId: pg.id, name: txt(P.Name), company, channel: txt(P.Channel) || 'Email',\n  email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };\nconst allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Backlog'] : ['Awaiting approval'];\n// Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.\nif (!allowed.includes(status)) return { json: { ...base, action: 'closed',\n  closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\\nStatus: ${h(status)}. Nothing was sent again.` } };\nif (p.kind === 'skip') return { json: { ...base, action: 'skip' } };\nif (p.kind === 'edit') return { json: { ...base, action: 'notice',\n  notice: `✏️ <b>Edit ${h(base.name)}</b>\\nSwipe left on the card (Reply) and send your version. First line <code>Subject: …</code> for emails.` } };\nlet raw = p.kind === 'choose' ? txt(P['Variant ' + p.variant]) : p.text;\nraw = String(raw || '').replace(/\\n*\\[did not pass review\\]\\s*$/, '').trim();\nlet subject = txt(P['Draft subject']), body = raw;\nconst m = raw.match(/^subject:\\s*(.+)\\n+/i);\nif (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }\nif (!body) return { json: { ...base, action: 'notice', notice: '⚠️ <b>That variant is empty.</b> Pick another one or reply with your text.' } };\nconst chosen = p.kind === 'choose' ? p.variant : 'Edited';\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst action = base.channel === 'LinkedIn' ? 'linkedin' : (GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');\nif (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `⚠️ <b>No email address for ${h(base.name)}.</b>` } };\nreturn { json: { ...base, action, chosen, subject, body } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "b52403b4-61fc-465b-bfd8-1dea1554fc5b",
+      "id": "fd922167-528e-41fe-97c8-510e05d44cd6",
       "name": "Route",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1540,
+        1760,
         300
       ],
       "parameters": {
@@ -578,6 +729,29 @@
               },
               "renameOutput": true,
               "outputKey": "notice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "closed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "closed"
             }
           ]
         },
@@ -585,13 +759,13 @@
       }
     },
     {
-      "id": "4c3aea0c-b684-4b78-b203-13250611b5e3",
+      "id": "e315f558-73fe-4eb1-b122-57669259b7ba",
       "name": "Gmail · send",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1780,
-        0
+        2000,
+        60
       ],
       "parameters": {
         "resource": "message",
@@ -607,20 +781,20 @@
       },
       "credentials": {
         "gmailOAuth2": {
-          "id": "",
+          "id": "SZBYk0OCrdNe1W56",
           "name": "Gmail account"
         }
       },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2a9066b0-3c37-4757-a87f-8626f987d13d",
+      "id": "0e11060d-a20e-4e5b-a849-9dea384e2e34",
       "name": "Gmail · create draft",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1780,
-        160
+        2000,
+        220
       ],
       "parameters": {
         "resource": "draft",
@@ -634,34 +808,34 @@
       },
       "credentials": {
         "gmailOAuth2": {
-          "id": "",
+          "id": "SZBYk0OCrdNe1W56",
           "name": "Gmail account"
         }
       },
       "onError": "continueRegularOutput"
     },
     {
-      "id": "6236ce0b-9ffb-407e-bb0c-50fb0204c438",
+      "id": "41aca49a-1ec3-49b4-a7da-47a6d08ed08d",
       "name": "Build outcome",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2020,
-        200
+        2240,
+        260
       ],
       "parameters": {
-        "jsCode": "// Result -> Notion update + Telegram confirmation. One node for all outcomes keeps the log consistent.\nconst d = $('Decide action (rules)').item.json;\nconst now = new Date().toISOString();\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nconst err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;\nlet status, msg, extra = {};\nif (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent'; msg = err ? `❌ Sending failed for ${d.name}: ${err}` : `✅ Sent to ${d.name} (${d.email}), variant ${d.chosen}${d.via || ''}.`; if (!err) extra['Sent at'] = { date: { start: now } }; }\nelse if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created'; msg = err ? `❌ Gmail draft failed for ${d.name}: ${err}` : `📝 Gmail draft for ${d.name} is ready in hello@ (variant ${d.chosen}${d.via || ''}). Open Gmail, check it, send it yourself.`; }\nelse if (d.action === 'linkedin') { status = 'Approved'; msg = `🔗 LinkedIn for ${d.name}: ${d.linkedin}\\nCopy and paste (variant ${d.chosen}):\\n\\n${d.body}`; }\nelse if (d.action === 'skip') { status = 'Skipped'; msg = `⏭ Skipped ${d.name}. No message will be sent.`; }\nconst props = { 'Status': { status: { name: status } },\n  'Approval log': { rich_text: t(`${d.log ? d.log + '\\n' : ''}${now.slice(0, 16)} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${err ? ' ERROR ' + err : ''}`) } };\nif (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },\n  'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });\nObject.assign(props, extra);\nreturn { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, message: msg, notionBody: { properties: props } } };",
+        "jsCode": "const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Result -> Notion update + how to close the card. A decided card is EDITED into a one-line result and loses its\n// buttons, so an open card (with buttons) always means \"still needs you\". Errors keep the card open + ❌ reply.\nconst d = $('Decide action (rules)').item.json;\nconst now = new Date().toISOString();\nconst hhmm = new Date().toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nconst err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;\nconst who = `${h(d.name)}${d.company ? ' · ' + h(d.company) : ''}`;\nconst via = d.fromNotion ? ' · approved in Notion' : '';\nlet status, closeText = null, replyText = null, extra = {};\nif (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent';\n  if (err) replyText = `❌ <b>Sending failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else { closeText = `✅ <b>SENT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · from hello@`; extra['Sent at'] = { date: { start: now } }; } }\nelse if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created';\n  if (err) replyText = `❌ <b>Gmail draft failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else closeText = `📝 <b>GMAIL DRAFT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via}\\n👉 Open Gmail drafts (hello@), check, send.`; }\nelse if (d.action === 'linkedin') { status = 'Approved';\n  closeText = `🔗 <b>LINKEDIN · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · text below 👇`;\n  replyText = `🔗 <b>Paste into LinkedIn</b> (${h(d.linkedin)})\\n\\n${h(d.body)}`; }\nelse if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\\n${hhmm}${via} · nothing will be sent.`; }\nconst props = { 'Status': { status: { name: status } },\n  'Approval log': { rich_text: t(`${d.log ? d.log + '\\n' : ''}${now.slice(0, 16)} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };\nif (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },\n  'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });\nObject.assign(props, extra);\nreturn { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, replyTo: d.replyTo,\n  closeText, replyText, ok: !err, notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "baae49e2-6276-4b6c-a65d-98f96a1b5e87",
+      "id": "8881346b-7eb5-46f1-92eb-4b6a97a1d837",
       "name": "Notion · save outcome",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2240,
-        200
+        2460,
+        260
       ],
       "parameters": {
         "method": "PATCH",
@@ -684,24 +858,67 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "8f63d96b-0f8c-4e27-85d5-54d5cda0ebaf",
-      "name": "Telegram · confirm",
+      "id": "088fd74c-69f0-4d33-903d-5801f10262ca",
+      "name": "Close card?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2680,
+        180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4dc32e73-cb5d-49b8-be49-01c309dd3734",
+              "leftValue": "={{ $('Build outcome').item.json.closeText || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c4da8a3a-c3ed-487c-9357-27ddddc29831",
+      "name": "Telegram · close card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2460,
-        200
+        2900,
+        120
       ],
       "parameters": {
+        "resource": "message",
+        "operation": "editMessageText",
+        "messageType": "message",
         "chatId": "={{ $('Build outcome').item.json.chatId }}",
-        "text": "={{ $('Build outcome').item.json.message }}",
+        "messageId": "={{ $('Build outcome').item.json.cardMessageId }}",
+        "text": "={{ $('Build outcome').item.json.closeText }}",
+        "replyMarkup": "none",
         "additionalFields": {
-          "appendAttribution": false,
           "disable_web_page_preview": true,
-          "reply_to_message_id": "={{ $json.cardMessageId }}"
+          "parse_mode": "HTML"
         }
       },
       "credentials": {
@@ -713,33 +930,93 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a3b3683e-5c4f-4a49-b6cf-28edb0c84874",
+      "id": "9de8e075-2f7f-4a82-aba9-84507dbef709",
+      "name": "Extra message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2680,
+        380
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee564298-86a6-4dca-b825-9feff6c4c6cb",
+              "leftValue": "={{ $('Build outcome').item.json.replyText || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "55d16d57-198f-41e7-8239-c050bfc7c850",
+      "name": "Telegram · extra message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2900,
+        380
+      ],
+      "parameters": {
+        "chatId": "={{ $('Build outcome').item.json.chatId }}",
+        "text": "={{ $('Build outcome').item.json.replyText }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML",
+          "reply_to_message_id": "={{ $('Build outcome').item.json.replyTo }}"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "x17tu5yr5xFWMSsZ",
+          "name": "Telegram approvals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "14257978-6bdf-4aae-9d09-2cc26b4b24ee",
       "name": "Refill queue?",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2680,
-        200
+        3120,
+        120
       ],
       "parameters": {
-        "jsCode": "// ONE OUT, ONE IN: after you decided a card in Telegram, top up the queue right away (runs WP · 50).\n// Not after Notion approvals (those come FROM 50: no loop) and not after notices.\n// (One Telegram update = one execution = one item, so index 0 lines up across nodes.)\nconst d = $('Decide action (rules)').first().json;\nconst p = $('Parse update (rules)').first().json;\nreturn (!p.fromNotion && ['send', 'gmail_draft', 'linkedin', 'skip'].includes(d.action)) ? [{ json: { refill: true } }] : [];"
+        "jsCode": "// ONE OUT, ONE IN: after you decided a card in Telegram, top up the queue right away (runs WP · 50).\n// Not after Notion approvals (those come FROM 50: no loop), not after notices or errors.\nconst d = $('Decide action (rules)').first().json;\nconst ok = $('Build outcome').first().json.ok;\nreturn (!d.fromNotion && ok && ['send', 'gmail_draft', 'linkedin', 'skip'].includes(d.action)) ? [{ json: { refill: true } }] : [];"
       }
     },
     {
-      "id": "eae3994c-f095-4733-ab6f-a8b1a681f6cc",
+      "id": "4d9f8ee0-29ec-4f28-8854-cc7d956cdbaa",
       "name": "Run WP · 50 (next card)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        2900,
-        200
+        3340,
+        120
       ],
       "parameters": {
         "source": "database",
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "nKdLZEFyebsDumCl",
+          "mode": "id"
         },
         "mode": "once",
         "options": {
@@ -749,13 +1026,13 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "8eb28b7b-34fb-4dc0-b576-f3c747a56ebf",
+      "id": "4146ad6b-953b-45db-bbef-dbc76917f80f",
       "name": "Telegram · notice",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1780,
-        480
+        2000,
+        520
       ],
       "parameters": {
         "chatId": "={{ $json.chatId }}",
@@ -763,7 +1040,8 @@
         "additionalFields": {
           "appendAttribution": false,
           "disable_web_page_preview": true,
-          "reply_to_message_id": "={{ $json.cardMessageId }}"
+          "parse_mode": "HTML",
+          "reply_to_message_id": "={{ $json.replyTo }}"
         }
       },
       "credentials": {
@@ -775,18 +1053,48 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "776dfd4f-6464-4ed9-8ba2-b72e81c11a45",
+      "id": "26771829-c1ef-4b13-a01d-99d009a25a78",
+      "name": "Telegram · close handled card",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        680
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "editMessageText",
+        "messageType": "message",
+        "chatId": "={{ $json.chatId }}",
+        "messageId": "={{ $json.cardMessageId }}",
+        "text": "={{ $json.closeText }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "x17tu5yr5xFWMSsZ",
+          "name": "Telegram approvals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "027b8ee4-7bd6-4dbb-9165-ca1552ecfb3e",
       "name": "Note · 51",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         0,
-        -380
+        -420
       ],
       "parameters": {
-        "width": 1100,
-        "height": 330,
-        "content": "## WP · 51 Approval handler (Telegram trigger): what and why\nHandles taps on the cards from WP · 50 and replies to them. **Must be published (active)** so Telegram can reach it.\n1. **Only Noah's chat** (id in *Parse update*) is accepted; anything else is ignored.\n2. **Idempotent:** acts only while the contact is *Awaiting approval*. A double tap or a late tap gets \"Already handled\", never a second email.\n3. **Legal-basis gate:** Email + Consent / Existing relationship / Inbound → **sent** from hello@. Email + *None - draft only* (all article-sourced leads) → **Gmail draft** in hello@ that you send yourself. LinkedIn → the text comes back to you to paste (LinkedIn has no sending API for this).\n4. **Edit:** reply to the card with your own text (first line \"Subject: …\"); that version goes through the same gate as *Chosen variant = Edited*.\n5. **🌐 WEBSITE? answers** (bottom branch): reply with a domain → Companies.Domain (*Manual*) + that company's *Not reachable*/*Check manually* contacts back to *Needs email*. 🚫 No website → Domain source *No website*.\n6. Every outcome writes Status, Chosen variant, final subject/body, Approved/Sent at and an *Approval log* line to Notion, and confirms in Telegram.\nDocs: docs/50-approval.md"
+        "width": 1200,
+        "height": 380,
+        "content": "## WP · 51 Approval handler (Telegram trigger): what and why\n**Input:** every tap and message in the approvals chat (and Notion approvals handed over by WP · 50). **Must be published.**\n**Rule: you always get an answer.** Tap → toast \"Got it ✔\" + the card is **closed** (edited into a one-line result, buttons removed). Reply → result or a clear note. Anything unmatched → 🤔 help note. No answer = bug.\n1. **Gate:** only Noah's chat id; anything else is ignored silently (security).\n2. **Route update:** 🌐 website answers · replies to a card (own text) · taps (A/B/C/Edit/Skip) · unmatched.\n3. **Idempotent:** acts only while the contact is *Awaiting approval*. A late/double tap closes the card as \"Already handled\", never a second email.\n4. **Legal-basis gate:** Email + Consent/Existing relationship/Inbound → **sent**. Email + *None - draft only* (all article leads) → **Gmail draft** in hello@. LinkedIn → text to paste.\n5. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.\n6. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.\nDocs: docs/50-approval.md"
       }
     }
   ],
@@ -839,14 +1147,25 @@
       "main": [
         [
           {
-            "node": "Website answer?",
+            "node": "Telegram · answer tap",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Website answer?": {
+    "Telegram · answer tap": {
+      "main": [
+        [
+          {
+            "node": "Route update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route update": {
       "main": [
         [
           {
@@ -857,7 +1176,32 @@
         ],
         [
           {
-            "node": "Button or reply?",
+            "node": "Notion · find contact by card",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notion · get contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Help text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Help text": {
+      "main": [
+        [
+          {
+            "node": "Telegram · help",
             "type": "main",
             "index": 0
           }
@@ -886,7 +1230,7 @@
         ],
         [
           {
-            "node": "Telegram · website reply",
+            "node": "Telegram · website retry",
             "type": "main",
             "index": 0
           }
@@ -897,12 +1241,12 @@
       "main": [
         [
           {
-            "node": "Notion · contacts of company",
+            "node": "Telegram · close website question",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Telegram · website reply",
+            "node": "Notion · contacts of company",
             "type": "main",
             "index": 0
           }
@@ -925,35 +1269,6 @@
         [
           {
             "node": "Notion · back to Needs email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Button or reply?": {
-      "main": [
-        [
-          {
-            "node": "Telegram · answer tap",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Notion · find contact by card",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Telegram · answer tap": {
-      "main": [
-        [
-          {
-            "node": "Notion · get contact",
             "type": "main",
             "index": 0
           }
@@ -1040,6 +1355,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Telegram · close handled card",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1080,14 +1402,41 @@
       "main": [
         [
           {
-            "node": "Telegram · confirm",
+            "node": "Close card?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extra message?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Telegram · confirm": {
+    "Close card?": {
+      "main": [
+        [
+          {
+            "node": "Telegram · close card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extra message?": {
+      "main": [
+        [
+          {
+            "node": "Telegram · extra message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram · close card": {
       "main": [
         [
           {
@@ -1113,8 +1462,7 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "Europe/Berlin",
-    "saveManualExecutions": true,
-    "errorWorkflow": ""
+    "saveManualExecutions": true
   },
   "pinData": {}
 }

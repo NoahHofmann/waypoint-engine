@@ -2,7 +2,7 @@
   "name": "WP · 40 Draft + judge (sub-workflow)",
   "nodes": [
     {
-      "id": "de84d39a-24c7-4c5a-a0bb-478ca60bf828",
+      "id": "7b08d2b0-3e33-4748-802f-cfc01cfa36a4",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "0be99835-fedd-434d-a9ee-90db7ebfa370",
+      "id": "3d665745-efb3-4a0c-a100-d7a16ee23b8e",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "da35da32-c0fa-45a9-b1eb-fbbcf42cb850",
+      "id": "680b9ced-fe1f-4408-9baf-e287934cf4f7",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "302e1a58-a949-4fbf-a0ab-7850f9e113f7",
+      "id": "e5f48feb-0912-428e-8bd0-44179f2f9e6d",
       "name": "Notion · active offers",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -66,10 +66,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { property: \"Active\", checkbox: { equals: true } }, sorts: [{ property: \"Priority\", direction: \"ascending\" }] }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "7efad7eb-0b23-4dad-ac54-1702b62dba66",
+      "id": "3bdbaec3-e231-423a-b27b-271f88074b16",
       "name": "Notion · sales playbook",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -93,10 +99,16 @@
         },
         "options": {}
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "b9b10176-6ca2-4d17-9074-4ffebef63cfc",
+      "id": "bc7b832e-704a-46f0-80e9-00a0d8edbaa1",
       "name": "Notion · contacts to draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -123,10 +135,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { or: [ { property: \"Status\", status: { equals: \"Ready to draft\" } }, { property: \"Status\", status: { equals: \"LinkedIn only\" } } ] }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: $(\"Config\").first().json.maxDraftsPerRun }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "7c3dac04-9860-47b1-a5af-cc30a96a2c8e",
+      "id": "aad5ba45-92e0-4de2-9349-b0f18eebda06",
       "name": "Pick contacts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -139,7 +157,7 @@
       }
     },
     {
-      "id": "5391e76e-497f-41cc-a6ae-bd19bc1c3a76",
+      "id": "27eb1be5-7b10-4b8a-bcaf-99c9009019fb",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -162,10 +180,16 @@
           ]
         },
         "options": {}
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
       }
     },
     {
-      "id": "07747c70-cd9a-49ce-b445-aeb07d1e6a31",
+      "id": "38a414a3-fec4-433f-8c01-0dbefeff7639",
       "name": "Fetch article",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -199,7 +223,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "f5681978-b852-4e25-b42a-41f34a8a48d6",
+      "id": "50ae2c78-cf0a-4dbe-a454-66c1bc2b47d2",
       "name": "Fetch homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -233,7 +257,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7e3a40a5-1d54-410a-82c1-ec13fa8e9379",
+      "id": "3d899ea1-a33f-42f7-9cb9-8ea15b3c7431",
       "name": "Build brief (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -247,7 +271,7 @@
       }
     },
     {
-      "id": "8bd7d292-3f8d-4ea0-8476-3064c5f34519",
+      "id": "bd0a59fe-d7bf-4790-bd7a-68d546c11752",
       "name": "Draft (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -275,7 +299,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "15ea2fb2-16f8-4513-932f-88ccffb5ad2d",
+      "id": "b8deddbf-3803-4dfe-b802-9f9422798d37",
       "name": "OpenAI · draft 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -297,13 +321,13 @@
       },
       "credentials": {
         "openAiApi": {
-          "id": "",
+          "id": "pdSFtuDMCaKd3CHG",
           "name": "OpenAi account"
         }
       }
     },
     {
-      "id": "d11adea9-2e6b-485a-9711-7b3bddec0324",
+      "id": "9da899e9-dae1-49fe-8761-351043a63b5a",
       "name": "Schema · draft 1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -317,7 +341,7 @@
       }
     },
     {
-      "id": "90986d54-3cd4-4ba0-9ce0-f8438d039bf0",
+      "id": "89deeff6-829a-42da-89d9-e54b8a4983ec",
       "name": "Check rules 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -331,7 +355,7 @@
       }
     },
     {
-      "id": "08873a29-7c2e-47e8-b9e2-cffb08cb6853",
+      "id": "07f1fffd-3508-4101-b916-08742a03a20c",
       "name": "Judge (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -359,7 +383,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "1306fbec-4b3b-475c-a95f-5bb48a81f764",
+      "id": "8522b6cb-1eb3-4c12-aae7-969749b6c193",
       "name": "OpenAI · judge 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -381,13 +405,13 @@
       },
       "credentials": {
         "openAiApi": {
-          "id": "",
+          "id": "pdSFtuDMCaKd3CHG",
           "name": "OpenAi account"
         }
       }
     },
     {
-      "id": "505d2c0b-faca-4c16-b2f4-4c5a05617da0",
+      "id": "ebb46fa3-cc1f-4ea0-8b70-62500fddae4d",
       "name": "Schema · judge 1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -401,7 +425,7 @@
       }
     },
     {
-      "id": "215b9320-4aa4-450b-9c7f-79165f39df53",
+      "id": "b3dcf4da-6276-4f61-8d0a-9408480f4dbd",
       "name": "Decide 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -415,7 +439,7 @@
       }
     },
     {
-      "id": "7f003ea5-93cb-4278-afd4-80597091cbb5",
+      "id": "08c43a8e-56a2-46e2-ad26-9a8559fafcda",
       "name": "Passed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -433,7 +457,7 @@
           },
           "conditions": [
             {
-              "id": "b4aa1378-4783-4210-b0d8-742483e15430",
+              "id": "66bdcbcc-c01a-44cf-96bb-c9ae041b313b",
               "leftValue": "={{ $json.pass }}",
               "rightValue": "",
               "operator": {
@@ -449,7 +473,7 @@
       }
     },
     {
-      "id": "76ce1cb6-26bb-44f6-a2f5-cf63909ec172",
+      "id": "42d8f300-d511-43f4-a69f-52984c7550d7",
       "name": "Prepare retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -463,7 +487,7 @@
       }
     },
     {
-      "id": "8b37fe87-e655-4aec-8c64-bac0bf502077",
+      "id": "c3d46cc9-0ad8-44fb-8f50-399140cce652",
       "name": "Draft (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -491,7 +515,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c8ed5636-5614-4f28-9ce0-db3d7fa2bb7a",
+      "id": "4ac94390-bf57-4f26-b187-0b888ecd48f3",
       "name": "OpenAI · draft 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -513,13 +537,13 @@
       },
       "credentials": {
         "openAiApi": {
-          "id": "",
+          "id": "pdSFtuDMCaKd3CHG",
           "name": "OpenAi account"
         }
       }
     },
     {
-      "id": "439c2799-dbf5-4464-955f-4e0ca91164d9",
+      "id": "ca7a3325-d397-40da-b53e-3d07e5780232",
       "name": "Schema · draft 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -533,7 +557,7 @@
       }
     },
     {
-      "id": "15eb33f3-3371-4778-8018-2c3f74741173",
+      "id": "292b3553-e29e-4107-adad-d83e62563184",
       "name": "Check rules 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -547,7 +571,7 @@
       }
     },
     {
-      "id": "a065b24c-4a0d-45bc-958a-cf156d8e302b",
+      "id": "2a132e07-2ea3-46ba-aa15-74dcda534c0b",
       "name": "Judge (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -575,7 +599,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "ba64a9ef-b9f6-488c-83c9-d273b8ec63f8",
+      "id": "9f3ebcdc-400b-4e97-89d9-7595948a0d3a",
       "name": "OpenAI · judge 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -597,13 +621,13 @@
       },
       "credentials": {
         "openAiApi": {
-          "id": "",
+          "id": "pdSFtuDMCaKd3CHG",
           "name": "OpenAi account"
         }
       }
     },
     {
-      "id": "2ad86072-f7b3-4e38-8ff1-2a5110df9de7",
+      "id": "97fbf0dc-6bb1-4be7-affc-4d3ecd23b1b2",
       "name": "Schema · judge 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -617,7 +641,7 @@
       }
     },
     {
-      "id": "b97e0a47-3550-4663-8207-4398bc0c389e",
+      "id": "8d162eb6-a3d6-49b2-b9a2-0ffcc39adf93",
       "name": "Decide 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -631,7 +655,7 @@
       }
     },
     {
-      "id": "301dd1fb-871e-4ffa-bad2-8b858bb074c0",
+      "id": "91de4d92-c41d-47ad-8f0f-bc43f3c372c7",
       "name": "Build draft update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -645,7 +669,7 @@
       }
     },
     {
-      "id": "c92b6deb-ea7a-461b-96bb-e04815496b06",
+      "id": "bde091c8-714a-4a15-8797-150d34909e84",
       "name": "Notion · save draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -674,10 +698,16 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "2591083e-c108-4153-b98f-d479b3b98141",
+      "id": "8f9d8695-0831-4df0-bce0-2d9eba8fabb5",
       "name": "Run summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -690,7 +720,7 @@
       }
     },
     {
-      "id": "1101590c-da88-463d-8552-e18412d351c9",
+      "id": "1667f914-dbce-48f2-86bb-562f3ced86d3",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -699,11 +729,11 @@
         100
       ],
       "parameters": {
-        "jsCode": "// RUN LOG: one row per execution in Notion › Runs (runtime, volume, errors, estimated cost).\n// Why: the dashboard's System health table showed only Intake; sub-workflows were invisible.\nconst started = $('Config').first().json.startedAt;\nconst r = $json;\nconst att = (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0);\nconst m = { in: r.drafted, out: r.passed, errors: 0, costEur: Math.round(att * 0.019 * 1000) / 1000,\n  notes: `${r.passed}/${r.drafted} passed (${r.firstTry} on the first try), ${r.failed} to Check manually. ${att} draft attempts. Model ${$('Config').first().json.draftModel}, ${$('Config').first().json.promptVersion}. Cost estimated (~€0.019 per attempt).`, skip: !r.drafted };\nif (m.skip) return [];   // nothing happened (e.g. a refill run with no new cards): no row\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = x => [{ type: 'text', text: { content: String(x ?? '').slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`Draft ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Draft' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } } } }];"
+        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst r = $json;\nconst c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0) };\nconst x = { model: $('Config').first().json.draftModel, prompt: $('Config').first().json.promptVersion };\nconst view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.019 * 1000) / 1000, skip: !c.in,\n  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Cost estimated (~€0.019 per attempt).` });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Draft ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Draft' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
       }
     },
     {
-      "id": "561d78b7-55a4-4675-84c5-813cdd8eb8ed",
+      "id": "4222b744-8bc1-4363-b529-6b10ba1aa6d2",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -712,8 +742,8 @@
         100
       ],
       "parameters": {
-        "method": "POST",
-        "url": "https://api.notion.com/v1/pages",
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "notionApi",
         "sendHeaders": true,
@@ -725,15 +755,34 @@
             }
           ]
         },
-        "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}"
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "9767dcfb-6918-46f1-b688-f43981641eed",
+      "id": "4d879b22-2940-4483-a108-05012e70dd89",
+      "name": "Remember run log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5100,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// Remember the Runs row created in this execution, so a later pass updates it instead of adding a row.\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) {}\nif (!acc.pageId && $json.id) { acc.pageId = $json.id; cd.set('runlog', JSON.stringify(acc)); }\nreturn [{ json: { runLogPageId: acc.pageId || null } }];"
+      }
+    },
+    {
+      "id": "a3959038-2d11-442b-9a09-7688ad5ba328",
       "name": "Note · 0 Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -748,7 +797,7 @@
       }
     },
     {
-      "id": "e91c2ef6-a441-44d3-80cf-66f9d2693049",
+      "id": "8dabf110-f798-49b4-9623-fedcb35bdf37",
       "name": "Note · 1 Load context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -763,7 +812,7 @@
       }
     },
     {
-      "id": "dfcb9a88-213b-40d4-ac56-2911faf0750d",
+      "id": "7511cb33-519a-4de6-a0d7-bd1532c0064e",
       "name": "Note · 2 Build brief",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -778,7 +827,7 @@
       }
     },
     {
-      "id": "386caf0d-fc83-4995-b03e-fee02f8e03c6",
+      "id": "899ffef3-8fcd-4908-b19e-82d445862617",
       "name": "Note · 3 Draft and check",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -793,7 +842,7 @@
       }
     },
     {
-      "id": "a320fd2b-570f-4e48-a122-92b3bd70a080",
+      "id": "903c18f8-2287-4f26-9dc7-e751ac8e9697",
       "name": "Note · 4 Judge and decide",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -808,7 +857,7 @@
       }
     },
     {
-      "id": "4de6744f-7774-42c6-8fa8-f010a07cd29c",
+      "id": "e1e4fb9e-2744-4c07-bde7-005a40ad62ec",
       "name": "Note · 5 Retry and save",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1188,6 +1237,17 @@
         [
           {
             "node": "Notion · log run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · log run": {
+      "main": [
+        [
+          {
+            "node": "Remember run log",
             "type": "main",
             "index": 0
           }

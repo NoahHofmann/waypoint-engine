@@ -46,3 +46,6 @@
 | 16 Oct | Run log rows for 30, 40, 50 (Runs.Duration s added) | System health showed only Intake. Measured: 40 = 46 s (was 6:31), 50 = 6.5 s |
 | 16 Oct | Telegram routing rule: needs an answer → approvals bot; info only → alerts bot | Clear rule instead of a per-message call |
 | 16 Oct | Contacts store Draft model + Prompt version | Groundwork for the response-rate analytics agent (docs/roadmap.md) |
+| 16 Oct | 51 v4: every tap/reply answered; decided cards are edited closed (buttons removed); unmatched messages get a help note; HTML bold formatting | Noah: no response left him unsure whether a tap was recorded; open vs. done must be visible at a glance |
+| 16 Oct | Run log is an upsert per execution ($execution.customData) | v1 wrote 2–3 rows per run, because 30/40 summaries run once per arriving branch |
+| 16 Oct | All credential + workflow IDs preset in the generators (tools/runlog.py) | Zero-click imports |

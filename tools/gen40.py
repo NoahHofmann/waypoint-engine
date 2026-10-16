@@ -1,6 +1,6 @@
 import json, uuid, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from runlog import runlog_code
+from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 N=[]; C={}
@@ -285,13 +285,16 @@ return [{ json: { drafted: rows.length, passed: rows.filter(r => r.pass).length,
   drafts: rows.map(r => ({ name: r.name, company: r.company, channel: r.channel, passed: r.passed, attempts: r.attempts })) } }];"""})
 link("Notion · save draft","Run summary")
 M40=r"""const r = $json;
-const att = (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0);
-const m = { in: r.drafted, out: r.passed, errors: 0, costEur: Math.round(att * 0.019 * 1000) / 1000,
-  notes: `${r.passed}/${r.drafted} passed (${r.firstTry} on the first try), ${r.failed} to Check manually. ${att} draft attempts. Model ${$('Config').first().json.draftModel}, ${$('Config').first().json.promptVersion}. Cost estimated (~€0.019 per attempt).`, skip: !r.drafted };"""
+const c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0) };
+const x = { model: $('Config').first().json.draftModel, prompt: $('Config').first().json.promptVersion };
+const view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.019 * 1000) / 1000, skip: !c.in,
+  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Cost estimated (~€0.019 per attempt).` });"""
 node("Build run log","n8n-nodes-base.code",2,[4660,100],{"jsCode":runlog_code("Config","Draft","Draft",M40)})
 link("Run summary","Build run log")
-notion("Notion · log run",[4880,100],"POST","https://api.notion.com/v1/pages","={{ JSON.stringify($json) }}",onError="continueRegularOutput")
+node("Notion · log run","n8n-nodes-base.httpRequest",4.2,[4880,100],runlog_http_params(),onError="continueRegularOutput")
 link("Build run log","Notion · log run")
+node("Remember run log","n8n-nodes-base.code",2,[5100,100],{"jsCode":REMEMBER})
+link("Notion · log run","Remember run log")
 
 notes=[
 ("Note · 0 Overview",[-40,-820],900,560,"""## WP · 40 Draft + judge
@@ -325,6 +328,6 @@ Docs: docs/40-draft-judge.md"""),
 **Save:** *Build draft update* writes all three variants (failed ones marked "[did not pass review]"), default draft = first passing variant, Status *Draft ready* or *Check manually*. *Run summary* returns counts to the orchestrator.
 **Failure modes:** model/API error → node continues, contact shows "Judge returned no verdict" and lands in *Check manually*; Notion save retries 3×. Re-run safe: only *Ready to draft* / *LinkedIn only* contacts are picked, so drafted contacts are never redrafted.""")]
 for nm,pos,wd,ht,txt in notes: node(nm,"n8n-nodes-base.stickyNote",1,pos,{"width":wd,"height":ht,"content":txt})
-wf={"name":"WP · 40 Draft + judge (sub-workflow)","nodes":N,"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf={"name":"WP · 40 Draft + judge (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
 json.dump(wf,open(R+'workflows/40-draft-judge.json','w'),indent=2,ensure_ascii=False)
 print(len(N))

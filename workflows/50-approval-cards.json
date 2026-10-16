@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "06b14001-3e94-4d80-bf43-9405a76d77e7",
+      "id": "0256c15f-5162-48a6-85f4-b95809128d21",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "a1ce9211-8e7f-4f0f-a143-383744adafb3",
+      "id": "5f866e35-8de2-46f5-9a13-85613b40f4c7",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "b93747d3-6d52-4bc9-a1d5-12d1731cbbe4",
+      "id": "c82268fa-3063-4670-8c62-826dc2430cc8",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "6b36f836-90b2-4254-b9f1-0784c83efeea",
+      "id": "0029c383-1ca1-478d-8583-9bdcdc898fa9",
       "name": "Notion · approved in Notion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -66,10 +66,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { and: [ { property: \"Approve in Notion\", select: { is_not_empty: true } }, { or: [ { property: \"Status\", status: { equals: \"Awaiting approval\" } }, { property: \"Status\", status: { equals: \"Draft ready\" } }, { property: \"Status\", status: { equals: \"Check manually\" } }, { property: \"Status\", status: { equals: \"Backlog\" } } ] } ] }, page_size: 20 }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "67e9ee77-8fcb-46f8-a4d3-9cf0d0d1b482",
+      "id": "c12201fa-d52f-4215-aa13-ae887be93caa",
       "name": "Notion approvals → 51",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -82,7 +88,7 @@
       }
     },
     {
-      "id": "cc1acca6-3e07-43d0-8d7a-4e8e8ee6aabb",
+      "id": "6e3524a2-f66d-48a6-bbdd-e5207d4b17dc",
       "name": "Run WP · 51 for each",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -94,8 +100,8 @@
         "source": "database",
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "iwDMW5Mq4s7mlia4",
+          "mode": "id"
         },
         "mode": "each",
         "options": {
@@ -105,7 +111,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "56aec417-1d4c-425e-9193-fdd87593cc62",
+      "id": "29e04d93-c6c2-4372-8444-1fdaf0aed826",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -132,10 +138,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { or: [\"Awaiting approval\", \"Approved\", \"Gmail draft created\", \"Sent\", \"Replied\", \"Meeting booked\"].map(n => ({ property: \"Status\", status: { equals: n } })) }, page_size: 100 }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "20c47a72-c049-4d69-97f3-b7f82c00cad9",
+      "id": "1a949be3-cb64-4373-94b6-ebf1f0fa69e0",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -162,10 +174,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { property: \"Status\", status: { equals: \"Draft ready\" } }, sorts: [{ timestamp: \"created_time\", direction: \"ascending\" }], page_size: 20 }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "7daa9159-d257-4b38-8f84-f8bee454daec",
+      "id": "8e7ca8c1-148e-47e6-9c7e-cca7803b3b85",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -178,7 +196,7 @@
       }
     },
     {
-      "id": "5ccc475f-7012-4b07-8b25-8700be250c4b",
+      "id": "b49db3f9-413b-4252-bd4a-9ba76f89a455",
       "name": "Duplicate company?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -196,7 +214,7 @@
           },
           "conditions": [
             {
-              "id": "518be7b6-c038-4634-89fc-ee64023fd374",
+              "id": "1c69017a-15b9-4da6-acda-69ee2f6d913e",
               "leftValue": "={{ $json.duplicate }}",
               "rightValue": true,
               "operator": {
@@ -212,7 +230,7 @@
       }
     },
     {
-      "id": "41f47742-46ff-478f-80fc-5ae3ef4e536c",
+      "id": "c9fa53af-1f8d-4569-a131-85ae1edd452d",
       "name": "Notion · move to Backlog",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -239,10 +257,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Backlog\" } }, \"Approval log\": { rich_text: [{ type: \"text\", text: { content: new Date().toISOString().slice(0,16) + \" backlog: \" + $json.other + \" at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now).\" } }] } } }) }}"
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "1c809258-7bc5-42aa-be01-617e7dda8c3a",
+      "id": "0520652d-152a-46be-8e1b-79c813682189",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -265,10 +289,16 @@
           ]
         },
         "options": {}
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
       }
     },
     {
-      "id": "1172d9c4-3107-463b-86cf-f9c3fd11841b",
+      "id": "d2096dd7-6a30-4ebc-9cbd-7f954affac25",
       "name": "Queue full notice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -277,11 +307,11 @@
         420
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// One short notice when drafts are waiting because 5 cards are still unanswered (otherwise this would be silent).\nconst cfg = $('Config').first().json;\nconst open = ($('Notion · cards still open').first().json.results || []).filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval');\nconst ready = ($input.first().json.results || []).length;\nif (open.length < cfg.maxOpenCards || ready === 0) return [];\nreturn [{ json: { text: `⏸ QUEUE FULL · ${open.length} cards unanswered\\n━━━━━━━━━━━━━━━━\\n${ready} new draft(s) are waiting. Answer or skip an open card (or use 'Approve in Notion') and they follow on the next run.\\nOpen: ` + open.map(pg => txt(pg.properties.Name)).join(', ') } }];"
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// One short notice when drafts are waiting because 5 cards are still unanswered (otherwise this would be silent).\nconst cfg = $('Config').first().json;\nconst open = ($('Notion · cards still open').first().json.results || []).filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval');\nconst ready = ($input.first().json.results || []).length;\nif (open.length < cfg.maxOpenCards || ready === 0) return [];\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nreturn [{ json: { text: `⏸ <b>QUEUE FULL · ${open.length} cards waiting for you</b>\\n━━━━━━━━━━━━━━━━\\n<b>${ready} new draft(s)</b> are queued behind them. Each card you answer pulls in the next one immediately.\\n<b>Open:</b> ` + open.map(pg => h(txt(pg.properties.Name))).join(', ') } }];"
       }
     },
     {
-      "id": "3133cc29-e772-4b01-920b-3a1a379a1962",
+      "id": "81592c53-6399-4d66-85b3-202beca298e4",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -290,11 +320,11 @@
         640
       ],
       "parameters": {
-        "jsCode": "// RUN LOG: one row per execution in Notion › Runs (runtime, volume, errors, estimated cost).\n// Why: the dashboard's System health table showed only Intake; sub-workflows were invisible.\nconst started = $('Config').first().json.startedAt;\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst ready = ($input.first().json.results || []).length;\nlet nApp = 0; try { nApp = ($('Notion · approved in Notion').first().json.results || []).length; } catch (e) {}\nconst cfg = $('Config').first().json;\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst m = { in: ready + nApp, out: Math.min(room, ready) + nApp, errors: 0, costEur: 0,\n  notes: `${open} cards open before this run, ${ready} drafts ready, up to ${Math.min(room, ready)} new card(s) (duplicates go to Backlog), ${nApp} approval(s) from Notion handed to 51.` + (room === 0 && ready ? ' QUEUE FULL.' : ''),\n  skip: ready === 0 && nApp === 0 };\nif (m.skip) return [];   // nothing happened (e.g. a refill run with no new cards): no row\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = x => [{ type: 'text', text: { content: String(x ?? '').slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`Approval cards ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Approval' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } } } }];"
+        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst ready = ($input.first().json.results || []).length;\nlet nApp = 0; try { nApp = ($('Notion · approved in Notion').first().json.results || []).length; } catch (e) {}\nconst room = Math.max(0, $('Config').first().json.maxOpenCards - open);\nconst c = { ready, nApp, cards: Math.min(room, ready) };\nconst x = { open, full: room === 0 && ready > 0 };\nconst view = (c, x) => ({ in: c.ready + c.nApp, out: c.cards + c.nApp, errors: 0, costEur: 0, skip: c.ready === 0 && c.nApp === 0,\n  notes: `${x.open} cards open before this run, ${c.ready} drafts ready, up to ${c.cards} new card(s) (second contacts at the same company go to Backlog), ${c.nApp} approval(s) from Notion handed to 51.` + (x.full ? ' QUEUE FULL.' : '') });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Approval cards ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Approval' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
       }
     },
     {
-      "id": "bbc17c9f-dcec-4677-b7d5-5cf54a1cf5e2",
+      "id": "3b503eea-5b5c-455e-a1e6-a6b8205bb802",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -303,8 +333,8 @@
         640
       ],
       "parameters": {
-        "method": "POST",
-        "url": "https://api.notion.com/v1/pages",
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "notionApi",
         "sendHeaders": true,
@@ -316,15 +346,34 @@
             }
           ]
         },
-        "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}"
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "2b82cc20-0ec8-4313-865c-5c69baf42fec",
+      "id": "5880a9ab-f98a-47ca-8264-899532634ef6",
+      "name": "Remember run log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        640
+      ],
+      "parameters": {
+        "jsCode": "// Remember the Runs row created in this execution, so a later pass updates it instead of adding a row.\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) {}\nif (!acc.pageId && $json.id) { acc.pageId = $json.id; cd.set('runlog', JSON.stringify(acc)); }\nreturn [{ json: { runLogPageId: acc.pageId || null } }];"
+      }
+    },
+    {
+      "id": "ab2ba1d9-51fb-4c03-be32-2a2c19ed9133",
       "name": "Telegram · queue full",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -336,7 +385,8 @@
         "chatId": "={{ $('Config').first().json.chatId }}",
         "text": "={{ $json.text }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "credentials": {
@@ -348,7 +398,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "d7d8be23-bdb4-4524-8daf-5457e84c190d",
+      "id": "07b7cd7b-bc74-4629-8bef-b783af0f1aa5",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -357,12 +407,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (plain text, max 4096 chars) and the callback keys.\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? 'Approve = I send you the text to paste into LinkedIn (manual send).'\n  : GREEN.includes(c.legalBasis) ? 'Approve = SENT from hello@ immediately.'\n  : 'Approve = Gmail DRAFT in hello@ (legal basis \"' + c.legalBasis + '\"): you review and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\nconst head = [\n  `📨 APPROVE ${c.cardNo}/${c.cardTotal} · ${txt(P.Company)} · ${c.name}${c.role ? ' (' + c.role + ')' : ''}`,\n  '━━━━━━━━━━━━━━━━',\n  `${c.channel} · ${c.language || 'EN'} · ICP ${txt(P['ICP score'])} · Offer: ${c.offer}`,\n  `Signal: ${txt(P['Signal summary'])}`,\n  `To: ${c.channel === 'Email' ? c.email : c.linkedin}`,\n  what,\n  `Passed review: ${c.passed || 'none'}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `— ${id} —\\n${clip(c[id] || '(empty)', 1000)}`).join('\\n\\n');\nconst foot = '✏️ Own version: reply to THIS card with the text (first line \"Subject: …\" for emails).' + (c.waiting ? `\\n⏸ ${c.waiting} more draft(s) wait until open cards are answered.` : '');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n' + foot, 4000);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (Telegram HTML: bold headers, escaped content, max 4096 chars) and the callback keys.\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? '<b>Tap = </b>I send you the text to paste into LinkedIn.'\n  : GREEN.includes(c.legalBasis) ? '<b>Tap = SENT</b> from hello@ immediately.'\n  : '<b>Tap = Gmail DRAFT</b> in hello@ (cold lead): you check and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\n// First line is parsed by WP · 51 (company · name) — keep the format \"📨 APPROVE n/m · Company · Name\".\nconst head = [\n  `📨 <b>APPROVE ${c.cardNo}/${c.cardTotal} · ${h(txt(P.Company))} · ${h(c.name)}</b>${c.role ? ' (' + h(c.role) + ')' : ''}`,\n  '━━━━━━━━━━━━━━━━',\n  `<b>${h(c.channel)}</b> · ${h(c.language || 'EN')} · ICP ${h(txt(P['ICP score']))} · <b>Offer:</b> ${h(c.offer)}`,\n  `<b>Signal:</b> ${h(txt(P['Signal summary']))}`,\n  `<b>To:</b> ${h(c.channel === 'Email' ? c.email : c.linkedin)}`,\n  what,\n  `<b>Passed review:</b> ${h(c.passed || 'none')}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `<b>— ${id} —</b>\\n${h(clip(c[id] || '(empty)', 1000))}`).join('\\n\\n');\nconst foot = '✏️ <b>Own version:</b> swipe left on this card (Reply) and send the text (first line \"Subject: …\" for emails).' + (c.waiting ? `\\n⏸ ${c.waiting} more draft(s) queued: each answer pulls in the next.` : '');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n' + foot, 3900);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "e8a795e2-873e-4623-bc9b-e1e72a016194",
+      "id": "23b3f1da-7dc0-4457-819e-88afb0fd676a",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -422,7 +472,8 @@
         },
         "additionalFields": {
           "appendAttribution": false,
-          "disable_web_page_preview": true
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
         }
       },
       "credentials": {
@@ -434,7 +485,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e315fde9-3fbd-4930-a160-086343738c98",
+      "id": "4916f3f1-a7b4-4695-9c49-95b08219adda",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -448,7 +499,7 @@
       }
     },
     {
-      "id": "16583c98-afb2-4363-82ac-6630a518fc36",
+      "id": "f81cd9ea-dac8-4598-b1d9-f8a808ab5405",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -474,10 +525,16 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}"
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
       }
     },
     {
-      "id": "c465f376-3498-4e8e-a29b-c6393414b501",
+      "id": "ffd30a2d-3fa4-4b42-a9c0-0262aa8dc925",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -504,10 +561,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { property: \"Domain source\", select: { equals: \"Not found\" } }, page_size: $(\"Config\").first().json.maxWebsiteQuestions }) }}"
       },
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "a0941c6f-db74-469c-949d-e61dfe71b907",
+      "id": "1549e279-0d60-44cc-a4f6-c840959c0466",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -516,11 +579,11 @@
         620
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// HUMAN FALLBACK for the website (last resort, kept rare): 30 tried ~30 likely domains and rejected all.\n// One short question per company; reply with the domain. 'ref w|<key>' lets 51 find the company again.\nreturn ($input.first().json.results || []).map(pg => { const P = pg.properties; const key = pg.id.replace(/-/g, '');\n  const q = encodeURIComponent(txt(P.Company) + ' ' + txt(P['Signal summary']).slice(0, 60));\n  return { json: { companyPageId: pg.id, key, company: txt(P.Company), google: 'https://www.google.com/search?q=' + q,\n    text: [`🌐 WEBSITE? · ${txt(P.Company)}`, '━━━━━━━━━━━━━━━━', txt(P['Signal summary']), `Article: ${txt(P['Signal source'])}`, '',\n      'I could not verify a website (all likely domains were parked, unrelated or empty).',\n      '↩️ Reply to THIS message with the domain (e.g. acme.ai). I save it and re-run email search for its contacts.',\n      `ref w|${key}`].join('\\n') } }; });"
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// HUMAN FALLBACK for the website (last resort, kept rare): 30 tried ~30 likely domains and rejected all.\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// One short question per company; reply with the domain. 'ref w|<key>' lets 51 find the company again.\nreturn ($input.first().json.results || []).map(pg => { const P = pg.properties; const key = pg.id.replace(/-/g, '');\n  const q = encodeURIComponent(txt(P.Company) + ' ' + txt(P['Signal summary']).slice(0, 60));\n  return { json: { companyPageId: pg.id, key, company: txt(P.Company), google: 'https://www.google.com/search?q=' + q,\n    text: [`🌐 <b>WEBSITE? · ${h(txt(P.Company))}</b>`, '━━━━━━━━━━━━━━━━', h(txt(P['Signal summary'])), `<b>Article:</b> ${h(txt(P['Signal source']))}`, '',\n      'I could not verify a website (all likely domains were parked, unrelated or empty).',\n      '↩️ <b>Swipe left on this message (Reply)</b> and send the domain, e.g. <code>acme.ai</code>. I save it and re-run email search for its contacts.',\n      `ref w|${key}`].join('\\n') } }; });"
       }
     },
     {
-      "id": "23a2273e-7280-438c-84b6-b714a86052b7",
+      "id": "2f902e7e-9bc2-4d5f-b5ed-811ff0a530b5",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -556,7 +619,8 @@
         },
         "additionalFields": {
           "appendAttribution": false,
-          "disable_web_page_preview": true
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
         }
       },
       "credentials": {
@@ -568,7 +632,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "f83190bb-6b97-43f6-a289-f3df6b825aba",
+      "id": "938de0f7-0789-48e5-bdfe-b5df52cd934b",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -595,10 +659,16 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ properties: { \"Domain source\": { select: { name: \"Asked in Telegram\" } } } }) }}"
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
-      "id": "6befead8-f445-4ea6-9218-14b0f8161c16",
+      "id": "7e3bea69-b9e4-4d34-bfe2-f81aaf687390",
       "name": "Note · 50 notion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -609,11 +679,11 @@
       "parameters": {
         "width": 760,
         "height": 220,
-        "content": "### 0 · Approvals made in Notion (runs first)\n**In:** contacts where you set *Approve in Notion* (A/B/C/Skip) and Status is Awaiting approval, Draft ready or Check manually.\n**Nodes:** Notion · approved in Notion → Notion approvals → 51 → Run WP · 51 for each (**select WP · 51 in this node once after import**).\n**Why:** if you miss a Telegram card you can decide in the dashboard; 51 applies the same lock and legal-basis gate, and confirms in Telegram."
+        "content": "### 0 · Approvals made in Notion (runs first)\n**In:** contacts where you set *Approve in Notion* (A/B/C/Skip) and Status is Awaiting approval, Draft ready or Check manually.\n**Nodes:** Notion · approved in Notion → Notion approvals → 51 → Run WP · 51 for each (WP · 51 preset by ID).\n**Why:** if you miss a Telegram card you can decide in the dashboard; 51 applies the same lock and legal-basis gate, and confirms in Telegram."
       }
     },
     {
-      "id": "9c8899bb-8faf-4ed5-a917-6d2d6cc387df",
+      "id": "69757bdd-7b11-4daa-aec7-e9c115e931d3",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -628,7 +698,7 @@
       }
     },
     {
-      "id": "2943f790-b667-4f06-8179-b0d56189fc5d",
+      "id": "cddf3d45-2127-432a-a7f5-13ba13cad14e",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -775,6 +845,17 @@
         [
           {
             "node": "Notion · log run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion · log run": {
+      "main": [
+        [
+          {
+            "node": "Remember run log",
             "type": "main",
             "index": 0
           }
