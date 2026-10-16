@@ -230,7 +230,28 @@ return { json: { ...prev, variants, parseFailed: raw.length === 0, oneLiner: Str
 DECIDE=r"""// Combine code checks and judge per variant. A variant passes only if BOTH are clean.
 // The contact is ready if at least one variant passes; Noah picks which one to send in 50.
 const p = $('%CHECK%').item.json;
-const jv = $json.output?.variants || [];
+// Judge 2 is Claude without an output parser (n8n's parser broke on Claude's JSON): parse the text tolerantly.
+function parseLoose(t) {
+  if (t && typeof t === 'object') return t;
+  t = String(t || ''); const a = t.indexOf('{'), z = t.lastIndexOf('}');
+  if (a < 0 || z < a) return {};
+  const j = t.slice(a, z + 1);
+  try { return JSON.parse(j); } catch (e) {}
+  let out = '', inStr = false, esc = false;
+  for (const ch of j) {
+    if (inStr) {
+      if (esc) { esc = false; out += ch; continue; }
+      if (ch === '\\') { esc = true; out += ch; continue; }
+      if (ch === '"') { inStr = false; out += ch; continue; }
+      if (ch === '\n') { out += '\\n'; continue; }
+      if (ch === '\r') continue;
+      if (ch === '\t') { out += '\\t'; continue; }
+      out += ch;
+    } else { if (ch === '"') inStr = true; out += ch; }
+  }
+  try { return JSON.parse(out); } catch (e) { return {}; }
+}
+const jv = $json.output?.variants || parseLoose($json.text).variants || [];
 const clean = arr => (arr || []).filter(x => x && !/^\s*(none|n\/a|keine|-)\s*\.?$/i.test(String(x)));
 // Code owns length/format. The judge still sometimes counts words; those remarks are dropped here.
 const LENGTH = /(\bwords?\b|\bcharacters?\b|\bchars?\b|too long|too short|length|wortanzahl|zeichen)/i;
@@ -280,14 +301,20 @@ def stage(n,x,inp,prev_expr):
     cn=f"Check rules {n}"
     node(cn,"n8n-nodes-base.code",2,[x+240,200],{"jsCode":CHECK.replace("%PREV%",prev_expr),"mode":"runOnceForEachItem"})
     link(dn,cn)
-    jn=f"Judge (attempt {n})"; ojn=f"OpenAI · judge {n}"; sjn=f"Schema · judge {n}"
+    jn=f"Judge (attempt {n})"; ojn=f"OpenAI · judge {n}" if n==1 else f"Claude · judge {n}"; sjn=f"Schema · judge {n}"
+    # Cross-family judging: attempt 1 = Claude draft judged by GPT-5 mini; attempt 2 = GPT-5.1 draft judged by Claude.
+    jsys = JUDGE_SYS if n==1 else JUDGE_SYS + "\n\n## Output format\nReturn ONLY one JSON object, no code fences, no text before or after. Keep every string on one line. Schema:\n" + JSCHEMA
     node(jn,"@n8n/n8n-nodes-langchain.chainLlm",1.7,[x+480,200],{"promptType":"define",
       "text":"={{ 'BRIEF:\\n' + $json.briefText + '\\n\\nDRAFTS:\\n' + $json.variants.map(v => '--- Variant ' + v.id + ' ---\\nSubject: ' + v.subject + '\\n' + v.body).join('\\n\\n') }}",
-      "hasOutputParser":True,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":JUDGE_SYS}]}},onError="continueRegularOutput")
-    node(ojn,"@n8n/n8n-nodes-langchain.lmChatOpenAi",1.2,[x+420,420],{"model":{"__rl":True,"value":"gpt-5-mini","mode":"id"},"options":{"timeout":120000,"maxRetries":2,"reasoningEffort":"low"}},
-         credentials={"openAiApi":{"id":"","name":"OpenAi account"}})
-    node(sjn,"@n8n/n8n-nodes-langchain.outputParserStructured",1.2,[x+560,420],{"schemaType":"manual","inputSchema":JSCHEMA})
-    link(ojn,jn,kind="ai_languageModel"); link(sjn,jn,kind="ai_outputParser")
+      "hasOutputParser":n==1,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":jsys}]}},onError="continueRegularOutput")
+    if n==1:
+        node(ojn,"@n8n/n8n-nodes-langchain.lmChatOpenAi",1.2,[x+420,420],{"model":{"__rl":True,"value":"gpt-5-mini","mode":"id"},"options":{"timeout":120000,"maxRetries":2,"reasoningEffort":"low"}},
+             credentials={"openAiApi":{"id":"","name":"OpenAi account"}})
+        node(sjn,"@n8n/n8n-nodes-langchain.outputParserStructured",1.2,[x+560,420],{"schemaType":"manual","inputSchema":JSCHEMA})
+        link(sjn,jn,kind="ai_outputParser")
+    else:
+        node(ojn,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x+420,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":8000,"temperature":0}})
+    link(ojn,jn,kind="ai_languageModel")
     link(cn,jn)
     den=f"Decide {n}"
     node(den,"n8n-nodes-base.code",2,[x+720,200],{"jsCode":DECIDE.replace("%CHECK%",cn),"mode":"runOnceForEachItem"})
@@ -327,7 +354,7 @@ const props = {
   'Angle': { select: { name: 'Funding trigger' } },
   // For the later analytics agent: which model + prompt wrote this, so reply rates can be compared per model/variant
   'Draft model': { rich_text: t(r.attempt === 2 ? 'gpt-5.1 (fallback)' : $('Config').first().json.draftModel) },
-  'Prompt version': { rich_text: t($('Config').first().json.promptVersion) }
+  'Prompt version': { rich_text: t($('Config').first().json.promptVersion + (r.attempt === 2 ? ' · judged by Claude' : ' · judged by GPT-5 mini')) }
 };
 if (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };
 return { json: { contactPageId: r.contactPageId, name: r.name, company: r.company, channel: r.channel, pass: r.pass,

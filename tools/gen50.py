@@ -356,6 +356,10 @@ const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manua
 // Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.
 if (!allowed.includes(status)) return { json: { ...base, action: 'closed',
   closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\nStatus: ${h(status)}. Nothing was sent again.` } };
+// Lock (T2, 16 Oct): a tap that is still being processed by another execution holds the contact for 90 s.
+const lock = txt(P.Lock); const [lockId, lockTs] = lock.split('|');
+// The in-flight execution closes the card itself; this tap only gets the 'Got it' toast (action 'ignore' = no route).
+if (lockId && lockId !== String($execution.id) && Date.now() - Number(lockTs || 0) < 90000) return { json: { ...base, action: 'ignore' } };
 if (p.kind === 'skip') return { json: { ...base, action: 'skip' } };
 if (p.kind === 'edit') return { json: { ...base, action: 'notice',
   notice: `✏️ <b>Edit ${h(base.name)}</b>\nSwipe left on the card (Reply) and send your version. First line <code>Subject: …</code> for emails.` } };
@@ -375,7 +379,32 @@ link("Notion · get contact","Decide action (rules)"); link("First match","Decid
 node("Route","n8n-nodes-base.switch",3.2,[1760,300],{"mode":"rules","rules":{"values":[
   {"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"leftValue":"={{ $json.action }}","rightValue":v,"operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"renameOutput":True,"outputKey":v}
   for v in ["send","gmail_draft","linkedin","skip","notice","closed","li_sent"]]},"options":{}})
-link("Decide action (rules)","Route")
+# --- Lock: claim, wait, re-read, proceed only if the claim is still ours (last writer wins).
+# Notion has no compare-and-set; two taps within ~1 s both pass Decide, so the claim is verified after a pause.
+node("Needs lock?","n8n-nodes-base.if",2.2,[1540,520],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},
+  "conditions":[{"leftValue":"={{ ['send','gmail_draft','linkedin','skip'].includes($json.action) }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
+link("Decide action (rules)","Needs lock?")
+notion(node,"Notion · claim lock",[1760,620],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+  '={{ JSON.stringify({ properties: { Lock: { rich_text: [{ text: { content: $execution.id + "|" + Date.now() } }] } } }) }}')
+link("Needs lock?","Notion · claim lock",0)
+node("Wait 2 s","n8n-nodes-base.wait",1.1,[1980,620],{"resume":"timeInterval","amount":2,"unit":"seconds"})
+link("Notion · claim lock","Wait 2 s")
+notion(node,"Notion · re-read contact",[2200,620],"GET","={{ 'https://api.notion.com/v1/pages/' + $('Decide action (rules)').item.json.contactPageId }}")
+link("Wait 2 s","Notion · re-read contact")
+CLAIM=TXT+H_JS+r"""
+// Proceed only if our claim survived and the contact is still undecided. Otherwise close as already handled.
+const d = $('Decide action (rules)').item.json;
+const P = $json.properties || {};
+const mine = txt(P.Lock).split('|')[0] === String($execution.id);
+const st = txt(P.Status);
+const open = ['Awaiting approval', 'Draft ready', 'Check manually', 'Second contact'].includes(st);
+if (mine && open) return { json: d };
+// Lost the race: the winning execution closes the card, so this one stays silent (toast only).
+return { json: { ...d, action: 'ignore' } };"""
+node("Claim still ours?","n8n-nodes-base.code",2,[2420,620],{"jsCode":CLAIM,"mode":"runOnceForEachItem"})
+link("Notion · re-read contact","Claim still ours?")
+link("Claim still ours?","Route")
+link("Needs lock?","Route",1)
 node("Gmail · send","n8n-nodes-base.gmail",2.1,[2000,60],{"resource":"message","operation":"send","sendTo":"={{ $json.email }}","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"appendAttribution":False,"senderName":"Noah Hofmann"}},credentials=GM,onError="continueRegularOutput")
 link("Route","Gmail · send",0)
 node("Gmail · create draft","n8n-nodes-base.gmail",2.1,[2000,220],{"resource":"draft","operation":"create","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"sendTo":"={{ $json.email }}"}},credentials=GM,onError="continueRegularOutput")

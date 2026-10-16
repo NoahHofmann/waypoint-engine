@@ -22,4 +22,7 @@ Goal: try to break the engine before the demo. Each test lists what to do, what 
 **Restore after T11/T12:** put the correct key and DB id back.
 
 ## Results
-(filled in after the run)
+| # | Date | Result | Fix |
+|---|---|---|---|
+| T2 | 16 Oct 16:10 | ❌ Several fast taps (A and B) created 3 Gmail drafts; the card closed only after a few taps | 51 v5: Notion lock (claim → wait 2 s → verify). Retest |
+| T3 | 16 Oct 16:13 | ✅ "hello" → 🤔 Not matched to a card, with help text | – |

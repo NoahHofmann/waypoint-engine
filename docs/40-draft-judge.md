@@ -104,6 +104,7 @@ Re-running is safe: already drafted contacts have moved to *Draft ready* or late
 | Batch size (in the Draft/Judge nodes) | 4 | Lower it if the API returns rate-limit errors |
 
 ## Changelog
+- **v7 · 16 Oct:** cross-family judging on both attempts: attempt 1 Claude drafts → GPT-5 mini judges; attempt 2 GPT-5.1 drafts → **Claude Sonnet 5.5 judges** (no output parser, tolerant JSON parse). *Prompt version* records which judge scored. Quality scores compare cleanly only within the same judge (benchmark = attempt-1 rows).
 - **v6 · 16 Oct:** Claude max tokens 2500 → 8000 (the 15:52 run still had empty or cut-off emails: "model output: empty", no API error, so the token budget ran out before the text). **Attempt 2 now drafts with GPT-5.1** as a fallback, so a failing draft model never leaves you without cards. Draft model in Notion shows `gpt-5.1 (fallback)` for those.
 - **v5 · 16 Oct (draft-v7):** Claude Sonnet 5.5 drafts. Output is plain-text sections (`=== A ===`, `SUBJECT:`, body) instead of JSON: Claude's JSON broke on quotes and raw newlines, so every email arrived empty. JSON stays as a fallback. If nothing parses, Judge notes show the first 300 characters of the model output (or the API error), so the cause is visible in Notion.
 - **v4 · 15 Oct:**

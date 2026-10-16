@@ -91,7 +91,7 @@ Why the design looks like this:
 ## 5. Failure modes and recovery
 | What breaks | What you see | What happens | What you do |
 |---|---|---|---|
-| Double or late tap | "Already handled: … is Sent" | Nothing is sent twice | – |
+| Double or late tap | Toast only (fast taps) or ☑️ ALREADY HANDLED (late tap) | Lock + status check: nothing is created twice | – |
 | Gmail error | ❌ reply under the card | Status stays *Awaiting approval* | Tap again later |
 | Reply to the wrong message | "Could not find the contact for this card." | Nothing | Reply directly to the 📨 card |
 | Not a domain in a 🌐 reply | "… doesn't look like a domain" | Nothing saved | Reply again, e.g. `acme.ai` |
@@ -106,6 +106,7 @@ Why the design looks like this:
 | 50 / 51 Parse | allowed chat id | 1170608781 |
 
 ## Changelog
+- **v5 · 16 Oct (T2 fix):** double-tap lock. Three fast taps created 3 Gmail drafts, because each tap read *Awaiting approval* before any of them wrote. Now 51 writes its execution id to Contacts › *Lock*, waits 2 s, re-reads and continues only if the lock is still its own. Taps that lose get only the toast; the winning tap closes the card. A lock expires after 90 s, so a tap after a Gmail error works again.
 - **v3 · 16 Oct:** duplicates go to Second contact (first named Backlog); one-out-one-in refill from 51; run log row per 50 run in Notion › Runs; Notion approval can also promote a Backlog contact; credential IDs preset.
 - **v2 · 15 Oct:**
   - Stack guard (max 5 open cards); cards numbered "APPROVE n/m" with type tag and divider.
