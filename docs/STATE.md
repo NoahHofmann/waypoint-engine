@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 17:00 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 16 Oct 2026, 17:35 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -86,8 +86,9 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 
 ## Open issues (in priority order)
 1. **Drafting fixed** (40 v6/v7): Claude cards arrived at 16:10. Claude max tokens 8000; attempt 2 = GPT-5.1 draft judged by Claude (cross-family both ways).
-2. **Stress tests:** passed T1–T8 (T2 after the lock fix). Next: T9+T10 together (Ambio Evidence holds an injection line, Tommi = Ready to draft; **remove the injection line after T10**), T11, T12, T13, T14.
-1b. Intake: Normalize 71 → 20, all 20 already known. Tech Funding News returns 403 (blocks n8n). Planned: TFN via HTTP Request with a browser User-Agent, maxAgeDays 7 → 14, German funding terms.
+2. **Stress tests:** T1–T10 passed (T2 after the lock fix). Injection line removed from Ambio again. Left: T11, T12, T13, T14.
+1b. Intake fix shipped (00, 16 Oct 17:35): 14-day window, German funding terms, weekly round-ups dropped, known-companies query limited to past month. Tech Funding News still 403; left in (harmless, onError continue). Revisit only if volume stays low.
+1c. Run titles now "YYYY-MM-DD HH:mm (Berlin) · Workflow" in all workflows; Intake has Duration s.
 2. Stress tests not yet run (`docs/test-plan.md`).
 3. README, architecture diagram and demo script for Monday.
 4. Docs for 00/10/20/90 are not yet in the new template.
