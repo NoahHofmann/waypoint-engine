@@ -104,6 +104,7 @@ Re-running is safe: already drafted contacts have moved to *Draft ready* or late
 | Batch size (in the Draft/Judge nodes) | 4 | Lower it if the API returns rate-limit errors |
 
 ## Changelog
+- **v5 · 16 Oct (draft-v7):** Claude Sonnet 5.5 drafts. Output is plain-text sections (`=== A ===`, `SUBJECT:`, body) instead of JSON: Claude's JSON broke on quotes and raw newlines, so every email arrived empty. JSON stays as a fallback. If nothing parses, Judge notes show the first 300 characters of the model output (or the API error), so the cause is visible in Notion.
 - **v4 · 15 Oct:**
   - Draft GPT-5.1 and judge GPT-5 mini both set to low reasoning (model decision pending); 4 contacts processed in parallel.
   - The judge's length remarks and LinkedIn proof/ask demands are dropped.

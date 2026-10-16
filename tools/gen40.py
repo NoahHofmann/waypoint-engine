@@ -31,7 +31,7 @@ return [{ json: {
   draftModel: 'claude-sonnet-5-5', // 'Claude · draft 1/2'. Change here AND in the two sub-nodes when switching models
   judgeModel: 'gpt-5-mini',         // 'OpenAI · judge 1/2', reasoning effort low. Why: a different model family grades the draft (no self-grading)
   calLink: 'https://cal.com/book-a-call-with-noah/30min',
-  promptVersion: 'draft-v6 / judge-v5',
+  promptVersion: 'draft-v7 / judge-v5',
   playbookPageId: '3fa64e3c573c81bb9e99da3b6be520c1',   // Notion › Sales Playbook (edit there)
   // NOAH PROFILE: the ONLY facts about Noah a draft may use (canonical metrics, project instructions).
   profile: [
@@ -163,7 +163,25 @@ function parseLoose(t) {
   }
   try { return JSON.parse(out); } catch (e) { return {}; }
 }
-const parsed = $json.output?.variants ? $json.output : parseLoose($json.text ?? $json.output ?? $json.response);
+// draft-v7: plain-text sections (=== A === / SUBJECT: / body). JSON broke on Claude's quotes and newlines.
+function parseSections(t) {
+  t = String(t || '').replace(/\r/g, '').replace(/^```[a-z]*\n?|```\s*$/gm, '');
+  if (!/===\s*A\s*===/i.test(t)) return null;
+  const one = (t.match(/ONE-LINER:\s*(.+)/i) || [])[1] || '';
+  const variants = [];
+  const re = /===\s*([ABC])\s*===\s*\n([\s\S]*?)(?====\s*(?:[ABC]|END)\s*===|$)/gi;
+  let m;
+  while ((m = re.exec(t))) {
+    let block = m[2].replace(/^\s*\n/, '');
+    let subject = '';
+    const sm = block.match(/^\s*SUBJECT:[ \t]*(.*)\n?/i);
+    if (sm) { subject = sm[1].trim(); block = block.slice(sm[0].length); }
+    variants.push({ id: m[1].toUpperCase(), subject, body: block.trim() });
+  }
+  return { company_one_liner: one.trim(), variants };
+}
+const rawText = String($json.text ?? (typeof $json.output === 'string' ? $json.output : '') ?? '');
+const parsed = $json.output?.variants ? $json.output : (parseSections(rawText) || parseLoose(rawText || $json.output || $json.response));
 const raw = (parsed.variants || []).filter(v => v && v.body);
 const words = s => String(s).trim().split(/\s+/).filter(Boolean).length;
 const HYPE = /(revolutionary|game[- ]changing|synergy|leverage|unlock|skyrocket|hope this (email )?finds you|congratulations|congrats|herzlichen glückwunsch|gratuliere|startups like yours|companies like yours|teams like yours|i specialize in|is exciting|impressive)/i;
@@ -172,7 +190,7 @@ const allowed = b.allowedText.replace(/[.,\s]/g, '');
 const variants = ['A', 'B', 'C'].map(id => {
   const v = raw.find(x => String(x.id).toUpperCase().startsWith(id)) || null;
   const issues = [];
-  if (!v) return { id, subject: '', body: '', issues: ['Variant missing'] };
+  if (!v) return { id, subject: '', body: '', issues: ['Variant missing' + (id === 'A' ? ' · model output: ' + (rawText ? rawText.slice(0, 300).replace(/\s+/g, ' ') : ($json.error ? 'ERROR ' + JSON.stringify($json.error).slice(0, 300) : 'empty')) : '')] };
   const body = String(v.body), subject = b.channel === 'Email' ? String(v.subject || '') : '';
   if (b.channel === 'Email') {
     if (words(subject) < 3 || words(subject) > 7) issues.push(`Subject has ${words(subject)} words (3-7)`);
