@@ -72,6 +72,7 @@ return dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { j
   contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),
   offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',
   passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),
+  judgeNotes: txt(P['Judge notes']), oneLiner: txt(P['Company one-liner']), quality: txt(P['Quality score']), fromQueue: open > 0,
   companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"""})
 link("Notion · drafts ready","Pick drafts")
 node("Duplicate company?","n8n-nodes-base.if",2.2,[990,200],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"id":str(uuid.uuid4()),"leftValue":"={{ $json.duplicate }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
@@ -120,17 +121,40 @@ const what = c.channel === 'LinkedIn' ? '<b>Tap = </b>I send you the text to pas
   : '<b>Tap = Gmail DRAFT</b> in hello@ (cold lead): you check and send it yourself.';
 const clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
 // First line is parsed by WP · 51 (company · name) — keep the format "📨 APPROVE n/m · Company · Name".
+// Tag: first cards of a run = APPROVE; a card that waited in the queue and arrives after you answered one = BACKLOG.
+const tag = c.fromQueue ? `📥 <b>BACKLOG` : `📨 <b>APPROVE`;
+const icp = Number(txt(P['ICP score']));
+const what1 = c.oneLiner || txt(P['Sector']) || '';
 const head = [
-  `📨 <b>APPROVE ${c.cardNo}/${c.cardTotal} · ${h(txt(P.Company))} · ${h(c.name)}</b>${c.role ? ' (' + h(c.role) + ')' : ''}`,
+  `${tag} · ${h(txt(P.Company))} · ${h(c.name)}</b>${c.role ? ' (' + h(c.role) + ')' : ''}`,
   '━━━━━━━━━━━━━━━━',
-  `<b>${h(c.channel)}</b> · ${h(c.language || 'EN')} · ICP ${h(txt(P['ICP score']))} · <b>Offer:</b> ${h(c.offer)}`,
+  what1 ? `🏢 <b>What they do:</b> ${h(what1)}` : null,
   `<b>Signal:</b> ${h(txt(P['Signal summary']))}`,
+  `<b>${h(c.channel)}</b> · ${h(c.language || 'EN')} · <b>ICP fit ${isNaN(icp) ? '?' : Math.round(icp) + '%'}</b> · <b>Offer:</b> ${h(c.offer)}`,
   `<b>To:</b> ${h(c.channel === 'Email' ? c.email : c.linkedin)}`,
   what,
-  `<b>Passed review:</b> ${h(c.passed || 'none')}`
-].join('\n');
-const variants = ['A', 'B', 'C'].map(id => `<b>— ${id} —</b>\n${h(clip(c[id] || '(empty)', 1000))}`).join('\n\n');
-const foot = '✏️ <b>Own version:</b> swipe left on this card (Reply) and send the text (first line "Subject: …" for emails).' + (c.waiting ? `\n⏸ ${c.waiting} more draft(s) queued: each answer pulls in the next.` : '');
+  `<b>Passed review:</b> ${h(c.passed || 'none')}${c.quality ? ' · <b>Quality</b> ' + h(c.quality) + '/10' : ''}`,
+  c.waiting ? `<b>Queue:</b> ${c.waiting} more waiting after this` : null
+].filter(x => x != null).join('\n');
+// WHY a variant is not recommended: last attempt's issues from 'Judge notes', mapped to 6 plain categories.
+const lastAttempt = (c.judgeNotes || '').split(/\n(?=Attempt \d)/).pop() || '';
+const CATS = [
+  [/unsupported|numbers not in the brief/i, 'Claim not backed by the facts'],
+  [/opening not specific|generic self-intro|names? or company/i, 'Too generic for this company'],
+  [/tone|hype|flattery|filler/i, 'Tone / hype'],
+  [/words|characters|subject has|formatting|link|opt-out|sign-off|missing/i, 'Length / format'],
+  [/funding|sie|du|no-oriented|same .*question|language/i, 'Breaks a playbook rule'],
+  [/playbook/i, 'Breaks a playbook rule']];
+const why = id => {
+  const line = (lastAttempt.match(new RegExp('^' + id + ': FAIL[^\\n]*', 'm')) || [])[0];
+  if (!line) return '';
+  const detail = line.replace(/^\w: FAIL( \(\d+\/10\))? · /, '');
+  const cat = (CATS.find(([re]) => re.test(detail)) || [null, 'Other'])[1];
+  return `⚠️ <i>Not recommended: ${h(cat)}</i> · ${h(clip(detail.split(' · ')[0], 110))}\n`;
+};
+const passedIds = (c.passed || '').split(/,\s*/);
+const variants = ['A', 'B', 'C'].map(id => `<b>— ${id} —</b>${passedIds.includes(id) ? ' ✅' : ''}\n${passedIds.includes(id) ? '' : why(id)}${h(clip(String(c[id] || '(empty)').replace(/\n*\[did not pass review\]\s*$/, ''), 1000))}`).join('\n\n');
+const foot = '✏️ <b>Own version:</b> swipe left on this card (Reply) and send the text (first line "Subject: …" for emails).';
 const text = clip(head + '\n\n' + variants + '\n\n' + foot, 3900);
 return { json: { ...c, key, text, company: txt(P.Company) } };"""
 node("Build card","n8n-nodes-base.code",2,[1540,200],{"jsCode":CARD,"mode":"runOnceForEachItem"})
@@ -220,7 +244,7 @@ const u = $json; const ALLOWED = '{CHAT}';
 const cb = u.callback_query; const msg = u.message;
 const chatId = String(cb?.message?.chat?.id ?? msg?.chat?.id ?? '');
 const uuidOf = key => key ? key.replace(/(.{{8}})(.{{4}})(.{{4}})(.{{4}})(.{{12}})/, '$1-$2-$3-$4-$5') : null;
-const titleOf = t => String(t || '').split('\n')[0].replace(/^📨 APPROVE \d+\/\d+ · /, '').replace(/^🌐 WEBSITE\? · /, '').replace(/^🔗 LINKEDIN TO SEND · /, '');
+const titleOf = t => String(t || '').split('\n')[0].replace(/^(📨 APPROVE|📥 BACKLOG)( \d+\/\d+)? · /, '').replace(/^🌐 WEBSITE\? · /, '').replace(/^🔗 LINKEDIN TO SEND · /, '');
 if (chatId !== ALLOWED) return {{ json: {{ ok: false, kind: 'ignore', reason: 'unauthorized chat ' + chatId }} }};
 if (cb) {{
   const [k, key, v] = String(cb.data || '').split('|');

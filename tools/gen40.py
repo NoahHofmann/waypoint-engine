@@ -31,7 +31,7 @@ return [{ json: {
   draftModel: 'claude-sonnet-5-5', // 'Claude · draft 1/2'. Change here AND in the two sub-nodes when switching models
   judgeModel: 'gpt-5-mini',         // 'OpenAI · judge 1/2', reasoning effort low. Why: a different model family grades the draft (no self-grading)
   calLink: 'https://cal.com/book-a-call-with-noah/30min',
-  promptVersion: 'draft-v5 / judge-v5',
+  promptVersion: 'draft-v6 / judge-v5',
   playbookPageId: '3fa64e3c573c81bb9e99da3b6be520c1',   // Notion › Sales Playbook (edit there)
   // NOAH PROFILE: the ONLY facts about Noah a draft may use (canonical metrics, project instructions).
   profile: [
@@ -134,7 +134,7 @@ link("Fetch homepage","Build brief (rules)")
 
 DRAFT_SYS=open(R+'prompts/draft.md').read()
 JUDGE_SYS=open(R+'prompts/judge.md').read()
-DSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"subject":{"type":["string","null"]},"body":{"type":"string"}}}}}},indent=2)
+DSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"company_one_liner":{"type":["string","null"]},"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"subject":{"type":["string","null"]},"body":{"type":"string"}}}}}},indent=2)
 JSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"unsupported_claims":{"type":["array","null"],"items":{"type":"string"}},"names_ok":{"type":["boolean","null"]},"language_ok":{"type":["boolean","null"]},"specific_opening":{"type":["boolean","null"]},"tone_ok":{"type":["boolean","null"]},"playbook_violations":{"type":["array","null"],"items":{"type":"string"}},"notes":{"type":["string","null"]},"score_hook":{"type":["number","null"]},"score_relevance":{"type":["number","null"]},"score_natural":{"type":["number","null"]},"score_ask":{"type":["number","null"]}}}}}},indent=2)
 
 CHECK=r"""// Code checks for EACH variant before the judge: format, link, opt-out, no number outside the brief,
@@ -158,6 +158,8 @@ const variants = ['A', 'B', 'C'].map(id => {
     const [lo, hi] = id === 'C' ? [25, 60] : [55, 120];
     if (words(core) < lo || words(core) > hi) issues.push(`Body has ${words(core)} words before the link (${id === 'C' ? '25-55' : '60-110'})`);
     if (!body.includes(b.bookingLink)) issues.push('Booking link missing or altered');
+    // Formatting: greeting, 2+ paragraphs and the ask must be separated by blank lines (one GPT draft arrived as a wall of text)
+    if ((core.match(/\n[ \t]*\n/g) || []).length < 2) issues.push('Formatting: no blank lines between greeting, paragraphs and ask');
     if (!/won't follow up|melde ich mich nicht wieder/i.test(body)) issues.push('Opt-out line missing');
     if (!body.includes('noahhofmann.com/waypoint')) issues.push('Sign-off missing');
   } else {
@@ -183,7 +185,7 @@ let noSeen = 0;
 variants.forEach((v, i) => { if (/bad idea|crazy|schlechte idee|verrückt/i.test(asks[i])) { noSeen++; if (noSeen > 1) v.issues.push('Same no-oriented question as another variant ("bad idea"/"crazy"); use a plain, specific question'); } });
 // Template self-intro (was in every v4 email)
 variants.forEach(v => { if (/\bI help (funded |early[- ]stage )?(B2B )?(founders|CEOs|teams|startups)\b/i.test(v.body)) v.issues.push('Generic self-intro "I help funded B2B …"; say what Noah would do for THIS company'); });
-return { json: { ...prev, variants } };"""
+return { json: { ...prev, variants, oneLiner: String($json.output?.company_one_liner || '').slice(0, 200) } };"""
 DECIDE=r"""// Combine code checks and judge per variant. A variant passes only if BOTH are clean.
 // The contact is ready if at least one variant passes; Noah picks which one to send in 50.
 const p = $('%CHECK%').item.json;
@@ -260,6 +262,7 @@ const quality = qs.length ? Math.round(qs.reduce((a, b) => a + b, 0) / qs.length
 const props = {
   'Status': { status: { name: r.pass ? 'Draft ready' : 'Check manually' } },
   'Quality score': { number: quality },
+  'Company one-liner': { rich_text: t(r.oneLiner || '') },
   'Variant A': { rich_text: t(fmt(byId('A'))) },
   'Variant B': { rich_text: t(fmt(byId('B'))) },
   'Variant C': { rich_text: t(fmt(byId('C'))) },

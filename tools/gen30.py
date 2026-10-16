@@ -121,7 +121,7 @@ const STOP = new Set(['raises','raise','million','funding','round','seed','serie
 const topicWords = [...new Set((txt($json.properties?.['Signal summary']) + ' ' + txt($json.properties?.Sector))
   .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, ' ').split(/[^a-z0-9-]+/)
   .filter(w => w.length >= 4 && !STOP.has(w) && !/^\d/.test(w) && !core.split(' ').includes(w)))].slice(0, 12);
-return { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, topicWords, q1, q2, q3, braveCalls: 0 } };"""
+return { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, topicWords, signalSource: txt($json.properties?.['Signal source']), q1, q2, q3, braveCalls: 0 } };"""
 node("Prep search","n8n-nodes-base.code",2,[1360,200],{"jsCode":PREP,"mode":"runOnceForEachItem"})
 link("Notion · get company","Prep search")
 
@@ -204,6 +204,18 @@ const tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];
 if (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);
 const set = [];
 const add = d => { if (d && /^[a-z0-9-]+(\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };
+// 0 · Links in the funding article (Noah, 16 Oct: the company name is usually hyperlinked to its site).
+//     Only links whose anchor text or domain contains the company name; news/social sites excluded.
+//     These go FIRST, but still pass the same homepage checks in the next nodes.
+const html = String(p.articleHtml || '');
+let newsHost = ''; try { newsHost = new URL(p.signalSource).hostname.replace(/^www\./, ''); } catch (e) {}
+const BAN = /(linkedin|twitter|x\.com|facebook|instagram|youtube|tiktok|crunchbase|dealroom|pitchbook|eu-startups|tech\.eu|sifted|techcrunch|google|apple\.com|medium\.com|substack|wikipedia|bit\.ly|t\.co|wp\.com|gravatar)/i;
+for (const m of html.matchAll(/<a[^>]+href=["'](https?:\/\/[^"'#?]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+  let d = ''; try { d = new URL(m[1]).hostname.replace(/^www\./, '').toLowerCase(); } catch (e) { continue; }
+  if (!d || (newsHost && d.endsWith(newsHost)) || BAN.test(d)) continue;
+  const anchor = tr(m[2].replace(/<[^>]+>/g, ' ')).replace(/[^a-z0-9]/g, '');
+  if ((joined.length >= 3) && (anchor.includes(joined) || d.replace(/[^a-z0-9]/g, '').includes(joined))) add(d);
+}
 tlds.forEach(t => add(`${joined}.${t}`));
 if (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }
 // Common startup patterns: get<name>.com, <name>hq.com, <name>app.com
@@ -212,11 +224,21 @@ if (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); i
 [joined + 'hq.com', joined + 'app.com', joined + 'ai.com', joined + 'labs.com', joined + '.app'].forEach(add);
 // Other European ccTLDs last (HQ country is often only known as 'Other EU')
 ['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));
-set.slice(0, 32).forEach((d, i) => out.push({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));
+const { articleHtml, ...pLean } = p;   // don't copy the article HTML into ~30 candidate items
+set.slice(0, 32).forEach((d, i) => out.push({ json: { ...pLean, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));
 });
 return out;"""
 node("Website candidates","n8n-nodes-base.code",2,[2460,-200],{"jsCode":CANDS})
-link("Has domain?","Website candidates",1)
+node("Fetch article (links)","n8n-nodes-base.httpRequest",4.2,[2240,-380],{
+  "method":"GET","url":"={{ $json.signalSource }}",
+  "sendHeaders":True,"headerParameters":{"parameters":[{"name":"User-Agent","value":"Mozilla/5.0 (compatible; WaypointResearch/1.0; +https://noahhofmann.com)"}]},
+  "options":{"timeout":10000,"redirect":{"redirect":{"followRedirects":True,"maxRedirects":4}},
+             "response":{"response":{"neverError":True,"responseFormat":"text","outputPropertyName":"articleHtml"}}}},onError="continueRegularOutput")
+link("Has domain?","Fetch article (links)",1)
+node("Keep contact + article","n8n-nodes-base.merge",3,[2460,-380],{"mode":"combine","combineBy":"combineByPosition","options":{}})
+link("Has domain?","Keep contact + article",1,0)
+link("Fetch article (links)","Keep contact + article",0,1)
+link("Keep contact + article","Website candidates")
 node("Fetch candidate homepage","n8n-nodes-base.httpRequest",4.2,[2700,-200],{
   "method":"GET","url":"={{ 'https://' + $json.candidate }}",
   "sendHeaders":True,"headerParameters":{"parameters":[{"name":"User-Agent","value":"Mozilla/5.0 (compatible; WaypointResearch/1.0; +https://noahhofmann.com)"}]},

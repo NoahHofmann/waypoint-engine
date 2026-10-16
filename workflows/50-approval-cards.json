@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "d3c6d362-3a1a-4af0-8970-99b94564ca32",
+      "id": "13e306ce-0e50-47c6-9e50-c817c7912497",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "0a8d4087-1a94-4610-af45-e52ac5f4e447",
+      "id": "0128c47e-0c28-4b8d-8516-207484146a45",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "2a28169b-1496-42cb-8131-6f4705ccada9",
+      "id": "c9e92944-e6b7-4c31-a85e-d3b97cac099e",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "bb84c9e3-b0b5-4913-817b-23876ea07027",
+      "id": "da6414ef-f624-4592-b338-e4b1381b3556",
       "name": "Notion · approved in Notion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "277ef451-292a-45a5-9f2f-5c526de35147",
+      "id": "dddebb10-9c0a-46b9-9dce-6db02ff5831e",
       "name": "Notion approvals → 51",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -88,7 +88,7 @@
       }
     },
     {
-      "id": "2b2c8216-aea7-4f76-a72e-27867fbee4a9",
+      "id": "27fe587f-87b9-425d-aedf-2c22f20f678c",
       "name": "Run WP · 51 for each",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -111,7 +111,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c18e4f8c-8282-4a81-8074-7f44ccf324d5",
+      "id": "ef5ba75e-1d40-47fa-9aa5-1066dc0e990e",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -147,7 +147,7 @@
       }
     },
     {
-      "id": "a9228d5f-9f57-40c8-a116-cd655e140b3a",
+      "id": "309c3510-9c45-4d06-9bbe-e178a66f2112",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -183,7 +183,7 @@
       }
     },
     {
-      "id": "21491bb3-9568-44b8-916a-6b62c2da6a53",
+      "id": "1cb9c5d9-2352-4f43-9e1b-684a9870297a",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -192,11 +192,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new\n// (the drafts stay 'Draft ready' and go out after you answer the open ones).\nconst cfg = $('Config').first().json;\n// ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out\n// (or a second draft for the same company in this batch) goes to BACKLOG: kept with its drafts as the\n// second contact if the first doesn't reply. Not an error; nothing is sent.\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst all = ($input.first().json.results || []).filter(pg => pg.properties.Company?.relation?.[0]?.id);\nconst dups = [], ready = [];\nall.forEach(pg => { const co = pg.properties.Company.relation[0].id;\n  if (busy[co]) dups.push({ pg, other: busy[co] }); else { busy[co] = txt(pg.properties.Name); ready.push(pg); } });\nconst take = ready.slice(0, room);\nconst dupItems = dups.map(d => ({ json: { duplicate: true, contactPageId: d.pg.id, name: txt(d.pg.properties.Name), other: d.other } }));\nreturn dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { json: { duplicate: false,\n  cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new\n// (the drafts stay 'Draft ready' and go out after you answer the open ones).\nconst cfg = $('Config').first().json;\n// ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out\n// (or a second draft for the same company in this batch) goes to BACKLOG: kept with its drafts as the\n// second contact if the first doesn't reply. Not an error; nothing is sent.\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst all = ($input.first().json.results || []).filter(pg => pg.properties.Company?.relation?.[0]?.id);\nconst dups = [], ready = [];\nall.forEach(pg => { const co = pg.properties.Company.relation[0].id;\n  if (busy[co]) dups.push({ pg, other: busy[co] }); else { busy[co] = txt(pg.properties.Name); ready.push(pg); } });\nconst take = ready.slice(0, room);\nconst dupItems = dups.map(d => ({ json: { duplicate: true, contactPageId: d.pg.id, name: txt(d.pg.properties.Name), other: d.other } }));\nreturn dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { json: { duplicate: false,\n  cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  judgeNotes: txt(P['Judge notes']), oneLiner: txt(P['Company one-liner']), quality: txt(P['Quality score']), fromQueue: open > 0,\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"
       }
     },
     {
-      "id": "a620f9ed-6ba2-4111-8036-e8e0318b6b2c",
+      "id": "5a9c3a98-bcdd-4f3d-94c0-f4b980f38227",
       "name": "Duplicate company?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -214,7 +214,7 @@
           },
           "conditions": [
             {
-              "id": "9a5114b9-e72f-4849-bc63-a67420251875",
+              "id": "b7c174a5-ba3f-41a6-a709-1c130f6a04fe",
               "leftValue": "={{ $json.duplicate }}",
               "rightValue": true,
               "operator": {
@@ -230,7 +230,7 @@
       }
     },
     {
-      "id": "315c1575-8ec9-4c76-8cb4-e667fa285cbb",
+      "id": "c801b515-57e8-4964-bdd8-13004d4c0ebb",
       "name": "Notion · move to Backlog",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -266,7 +266,7 @@
       }
     },
     {
-      "id": "03c299a7-9360-493a-a8cb-1d2cd773c8c6",
+      "id": "7a53302f-cfbd-4959-b2e8-1269b7def617",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "id": "f3fbc182-9800-4d5e-9483-f3e3343dc580",
+      "id": "d7b8185b-2eee-47de-bf2d-bcef79ee9cfd",
       "name": "Queue full notice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -311,7 +311,7 @@
       }
     },
     {
-      "id": "6ee00f1c-f9a6-4568-8a31-87228edc3266",
+      "id": "dbf9ff2f-70fb-4352-bd36-7fe35249dc9f",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -324,7 +324,7 @@
       }
     },
     {
-      "id": "48506fea-12ce-4f76-82c0-b5e11cf4fc1a",
+      "id": "20d887cf-51ac-4f0e-9c52-eda9303fa4f1",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -360,7 +360,7 @@
       }
     },
     {
-      "id": "3f7523c4-cad5-4355-b692-76fffa860980",
+      "id": "3f9b7522-dbab-482b-8731-e46a4ac44e06",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -373,7 +373,7 @@
       }
     },
     {
-      "id": "f99106bd-8a9b-4479-b5a4-3c02ebe715d8",
+      "id": "195c7893-3551-4825-a97c-6f13b583ea61",
       "name": "Telegram · queue full",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -398,7 +398,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "5acb8d7d-8214-433f-91e7-4f4aae6b4eca",
+      "id": "56b7cad5-7157-4ea3-8070-efa2be4ccff8",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -407,12 +407,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (Telegram HTML: bold headers, escaped content, max 4096 chars) and the callback keys.\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? '<b>Tap = </b>I send you the text to paste into LinkedIn.'\n  : GREEN.includes(c.legalBasis) ? '<b>Tap = SENT</b> from hello@ immediately.'\n  : '<b>Tap = Gmail DRAFT</b> in hello@ (cold lead): you check and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\n// First line is parsed by WP · 51 (company · name) — keep the format \"📨 APPROVE n/m · Company · Name\".\nconst head = [\n  `📨 <b>APPROVE ${c.cardNo}/${c.cardTotal} · ${h(txt(P.Company))} · ${h(c.name)}</b>${c.role ? ' (' + h(c.role) + ')' : ''}`,\n  '━━━━━━━━━━━━━━━━',\n  `<b>${h(c.channel)}</b> · ${h(c.language || 'EN')} · ICP ${h(txt(P['ICP score']))} · <b>Offer:</b> ${h(c.offer)}`,\n  `<b>Signal:</b> ${h(txt(P['Signal summary']))}`,\n  `<b>To:</b> ${h(c.channel === 'Email' ? c.email : c.linkedin)}`,\n  what,\n  `<b>Passed review:</b> ${h(c.passed || 'none')}`\n].join('\\n');\nconst variants = ['A', 'B', 'C'].map(id => `<b>— ${id} —</b>\\n${h(clip(c[id] || '(empty)', 1000))}`).join('\\n\\n');\nconst foot = '✏️ <b>Own version:</b> swipe left on this card (Reply) and send the text (first line \"Subject: …\" for emails).' + (c.waiting ? `\\n⏸ ${c.waiting} more draft(s) queued: each answer pulls in the next.` : '');\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n' + foot, 3900);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// Build the approval card (Telegram HTML: bold headers, escaped content, max 4096 chars) and the callback keys.\nconst h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst c = $('Pick drafts').item.json;\nconst P = $json.properties || {};\nconst key = c.contactPageId.replace(/-/g, '');\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst what = c.channel === 'LinkedIn' ? '<b>Tap = </b>I send you the text to paste into LinkedIn.'\n  : GREEN.includes(c.legalBasis) ? '<b>Tap = SENT</b> from hello@ immediately.'\n  : '<b>Tap = Gmail DRAFT</b> in hello@ (cold lead): you check and send it yourself.';\nconst clip = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;\n// First line is parsed by WP · 51 (company · name) — keep the format \"📨 APPROVE n/m · Company · Name\".\n// Tag: first cards of a run = APPROVE; a card that waited in the queue and arrives after you answered one = BACKLOG.\nconst tag = c.fromQueue ? `📥 <b>BACKLOG` : `📨 <b>APPROVE`;\nconst icp = Number(txt(P['ICP score']));\nconst what1 = c.oneLiner || txt(P['Sector']) || '';\nconst head = [\n  `${tag} · ${h(txt(P.Company))} · ${h(c.name)}</b>${c.role ? ' (' + h(c.role) + ')' : ''}`,\n  '━━━━━━━━━━━━━━━━',\n  what1 ? `🏢 <b>What they do:</b> ${h(what1)}` : null,\n  `<b>Signal:</b> ${h(txt(P['Signal summary']))}`,\n  `<b>${h(c.channel)}</b> · ${h(c.language || 'EN')} · <b>ICP fit ${isNaN(icp) ? '?' : Math.round(icp) + '%'}</b> · <b>Offer:</b> ${h(c.offer)}`,\n  `<b>To:</b> ${h(c.channel === 'Email' ? c.email : c.linkedin)}`,\n  what,\n  `<b>Passed review:</b> ${h(c.passed || 'none')}${c.quality ? ' · <b>Quality</b> ' + h(c.quality) + '/10' : ''}`,\n  c.waiting ? `<b>Queue:</b> ${c.waiting} more waiting after this` : null\n].filter(x => x != null).join('\\n');\n// WHY a variant is not recommended: last attempt's issues from 'Judge notes', mapped to 6 plain categories.\nconst lastAttempt = (c.judgeNotes || '').split(/\\n(?=Attempt \\d)/).pop() || '';\nconst CATS = [\n  [/unsupported|numbers not in the brief/i, 'Claim not backed by the facts'],\n  [/opening not specific|generic self-intro|names? or company/i, 'Too generic for this company'],\n  [/tone|hype|flattery|filler/i, 'Tone / hype'],\n  [/words|characters|subject has|formatting|link|opt-out|sign-off|missing/i, 'Length / format'],\n  [/funding|sie|du|no-oriented|same .*question|language/i, 'Breaks a playbook rule'],\n  [/playbook/i, 'Breaks a playbook rule']];\nconst why = id => {\n  const line = (lastAttempt.match(new RegExp('^' + id + ': FAIL[^\\\\n]*', 'm')) || [])[0];\n  if (!line) return '';\n  const detail = line.replace(/^\\w: FAIL( \\(\\d+\\/10\\))? · /, '');\n  const cat = (CATS.find(([re]) => re.test(detail)) || [null, 'Other'])[1];\n  return `⚠️ <i>Not recommended: ${h(cat)}</i> · ${h(clip(detail.split(' · ')[0], 110))}\\n`;\n};\nconst passedIds = (c.passed || '').split(/,\\s*/);\nconst variants = ['A', 'B', 'C'].map(id => `<b>— ${id} —</b>${passedIds.includes(id) ? ' ✅' : ''}\\n${passedIds.includes(id) ? '' : why(id)}${h(clip(String(c[id] || '(empty)').replace(/\\n*\\[did not pass review\\]\\s*$/, ''), 1000))}`).join('\\n\\n');\nconst foot = '✏️ <b>Own version:</b> swipe left on this card (Reply) and send the text (first line \"Subject: …\" for emails).';\nconst text = clip(head + '\\n\\n' + variants + '\\n\\n' + foot, 3900);\nreturn { json: { ...c, key, text, company: txt(P.Company) } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "2280b0ea-f98c-4c65-91ed-636def86ffbc",
+      "id": "46a7a410-e89a-4901-8c35-01b4e0365a4d",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -485,7 +485,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "9ed217cb-1e0c-45ee-998d-875aec7b8dd3",
+      "id": "ea9cdf84-37db-4ea0-ade2-76357ada6721",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -499,7 +499,7 @@
       }
     },
     {
-      "id": "09517ee1-b9a0-4334-be9e-3d6ddc71102a",
+      "id": "82dd115f-aa98-4049-bc75-f8019436eff8",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -534,7 +534,7 @@
       }
     },
     {
-      "id": "14456572-fc5b-4d1e-8230-062c8e89d809",
+      "id": "6efb7f04-a509-4d4f-a008-2aecb486d976",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -570,7 +570,7 @@
       }
     },
     {
-      "id": "29a66e65-b84f-4cfa-bb8d-6f8baa864f18",
+      "id": "a8e5297d-f13d-4804-a785-3e52bcba6bc2",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -583,7 +583,7 @@
       }
     },
     {
-      "id": "e2a49872-8bcd-44b8-a3ed-900a5fa8fd5e",
+      "id": "b0a99981-956f-4eba-a32f-e9a73b196f89",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -632,7 +632,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "d1fa7964-c5f5-4630-b09a-1b893c2e7d63",
+      "id": "85810899-ff9c-4e28-b43e-496f7bb59173",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -668,7 +668,7 @@
       }
     },
     {
-      "id": "9651833f-12f0-4594-9e50-4f79f2d36c1d",
+      "id": "08344a5b-09f4-4b1e-82dd-51a5c399ba4d",
       "name": "Note · 50 notion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "f7526636-b39c-4a0c-8bbb-833a0e1ba1a8",
+      "id": "5b632cc0-6181-4cb3-bb7b-a31b33c0a7d4",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -698,7 +698,7 @@
       }
     },
     {
-      "id": "dce91f5c-9db5-41a5-ba8b-fab2c26eeced",
+      "id": "d4998cfc-8516-4751-b59f-658b2c867af7",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

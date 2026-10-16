@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "3032879d-4fb3-4d66-8e4f-dca83c66098c",
+      "id": "e5037e13-19aa-4fa5-993c-771fa9c95cbe",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "999b9624-a788-472c-a1af-fc9e3fc6e7ec",
+      "id": "58858439-388a-4cd7-9c51-0cc2df48485e",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "eeb6f1b7-fe79-497f-93c3-bf5db42cd453",
+      "id": "80e2e2d1-318c-449e-809c-7a5768b7d618",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "6e914521-4592-4be2-8ff4-f22e3b2db20f",
+      "id": "5ea26733-b672-4e7b-a6a9-2a062e2c859d",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "3d747234-2515-47ea-b153-6d8b813936a9",
+              "id": "5a187081-2622-46ec-92ae-f9e1ce3128ce",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "32da625e-c8ee-4fd2-8421-14a8edbb1343",
+      "id": "90365c3f-be58-451c-8c8e-a5b5ab071e0c",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -107,7 +107,7 @@
       }
     },
     {
-      "id": "3983daa9-2546-449a-8a0d-00dc0f40639e",
+      "id": "4183d8e0-43e2-4f95-af27-e35d1e63711f",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -120,7 +120,7 @@
       }
     },
     {
-      "id": "3ae0c393-3361-43d7-801f-6341073fef78",
+      "id": "8bd0755d-5f0b-47be-92da-cfaed2f95b4e",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -152,7 +152,7 @@
       }
     },
     {
-      "id": "10de40f0-61be-4467-80b4-bb0eda8ec836",
+      "id": "cb408530-0e49-4517-862d-140ffacefcc8",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -161,12 +161,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nconst countryTld = ({ DE: 'de', AT: 'at', CH: 'ch', NL: 'nl', UK: 'co.uk' })[$json.properties?.Country?.select?.name] || null;\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = company;  // plain name: the quoted \"official website\" query returned 0 results in every live run\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\n// Topic words: what the company does, from the funding article summary + sector. Used by the website\n// fail-safe to check that a candidate homepage is about the SAME business (holo.pl sold hologram stickers).\nconst STOP = new Set(['raises','raise','million','funding','round','seed','series','startup','company','based','launches','launch','scale','scaling','platform','europe','european','first','their','about','with','from','into','that','this','for','the','and','its','new','backed','secures','closes','lands','helps','small','businesses','business','powered','tech','eu-startups','tech.eu','sifted']);\nconst topicWords = [...new Set((txt($json.properties?.['Signal summary']) + ' ' + txt($json.properties?.Sector))\n  .toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\(.*?\\)/g, ' ').split(/[^a-z0-9-]+/)\n  .filter(w => w.length >= 4 && !STOP.has(w) && !/^\\d/.test(w) && !core.split(' ').includes(w)))].slice(0, 12);\nreturn { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, topicWords, q1, q2, q3, braveCalls: 0 } };",
+        "jsCode": "// Attach company name + domain, build search query for attempt 1.\nconst c = $('Pick contacts (persona order, budget cap)').item.json;\nconst txt = p => {\n  if (!p) return '';\n  const arr = p.title || p.rich_text;\n  if (arr) return arr.map(t => t.plain_text).join('').trim();\n  return p.url || p.email || '';\n};\nconst company = txt($json.properties?.Company);\nconst countryTld = ({ DE: 'de', AT: 'at', CH: 'ch', NL: 'nl', UK: 'co.uk' })[$json.properties?.Country?.select?.name] || null;\nlet domain = txt($json.properties?.Domain).toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').split('/')[0];\nif (!/^[a-z0-9.-]+\\.[a-z]{2,}$/.test(domain)) domain = '';\n// Core company token for matching: strip legal forms, keep the distinctive word(s)\nconst core = company.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '')\n  .replace(/\\b(gmbh|ag|ug|se|kg|bv|b\\.v\\.|nv|sas|sa|srl|ltd|limited|inc|oy|ab|as|aps|haftungsbeschrankt)\\b/g, '')\n  .replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst q3 = company;  // plain name: the quoted \"official website\" query returned 0 results in every live run\nconst q1 = `site:linkedin.com/in \"${c.first} ${c.last}\" \"${company}\"`;\nconst q2 = `site:linkedin.com/in \"${c.first} ${c.last}\" ${domain ? domain.split('.')[0] : core} ${c.role || ''}`.trim();\n// Topic words: what the company does, from the funding article summary + sector. Used by the website\n// fail-safe to check that a candidate homepage is about the SAME business (holo.pl sold hologram stickers).\nconst STOP = new Set(['raises','raise','million','funding','round','seed','series','startup','company','based','launches','launch','scale','scaling','platform','europe','european','first','their','about','with','from','into','that','this','for','the','and','its','new','backed','secures','closes','lands','helps','small','businesses','business','powered','tech','eu-startups','tech.eu','sifted']);\nconst topicWords = [...new Set((txt($json.properties?.['Signal summary']) + ' ' + txt($json.properties?.Sector))\n  .toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\(.*?\\)/g, ' ').split(/[^a-z0-9-]+/)\n  .filter(w => w.length >= 4 && !STOP.has(w) && !/^\\d/.test(w) && !core.split(' ').includes(w)))].slice(0, 12);\nreturn { json: { ...c, company, companyCore: core, domain, domainSource: domain ? 'Article' : null, countryTld, topicWords, signalSource: txt($json.properties?.['Signal source']), q1, q2, q3, braveCalls: 0 } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "1193eba0-e857-4afe-934b-92e7bc30067a",
+      "id": "2950510e-b61b-4981-b8ea-2678dfcbd79c",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -226,7 +226,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "48b5df5b-d980-4689-98f0-a3dcba1690fd",
+      "id": "e06a9e7f-3d84-4b9b-95e8-96395202463c",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -240,7 +240,7 @@
       }
     },
     {
-      "id": "342597b1-b1d2-4a4b-b640-51f9bfc483dd",
+      "id": "d209faf5-6a49-4e26-af4c-3cbdeddf129f",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -258,7 +258,7 @@
           },
           "conditions": [
             {
-              "id": "f9b8bf79-def8-43c9-aa24-48904bca4dd0",
+              "id": "e4b30f22-f757-43b6-b0de-e6af14e41d5b",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -274,7 +274,7 @@
       }
     },
     {
-      "id": "fe904bb0-1c83-4596-82a1-2311b7f5574c",
+      "id": "4345dc1b-36a8-43de-bd4f-bd347d2ce3b8",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -334,7 +334,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "e5a5e01d-ad8b-48e9-8023-878c8e0455bd",
+      "id": "4cb3b65f-561d-4cfe-9070-d1760c61322d",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -348,7 +348,7 @@
       }
     },
     {
-      "id": "a14e407d-1c41-4926-9095-9b3d478cc308",
+      "id": "65e6855b-eea1-4e59-9bca-2c30e1b9d902",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -395,7 +395,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "80d0887c-1ce7-44c8-a0db-1ae6380d6aa2",
+      "id": "97cfff27-9ea3-4344-8a5d-5b052a898fb0",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -413,7 +413,7 @@
           },
           "conditions": [
             {
-              "id": "183954f1-5bd6-4f9e-8835-38408b6450ab",
+              "id": "492190eb-5b7a-4895-a4ba-bdb2c18cbcd5",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -429,7 +429,7 @@
       }
     },
     {
-      "id": "5dbb34c8-10ef-467e-a6a2-a8cb1dd284a7",
+      "id": "1dc10406-261a-4c1b-9e1f-9d3383436c94",
       "name": "Website candidates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -438,11 +438,66 @@
         -200
       ],
       "parameters": {
-        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\n// Runs once for ALL items: one contact in, up to 32 candidate items out. (Per-item mode can't return\n// several items -> \"A 'json' property isn't an object\", the same bug we fixed in 20.)\nconst out = [];\n$input.all().forEach((it, idx) => {\nconst p = it.json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n// (tryholo.ai was the real Holo site; v2 never tried it)\n['try', 'get', 'use'].forEach(pre => ['com', 'ai', 'io'].forEach(t => add(`${pre}${joined}.${t}`)));\n[joined + 'hq.com', joined + 'app.com', joined + 'ai.com', joined + 'labs.com', joined + '.app'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nset.slice(0, 32).forEach((d, i) => out.push({ json: { ...p, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));\n});\nreturn out;"
+        "jsCode": "// WEBSITE FAIL-SAFE, step 1 (rules): when the article gave no website, generate likely domains\n// from the company name and check each one by opening its homepage (next node). Free, no search API.\n// Runs once for ALL items: one contact in, up to 32 candidate items out. (Per-item mode can't return\n// several items -> \"A 'json' property isn't an object\", the same bug we fixed in 20.)\nconst out = [];\n$input.all().forEach((it, idx) => {\nconst p = it.json;\nconst tr = x => String(x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/œ/g, 'oe').replace(/ß/g, 'ss').replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');\nconst words = tr(p.companyCore).split(/\\s+/).filter(Boolean);\nconst joined = words.join(''), hyph = words.join('-'), first = words[0] || '';\nconst tlds = ['com', 'ai', 'io', 'co', 'eu', 'de', 'tech', 'app'];\nif (p.countryTld && !tlds.includes(p.countryTld)) tlds.unshift(p.countryTld);\nconst set = [];\nconst add = d => { if (d && /^[a-z0-9-]+(\\.[a-z]{2,}){1,2}$/.test(d) && !set.includes(d)) set.push(d); };\n// 0 · Links in the funding article (Noah, 16 Oct: the company name is usually hyperlinked to its site).\n//     Only links whose anchor text or domain contains the company name; news/social sites excluded.\n//     These go FIRST, but still pass the same homepage checks in the next nodes.\nconst html = String(p.articleHtml || '');\nlet newsHost = ''; try { newsHost = new URL(p.signalSource).hostname.replace(/^www\\./, ''); } catch (e) {}\nconst BAN = /(linkedin|twitter|x\\.com|facebook|instagram|youtube|tiktok|crunchbase|dealroom|pitchbook|eu-startups|tech\\.eu|sifted|techcrunch|google|apple\\.com|medium\\.com|substack|wikipedia|bit\\.ly|t\\.co|wp\\.com|gravatar)/i;\nfor (const m of html.matchAll(/<a[^>]+href=[\"'](https?:\\/\\/[^\"'#?]+)[^\"']*[\"'][^>]*>([\\s\\S]*?)<\\/a>/gi)) {\n  let d = ''; try { d = new URL(m[1]).hostname.replace(/^www\\./, '').toLowerCase(); } catch (e) { continue; }\n  if (!d || (newsHost && d.endsWith(newsHost)) || BAN.test(d)) continue;\n  const anchor = tr(m[2].replace(/<[^>]+>/g, ' ')).replace(/[^a-z0-9]/g, '');\n  if ((joined.length >= 3) && (anchor.includes(joined) || d.replace(/[^a-z0-9]/g, '').includes(joined))) add(d);\n}\ntlds.forEach(t => add(`${joined}.${t}`));\nif (words.length > 1) { ['com', 'ai', 'io'].forEach(t => add(`${hyph}.${t}`)); if (first.length >= 4) ['com', 'ai', 'io'].forEach(t => add(`${first}.${t}`)); }\n// Common startup patterns: get<name>.com, <name>hq.com, <name>app.com\n// (tryholo.ai was the real Holo site; v2 never tried it)\n['try', 'get', 'use'].forEach(pre => ['com', 'ai', 'io'].forEach(t => add(`${pre}${joined}.${t}`)));\n[joined + 'hq.com', joined + 'app.com', joined + 'ai.com', joined + 'labs.com', joined + '.app'].forEach(add);\n// Other European ccTLDs last (HQ country is often only known as 'Other EU')\n['fi', 'se', 'dk', 'no', 'pl', 'cz', 'fr', 'es', 'it', 'be', 'pt', 'ee'].forEach(t => add(`${joined}.${t}`));\nconst { articleHtml, ...pLean } = p;   // don't copy the article HTML into ~30 candidate items\nset.slice(0, 32).forEach((d, i) => out.push({ json: { ...pLean, candidate: d, candidateRank: i }, pairedItem: { item: idx } }));\n});\nreturn out;"
       }
     },
     {
-      "id": "d537bb9f-c03d-4d25-bb36-1879df3bdac0",
+      "id": "6e8280f7-1024-4592-94f6-ae6e12715503",
+      "name": "Fetch article (links)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        -380
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.signalSource }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; WaypointResearch/1.0; +https://noahhofmann.com)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 4
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "articleHtml"
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "63bc256b-74f2-4224-89c1-f44ba4b6bebc",
+      "name": "Keep contact + article",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2460,
+        -380
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      }
+    },
+    {
+      "id": "acd83969-11d6-4e9d-bf81-71029cec4566",
       "name": "Fetch candidate homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -488,7 +543,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "474983c6-efdf-4e95-bd1a-ec987004e31d",
+      "id": "e1f5c2f1-3f98-4cda-a520-1e98dbcab655",
       "name": "Pick verified website",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -501,7 +556,7 @@
       }
     },
     {
-      "id": "a37893b8-b402-4395-b1ce-5a7242959a02",
+      "id": "69787306-03f5-4044-995c-8ca1b7063d07",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -537,7 +592,7 @@
       }
     },
     {
-      "id": "8c995d1f-f34a-4ea1-a83a-c8dc09ec6946",
+      "id": "0c21babc-d3a5-424e-a1ec-75c60c569eb4",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -551,7 +606,7 @@
       }
     },
     {
-      "id": "85907ecb-9227-4ea7-a761-4644ab1440c0",
+      "id": "db5fcf4c-20d1-4aba-a92b-c57deca47a39",
       "name": "Site pages to scan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -564,7 +619,7 @@
       }
     },
     {
-      "id": "336755f8-24a8-47ed-bc79-e3bcb27cc4d3",
+      "id": "02cf1979-d490-4a30-8410-2ca55a1ceaf1",
       "name": "Fetch site page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -610,7 +665,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "1fb09a86-1c21-4b74-8784-f25ba683254e",
+      "id": "2aab2d61-8fb8-4654-a100-8af0c9ac3d62",
       "name": "Extract site emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -623,7 +678,7 @@
       }
     },
     {
-      "id": "2c08c4e3-a9d6-4e3e-83fa-07a0ca05c012",
+      "id": "f28a92d9-93c7-4fd9-933b-ae091763fd70",
       "name": "Has company inbox?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -641,7 +696,7 @@
           },
           "conditions": [
             {
-              "id": "3d6b44d9-e27f-411d-8706-68ec588ee6a3",
+              "id": "cec231bf-47a9-4cda-b60d-c10e193072d9",
               "leftValue": "={{ $json.companyInbox }}",
               "rightValue": "",
               "operator": {
@@ -657,7 +712,7 @@
       }
     },
     {
-      "id": "64d8f633-fae0-4bb2-ba36-062882da4784",
+      "id": "5e9b6088-d56f-437f-a442-2b3307b9b2b3",
       "name": "Notion · save company inbox",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -693,7 +748,7 @@
       }
     },
     {
-      "id": "914de1db-07e6-494b-9a65-e908af1196ef",
+      "id": "0d9bb691-c0d6-4d25-90d9-57eac4232f50",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -707,7 +762,7 @@
       }
     },
     {
-      "id": "80f7432e-4aa5-45b1-9a65-182e5f118c55",
+      "id": "3a0b18da-8ef8-402a-b3ce-691788544758",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -725,7 +780,7 @@
           },
           "conditions": [
             {
-              "id": "e377e5d8-a8dc-4c3c-9476-a6a9390f4547",
+              "id": "d02fe791-047e-4e3b-9bfa-be17ec14f7ba",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -741,7 +796,7 @@
       }
     },
     {
-      "id": "5ace7e5f-9d86-475b-8b72-4f443547fadc",
+      "id": "762cfeb6-e554-4e25-b9c4-8766dbe2373a",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -780,7 +835,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "b3522e63-d42e-4a86-8be2-63680380ccdb",
+      "id": "ef37675a-3e7c-4e49-9181-d350909268e0",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -794,7 +849,7 @@
       }
     },
     {
-      "id": "dda2a486-d1c7-4e9f-bd9e-5885db073efc",
+      "id": "35fa996a-9ad6-474d-8da7-58abbe7bd60c",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -829,7 +884,7 @@
       }
     },
     {
-      "id": "06339452-9669-4f32-a8d2-296011441e96",
+      "id": "a4edc613-81c2-4523-a4d2-10188b7a634f",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -842,7 +897,7 @@
       }
     },
     {
-      "id": "432d2a67-b6f3-4e7e-903d-874d3a3388e2",
+      "id": "e5b7dd76-3a97-4739-b134-d24535581af7",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -855,7 +910,7 @@
       }
     },
     {
-      "id": "afa05efe-5030-48b0-b1a6-cbf3cae0d3c1",
+      "id": "b881ce73-e126-4a0d-ba62-0367a37bd9c6",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -891,7 +946,7 @@
       }
     },
     {
-      "id": "100bfa12-849e-4e6c-a54e-cf3f55dc40dd",
+      "id": "a2b17cbb-a473-4dc3-b360-e317ef6be4d3",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -904,7 +959,7 @@
       }
     },
     {
-      "id": "6a46752e-fc53-47ca-8b45-3a1b19e8ba76",
+      "id": "d178f9be-aa41-4ab5-a7db-175456989efd",
       "name": "Note · 30 overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -919,7 +974,7 @@
       }
     },
     {
-      "id": "63f17035-e04c-446d-bb04-23f0c676a17d",
+      "id": "135e4d2a-1b03-466e-a982-f8bee36360ff",
       "name": "Note · Selection",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -934,7 +989,7 @@
       }
     },
     {
-      "id": "fa9640ca-1be9-4022-9059-8c10ee84aa29",
+      "id": "347533e3-daaa-4476-ac7f-e1c9b16b534b",
       "name": "Note · LinkedIn",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -949,7 +1004,7 @@
       }
     },
     {
-      "id": "a25b27a0-b40e-4f8b-b157-c5d6b6b68926",
+      "id": "00ad3770-884f-4441-bb7b-625f4ed79db7",
       "name": "Note · Website",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -964,7 +1019,7 @@
       }
     },
     {
-      "id": "568627ba-818e-4015-bf91-b1c7d09a1942",
+      "id": "ff10900e-0739-4a48-856d-e7a4b6027ded",
       "name": "Note · Email",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1139,6 +1194,33 @@
             "index": 0
           }
         ],
+        [
+          {
+            "node": "Fetch article (links)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Keep contact + article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch article (links)": {
+      "main": [
+        [
+          {
+            "node": "Keep contact + article",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Keep contact + article": {
+      "main": [
         [
           {
             "node": "Website candidates",
