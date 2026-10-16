@@ -248,7 +248,7 @@ const variants = p.variants.map(v => {
     ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];
   // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.
   const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));
-  const missing = v.issues.includes('Variant missing');
+  const missing = v.issues.some(x => String(x).startsWith('Variant missing'));
   const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;
   return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };
 });
@@ -266,7 +266,14 @@ def stage(n,x,inp,prev_expr):
       "hasOutputParser":False,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":DRAFT_SYS}]}},onError="continueRegularOutput")
     # Draft model: Claude Sonnet 5.5 (16 Oct, docs/model-choice.md). Mid-price tier: ~$0.026 per attempt.
     # To compare models later: swap this sub-node; the judge stays GPT-5 mini so Quality scores stay comparable.
-    node(on,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x-60,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":2500,"temperature":0.6}})
+    # 16 Oct: 2500 max tokens produced empty/cut emails (Sonnet 5.5 spends output tokens before the text) -> 8000.
+    # Attempt 2 = fallback on GPT-5.1 (the proven drafter), so one model failing never leaves Noah without cards.
+    if n==1:
+        node(on,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x-60,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":8000,"temperature":0.6}})
+    else:
+        on=f"OpenAI · draft {n} (fallback)"
+        node(on,"@n8n/n8n-nodes-langchain.lmChatOpenAi",1.2,[x-60,420],{"model":{"__rl":True,"value":"gpt-5.1","mode":"id"},"options":{"timeout":120000,"maxRetries":2,"reasoningEffort":"low"}},
+             credentials={"openAiApi":{"id":"","name":"OpenAi account"}})
     # No output-parser sub-node for the draft: 'Check rules' parses the JSON tolerantly (see parseLoose).
     link(on,dn,kind="ai_languageModel")
     link(inp,dn)
@@ -319,7 +326,7 @@ const props = {
   'Draft language': { select: { name: r.language } },
   'Angle': { select: { name: 'Funding trigger' } },
   // For the later analytics agent: which model + prompt wrote this, so reply rates can be compared per model/variant
-  'Draft model': { rich_text: t($('Config').first().json.draftModel) },
+  'Draft model': { rich_text: t(r.attempt === 2 ? 'gpt-5.1 (fallback)' : $('Config').first().json.draftModel) },
   'Prompt version': { rich_text: t($('Config').first().json.promptVersion) }
 };
 if (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };

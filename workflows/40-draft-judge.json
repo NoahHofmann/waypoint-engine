@@ -2,7 +2,7 @@
   "name": "WP · 40 Draft + judge (sub-workflow)",
   "nodes": [
     {
-      "id": "9b4f02c1-6177-459a-bde4-a7c31d02b268",
+      "id": "007c8cfd-e4d4-454c-97cd-db8e5fb5a6dd",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "2497a9c1-cec1-4b97-a957-6766c4dd50d8",
+      "id": "48c220a6-6a54-42aa-ab11-9c5c54a277ec",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "3b1cb654-6ca9-434d-8d56-5fffc59b9cc6",
+      "id": "d3b41c96-89bc-4dbb-b503-0a6313ce02bc",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "57ecd343-d734-4ac0-a21c-8dbdc65fb4ef",
+      "id": "360c283f-5a01-49b8-896b-8cdd69b5486f",
       "name": "Notion · active offers",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "b619c944-8b7c-4e9d-bec1-c934fd7e9f12",
+      "id": "1d8f4cc2-a765-4ffe-ab14-b5f4970f2e77",
       "name": "Notion · sales playbook",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -108,7 +108,7 @@
       }
     },
     {
-      "id": "eef1ed1e-ad6b-4ab5-8d26-5d9a92f382e8",
+      "id": "8f6e9fd0-5eef-4240-ae72-345146127804",
       "name": "Notion · contacts to draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -144,7 +144,7 @@
       }
     },
     {
-      "id": "1029a872-43f3-456f-a345-7a957b0ecdda",
+      "id": "9f6d6673-4496-4483-89e4-cfccdf5f089d",
       "name": "Pick contacts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -157,7 +157,7 @@
       }
     },
     {
-      "id": "8c821f3e-7829-495d-84f7-4c40599b8c1e",
+      "id": "343e60a9-c9a6-4f68-9b41-5746671489b9",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -189,7 +189,7 @@
       }
     },
     {
-      "id": "241283ea-9d19-4323-8d19-adb7045ffeae",
+      "id": "f159972a-cc78-4ecb-a3a0-82237455445c",
       "name": "Fetch article",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -223,7 +223,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2c07ea53-6894-4319-a947-64101124a519",
+      "id": "5b2295d3-b2cb-42e0-8aac-853698d8e9de",
       "name": "Fetch homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -257,7 +257,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "afe1734d-0910-463b-902d-1dab2c81b505",
+      "id": "f53ad9f0-aaa4-4eb7-a924-43e81785fe1d",
       "name": "Build brief (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -271,7 +271,7 @@
       }
     },
     {
-      "id": "9a5fea22-2060-4fe0-b808-771b8e5ddc55",
+      "id": "cd972953-2740-4225-818c-980a7c265cfd",
       "name": "Draft (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -299,7 +299,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "95704b1a-b066-4b8b-92b9-a6200e774bf4",
+      "id": "55ad03f1-d831-4e35-ab7f-7f46939ec976",
       "name": "Claude · draft 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -314,7 +314,7 @@
           "mode": "id"
         },
         "options": {
-          "maxTokensToSample": 2500,
+          "maxTokensToSample": 8000,
           "temperature": 0.6
         }
       },
@@ -326,7 +326,7 @@
       }
     },
     {
-      "id": "6f6fa682-6faf-4fef-90cb-a7d5ab1a9cb7",
+      "id": "9af45127-c9e3-4701-b571-59b91b26e8d7",
       "name": "Check rules 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -340,7 +340,7 @@
       }
     },
     {
-      "id": "529e0c5a-e473-4969-99c3-614be3d1ecca",
+      "id": "1499bb11-189e-43a2-8e3d-0040c513a4ce",
       "name": "Judge (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -368,7 +368,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "61e8e49b-33ee-4927-8455-8f9ec9676feb",
+      "id": "778d730e-28a8-4ce1-846a-d9eb3b88439f",
       "name": "OpenAI · judge 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -396,7 +396,7 @@
       }
     },
     {
-      "id": "2548c134-ae1e-414c-b220-0671d388e862",
+      "id": "17ca05e1-dd28-4253-a555-33b2fde8edf6",
       "name": "Schema · judge 1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -410,7 +410,7 @@
       }
     },
     {
-      "id": "70ad9e88-9195-497c-b6f6-d7f486afc565",
+      "id": "150a92b8-68ac-4f4c-8d5c-3c1e97048954",
       "name": "Decide 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -419,12 +419,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Combine code checks and judge per variant. A variant passes only if BOTH are clean.\n// The contact is ready if at least one variant passes; Noah picks which one to send in 50.\nconst p = $('Check rules 1').item.json;\nconst jv = $json.output?.variants || [];\nconst clean = arr => (arr || []).filter(x => x && !/^\\s*(none|n\\/a|keine|-)\\s*\\.?$/i.test(String(x)));\n// Code owns length/format. The judge still sometimes counts words; those remarks are dropped here.\nconst LENGTH = /(\\bwords?\\b|\\bcharacters?\\b|\\bchars?\\b|too long|too short|length|wortanzahl|zeichen)/i;\n// LinkedIn connection notes deliberately have no proof point, metric, question or ask.\nconst LI_OK = /(proof|metric|number|question|ask|call to action|cta|offer|booking|link|pitch)/i;\nconst judgeKeep = x => !LENGTH.test(String(x)) && !(p.channel === 'LinkedIn' && LI_OK.test(String(x)));\nconst variants = p.variants.map(v => {\n  const j = jv.find(x => String(x.id).toUpperCase().startsWith(v.id)) || null;\n  const judgeIssues = !j ? ['Judge returned no verdict' + ($json.error ? ': ' + String($json.error.message || $json.error).slice(0, 120) : '')] : [\n    ...clean(j.unsupported_claims).map(x => 'Unsupported: ' + x),\n    ...(j.names_ok === false ? ['Wrong name or company'] : []),\n    ...(j.language_ok === false ? ['Wrong language or Sie/du'] : []),\n    ...(j.specific_opening === false ? ['Opening not specific to this company'] : []),\n    ...(j.tone_ok === false && judgeKeep(j.notes || 'tone') ? ['Tone: ' + (j.notes || 'not plain/respectful')] : []),\n    ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];\n  // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.\n  const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));\n  const missing = v.issues.includes('Variant missing');\n  const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;\n  return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };\n});\nconst passed = variants.filter(v => v.pass).map(v => v.id);\nconst notes = `Attempt ${p.attempt}: ${passed.length ? 'passed ' + passed.join(', ') : 'no variant passed'}\\n` + variants.map(v =>\n  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${v.quality != null ? ' (' + v.quality + '/10)' : ''}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\\n');\nreturn { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,\n  judgeNotes: (p.judgeNotes ? p.judgeNotes + '\\n' : '') + notes,\n  feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\\n') } };",
+        "jsCode": "// Combine code checks and judge per variant. A variant passes only if BOTH are clean.\n// The contact is ready if at least one variant passes; Noah picks which one to send in 50.\nconst p = $('Check rules 1').item.json;\nconst jv = $json.output?.variants || [];\nconst clean = arr => (arr || []).filter(x => x && !/^\\s*(none|n\\/a|keine|-)\\s*\\.?$/i.test(String(x)));\n// Code owns length/format. The judge still sometimes counts words; those remarks are dropped here.\nconst LENGTH = /(\\bwords?\\b|\\bcharacters?\\b|\\bchars?\\b|too long|too short|length|wortanzahl|zeichen)/i;\n// LinkedIn connection notes deliberately have no proof point, metric, question or ask.\nconst LI_OK = /(proof|metric|number|question|ask|call to action|cta|offer|booking|link|pitch)/i;\nconst judgeKeep = x => !LENGTH.test(String(x)) && !(p.channel === 'LinkedIn' && LI_OK.test(String(x)));\nconst variants = p.variants.map(v => {\n  const j = jv.find(x => String(x.id).toUpperCase().startsWith(v.id)) || null;\n  const judgeIssues = !j ? ['Judge returned no verdict' + ($json.error ? ': ' + String($json.error.message || $json.error).slice(0, 120) : '')] : [\n    ...clean(j.unsupported_claims).map(x => 'Unsupported: ' + x),\n    ...(j.names_ok === false ? ['Wrong name or company'] : []),\n    ...(j.language_ok === false ? ['Wrong language or Sie/du'] : []),\n    ...(j.specific_opening === false ? ['Opening not specific to this company'] : []),\n    ...(j.tone_ok === false && judgeKeep(j.notes || 'tone') ? ['Tone: ' + (j.notes || 'not plain/respectful')] : []),\n    ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];\n  // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.\n  const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));\n  const missing = v.issues.some(x => String(x).startsWith('Variant missing'));\n  const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;\n  return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };\n});\nconst passed = variants.filter(v => v.pass).map(v => v.id);\nconst notes = `Attempt ${p.attempt}: ${passed.length ? 'passed ' + passed.join(', ') : 'no variant passed'}\\n` + variants.map(v =>\n  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${v.quality != null ? ' (' + v.quality + '/10)' : ''}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\\n');\nreturn { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,\n  judgeNotes: (p.judgeNotes ? p.judgeNotes + '\\n' : '') + notes,\n  feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\\n') } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "c87afd3a-856b-4f07-91cc-0d77bbb891d8",
+      "id": "af2f1f64-d159-4fa8-a490-cf79488bc2aa",
       "name": "Passed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -442,7 +442,7 @@
           },
           "conditions": [
             {
-              "id": "1cf49c6b-6683-4ff6-8f33-913f030048ed",
+              "id": "e92f6bce-dbfe-465c-a714-e2956f31a579",
               "leftValue": "={{ $json.pass }}",
               "rightValue": "",
               "operator": {
@@ -458,7 +458,7 @@
       }
     },
     {
-      "id": "819f6aa8-447f-4f21-9de6-63733e8da8b4",
+      "id": "1463416f-d01e-4351-8b83-f261ade4b69b",
       "name": "Prepare retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -472,7 +472,7 @@
       }
     },
     {
-      "id": "4a568cc1-4751-4e85-8a9c-14d5720be4ee",
+      "id": "065346b5-bb8e-4ee5-9dde-aa7714276896",
       "name": "Draft (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -500,10 +500,10 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "275f142e-0283-4f79-a9a6-60ce79e5b5a6",
-      "name": "Claude · draft 2",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "id": "9602a8d3-019b-4148-a899-36d545da6d3a",
+      "name": "OpenAI · draft 2 (fallback)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
       "position": [
         2940,
         420
@@ -511,23 +511,24 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "claude-sonnet-5-5",
+          "value": "gpt-5.1",
           "mode": "id"
         },
         "options": {
-          "maxTokensToSample": 2500,
-          "temperature": 0.6
+          "timeout": 120000,
+          "maxRetries": 2,
+          "reasoningEffort": "low"
         }
       },
       "credentials": {
-        "anthropicApi": {
-          "id": "GZsdXTaGEKzuDNrl",
-          "name": "Anthropic account"
+        "openAiApi": {
+          "id": "pdSFtuDMCaKd3CHG",
+          "name": "OpenAi account"
         }
       }
     },
     {
-      "id": "d35b5114-4a4a-4f86-b2ca-9122a126738f",
+      "id": "7a395239-bcf4-4dd8-be6c-ea368b639702",
       "name": "Check rules 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -541,7 +542,7 @@
       }
     },
     {
-      "id": "908bd8cf-320c-4386-a59a-7a1b31d89509",
+      "id": "f5d5d5c0-6f8a-46b3-932c-3f01efebf870",
       "name": "Judge (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -569,7 +570,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a82dcb68-baca-4d57-87b7-42facef56ebe",
+      "id": "5e7eed4b-74ba-44d5-8a98-a63863dc4be0",
       "name": "OpenAI · judge 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -597,7 +598,7 @@
       }
     },
     {
-      "id": "7ff26648-4b73-4e7c-8d1e-37d305b0ae14",
+      "id": "809f9e7a-f633-49b0-aa2d-6f11f3752004",
       "name": "Schema · judge 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -611,7 +612,7 @@
       }
     },
     {
-      "id": "2c3b356a-194c-44c1-adc2-31ca35f28f4c",
+      "id": "43bff5a0-cf0e-43ac-8074-4e30fd43f374",
       "name": "Decide 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -620,12 +621,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Combine code checks and judge per variant. A variant passes only if BOTH are clean.\n// The contact is ready if at least one variant passes; Noah picks which one to send in 50.\nconst p = $('Check rules 2').item.json;\nconst jv = $json.output?.variants || [];\nconst clean = arr => (arr || []).filter(x => x && !/^\\s*(none|n\\/a|keine|-)\\s*\\.?$/i.test(String(x)));\n// Code owns length/format. The judge still sometimes counts words; those remarks are dropped here.\nconst LENGTH = /(\\bwords?\\b|\\bcharacters?\\b|\\bchars?\\b|too long|too short|length|wortanzahl|zeichen)/i;\n// LinkedIn connection notes deliberately have no proof point, metric, question or ask.\nconst LI_OK = /(proof|metric|number|question|ask|call to action|cta|offer|booking|link|pitch)/i;\nconst judgeKeep = x => !LENGTH.test(String(x)) && !(p.channel === 'LinkedIn' && LI_OK.test(String(x)));\nconst variants = p.variants.map(v => {\n  const j = jv.find(x => String(x.id).toUpperCase().startsWith(v.id)) || null;\n  const judgeIssues = !j ? ['Judge returned no verdict' + ($json.error ? ': ' + String($json.error.message || $json.error).slice(0, 120) : '')] : [\n    ...clean(j.unsupported_claims).map(x => 'Unsupported: ' + x),\n    ...(j.names_ok === false ? ['Wrong name or company'] : []),\n    ...(j.language_ok === false ? ['Wrong language or Sie/du'] : []),\n    ...(j.specific_opening === false ? ['Opening not specific to this company'] : []),\n    ...(j.tone_ok === false && judgeKeep(j.notes || 'tone') ? ['Tone: ' + (j.notes || 'not plain/respectful')] : []),\n    ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];\n  // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.\n  const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));\n  const missing = v.issues.includes('Variant missing');\n  const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;\n  return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };\n});\nconst passed = variants.filter(v => v.pass).map(v => v.id);\nconst notes = `Attempt ${p.attempt}: ${passed.length ? 'passed ' + passed.join(', ') : 'no variant passed'}\\n` + variants.map(v =>\n  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${v.quality != null ? ' (' + v.quality + '/10)' : ''}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\\n');\nreturn { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,\n  judgeNotes: (p.judgeNotes ? p.judgeNotes + '\\n' : '') + notes,\n  feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\\n') } };",
+        "jsCode": "// Combine code checks and judge per variant. A variant passes only if BOTH are clean.\n// The contact is ready if at least one variant passes; Noah picks which one to send in 50.\nconst p = $('Check rules 2').item.json;\nconst jv = $json.output?.variants || [];\nconst clean = arr => (arr || []).filter(x => x && !/^\\s*(none|n\\/a|keine|-)\\s*\\.?$/i.test(String(x)));\n// Code owns length/format. The judge still sometimes counts words; those remarks are dropped here.\nconst LENGTH = /(\\bwords?\\b|\\bcharacters?\\b|\\bchars?\\b|too long|too short|length|wortanzahl|zeichen)/i;\n// LinkedIn connection notes deliberately have no proof point, metric, question or ask.\nconst LI_OK = /(proof|metric|number|question|ask|call to action|cta|offer|booking|link|pitch)/i;\nconst judgeKeep = x => !LENGTH.test(String(x)) && !(p.channel === 'LinkedIn' && LI_OK.test(String(x)));\nconst variants = p.variants.map(v => {\n  const j = jv.find(x => String(x.id).toUpperCase().startsWith(v.id)) || null;\n  const judgeIssues = !j ? ['Judge returned no verdict' + ($json.error ? ': ' + String($json.error.message || $json.error).slice(0, 120) : '')] : [\n    ...clean(j.unsupported_claims).map(x => 'Unsupported: ' + x),\n    ...(j.names_ok === false ? ['Wrong name or company'] : []),\n    ...(j.language_ok === false ? ['Wrong language or Sie/du'] : []),\n    ...(j.specific_opening === false ? ['Opening not specific to this company'] : []),\n    ...(j.tone_ok === false && judgeKeep(j.notes || 'tone') ? ['Tone: ' + (j.notes || 'not plain/respectful')] : []),\n    ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];\n  // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.\n  const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));\n  const missing = v.issues.some(x => String(x).startsWith('Variant missing'));\n  const quality = (j && !missing) ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;\n  return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };\n});\nconst passed = variants.filter(v => v.pass).map(v => v.id);\nconst notes = `Attempt ${p.attempt}: ${passed.length ? 'passed ' + passed.join(', ') : 'no variant passed'}\\n` + variants.map(v =>\n  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${v.quality != null ? ' (' + v.quality + '/10)' : ''}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\\n');\nreturn { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,\n  judgeNotes: (p.judgeNotes ? p.judgeNotes + '\\n' : '') + notes,\n  feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\\n') } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "d865b940-fc2e-430b-9ef3-5df9f6c55e8e",
+      "id": "c11bc4c4-3d66-4d6a-aa0f-86a02ea098db",
       "name": "Build draft update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -634,12 +635,12 @@
         100
       ],
       "parameters": {
-        "jsCode": "// Write all three variants to Notion. Default draft = first passing variant (A > B > C);\n// Noah chooses the one to send in Telegram (50) or sets \"Chosen variant\" here. Nothing is sent from 40.\nconst r = $json;\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1990) } }];\nconst fmt = v => v ? ((v.subject ? 'Subject: ' + v.subject + '\\n\\n' : '') + v.body + (v.pass ? '' : '\\n\\n[did not pass review]')) : '';\nconst byId = id => (r.variants || []).find(v => v.id === id);\nconst best = (r.variants || []).find(v => v.pass) || null;\nconst qs = (r.variants || []).map(v => v.quality).filter(q => q != null);\nconst quality = qs.length ? Math.round(qs.reduce((a, b) => a + b, 0) / qs.length * 10) / 10 : null;\nconst props = {\n  'Status': { status: { name: r.pass ? 'Draft ready' : 'Check manually' } },\n  'Quality score': { number: quality },\n  'Company one-liner': { rich_text: t(r.oneLiner || '') },\n  'Variant A': { rich_text: t(fmt(byId('A'))) },\n  'Variant B': { rich_text: t(fmt(byId('B'))) },\n  'Variant C': { rich_text: t(fmt(byId('C'))) },\n  'Variants passed': { rich_text: t(r.passedIds.length ? r.passedIds.join(', ') : 'none') },\n  'Draft subject': { rich_text: t(best?.subject || '') },\n  'Draft body': { rich_text: t(best?.body || '') },\n  'Draft version': { number: (r.draftVersion || 0) + 1 },\n  'Judge result': { select: { name: r.pass ? 'Pass' : 'Fail' } },\n  'Judge notes': { rich_text: t(r.judgeNotes) },\n  'Channel': { select: { name: r.channel } },\n  'Offer': { rich_text: t(r.offer) },\n  'Draft language': { select: { name: r.language } },\n  'Angle': { select: { name: 'Funding trigger' } },\n  // For the later analytics agent: which model + prompt wrote this, so reply rates can be compared per model/variant\n  'Draft model': { rich_text: t($('Config').first().json.draftModel) },\n  'Prompt version': { rich_text: t($('Config').first().json.promptVersion) }\n};\nif (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };\nreturn { json: { contactPageId: r.contactPageId, name: r.name, company: r.company, channel: r.channel, pass: r.pass,\n  passed: r.passedIds, attempts: r.attempt, quality, notionBody: { properties: props } } };",
+        "jsCode": "// Write all three variants to Notion. Default draft = first passing variant (A > B > C);\n// Noah chooses the one to send in Telegram (50) or sets \"Chosen variant\" here. Nothing is sent from 40.\nconst r = $json;\nconst t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1990) } }];\nconst fmt = v => v ? ((v.subject ? 'Subject: ' + v.subject + '\\n\\n' : '') + v.body + (v.pass ? '' : '\\n\\n[did not pass review]')) : '';\nconst byId = id => (r.variants || []).find(v => v.id === id);\nconst best = (r.variants || []).find(v => v.pass) || null;\nconst qs = (r.variants || []).map(v => v.quality).filter(q => q != null);\nconst quality = qs.length ? Math.round(qs.reduce((a, b) => a + b, 0) / qs.length * 10) / 10 : null;\nconst props = {\n  'Status': { status: { name: r.pass ? 'Draft ready' : 'Check manually' } },\n  'Quality score': { number: quality },\n  'Company one-liner': { rich_text: t(r.oneLiner || '') },\n  'Variant A': { rich_text: t(fmt(byId('A'))) },\n  'Variant B': { rich_text: t(fmt(byId('B'))) },\n  'Variant C': { rich_text: t(fmt(byId('C'))) },\n  'Variants passed': { rich_text: t(r.passedIds.length ? r.passedIds.join(', ') : 'none') },\n  'Draft subject': { rich_text: t(best?.subject || '') },\n  'Draft body': { rich_text: t(best?.body || '') },\n  'Draft version': { number: (r.draftVersion || 0) + 1 },\n  'Judge result': { select: { name: r.pass ? 'Pass' : 'Fail' } },\n  'Judge notes': { rich_text: t(r.judgeNotes) },\n  'Channel': { select: { name: r.channel } },\n  'Offer': { rich_text: t(r.offer) },\n  'Draft language': { select: { name: r.language } },\n  'Angle': { select: { name: 'Funding trigger' } },\n  // For the later analytics agent: which model + prompt wrote this, so reply rates can be compared per model/variant\n  'Draft model': { rich_text: t(r.attempt === 2 ? 'gpt-5.1 (fallback)' : $('Config').first().json.draftModel) },\n  'Prompt version': { rich_text: t($('Config').first().json.promptVersion) }\n};\nif (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };\nreturn { json: { contactPageId: r.contactPageId, name: r.name, company: r.company, channel: r.channel, pass: r.pass,\n  passed: r.passedIds, attempts: r.attempt, quality, notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "dd06982a-7e2e-44f7-a574-23dd7afa6615",
+      "id": "a2e04d9d-42a0-4794-8545-a2d77f239fad",
       "name": "Notion · save draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -677,7 +678,7 @@
       }
     },
     {
-      "id": "e644989e-59e4-42fa-951a-a75035189fe7",
+      "id": "25390128-f3ea-489a-a21a-191646049896",
       "name": "Run summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -690,7 +691,7 @@
       }
     },
     {
-      "id": "b02e9f1a-d2ca-499c-a395-ec2e08b8835b",
+      "id": "a8915fa7-299e-4840-99ad-e39d5538f961",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -703,7 +704,7 @@
       }
     },
     {
-      "id": "57682d37-7543-47be-b88a-cb2bf7e79694",
+      "id": "d59664ea-deeb-4e81-84a4-2afae5696ec6",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -739,7 +740,7 @@
       }
     },
     {
-      "id": "2401d145-b495-470f-b1c9-31fb708bbea6",
+      "id": "1a2bef43-4598-4991-ae97-5ef810e9251a",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -752,7 +753,7 @@
       }
     },
     {
-      "id": "5a28cf99-e74a-4034-8638-84a129f71b57",
+      "id": "f751f5cd-b336-4c21-ba30-cfe1b4c45484",
       "name": "Note · 0 Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -767,7 +768,7 @@
       }
     },
     {
-      "id": "f30bfde5-0c77-4b45-b04b-01b0f6105529",
+      "id": "ecff2765-5a46-4d0d-a477-fc472a5597aa",
       "name": "Note · 1 Load context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -782,7 +783,7 @@
       }
     },
     {
-      "id": "63105b07-8008-48a1-a35b-5a30904fbf3a",
+      "id": "80334930-225f-42db-9f10-8e4f28f6e093",
       "name": "Note · 2 Build brief",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -797,7 +798,7 @@
       }
     },
     {
-      "id": "fd6612af-c7f2-4097-89b0-e079aee7b975",
+      "id": "562c4efe-e0af-4b75-ab30-5b346da8953f",
       "name": "Note · 3 Draft and check",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -812,7 +813,7 @@
       }
     },
     {
-      "id": "52c64b18-7c8a-4591-927a-7680590e03b0",
+      "id": "8be27152-d535-421b-b4f3-a057baf722c8",
       "name": "Note · 4 Judge and decide",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -827,7 +828,7 @@
       }
     },
     {
-      "id": "72c5887a-f83f-46e3-886d-af888111321c",
+      "id": "cd773856-4fc5-478e-85fd-44e233d15e38",
       "name": "Note · 5 Retry and save",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1059,7 +1060,7 @@
         ]
       ]
     },
-    "Claude · draft 2": {
+    "OpenAI · draft 2 (fallback)": {
       "ai_languageModel": [
         [
           {
