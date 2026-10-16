@@ -2,7 +2,7 @@
   "name": "WP · 40 Draft + judge (sub-workflow)",
   "nodes": [
     {
-      "id": "6402dbe0-a8db-4ee5-8d78-7ec16a6aba33",
+      "id": "1cc45363-0282-4d4a-8fd6-6be3baa554fd",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "15d6da43-8f4d-4fe1-8b18-d61cdf086642",
+      "id": "d09565e7-0ef7-4b1a-b9d6-51c98576ee1a",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "8f852b9d-927e-4f41-89ac-6dd52be49f56",
+      "id": "8c495d5f-2139-40c5-af1e-bf475c71ea1d",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "28c90d4f-f49c-42ba-ad0c-9b2a730e29b4",
+      "id": "a5f624f5-da7b-4d5b-b25e-8c0a92eeca9c",
       "name": "Notion · active offers",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "b9375609-f0bb-478b-8d23-17dd9bb39ac8",
+      "id": "d9cc8474-799f-49cd-b2ff-34757dcbf195",
       "name": "Notion · sales playbook",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -108,7 +108,7 @@
       }
     },
     {
-      "id": "f24d34b6-19fd-42aa-a3d4-928da7bbb22a",
+      "id": "6e739b5c-88f8-4c7b-8da4-060983f3b8d6",
       "name": "Notion · contacts to draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -144,7 +144,7 @@
       }
     },
     {
-      "id": "ce9c1ff4-0dac-4098-b2d2-3ed3b42f4834",
+      "id": "0901f89f-a1ad-4d8d-b853-0699a2194d2a",
       "name": "Pick contacts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -157,7 +157,7 @@
       }
     },
     {
-      "id": "c745efd2-4bab-4812-88e4-ef0c68af25a8",
+      "id": "699da9b3-4cf8-4ea2-8179-1718ab326fde",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -189,7 +189,7 @@
       }
     },
     {
-      "id": "c673ef52-0eb1-405e-8e67-51440ce24c40",
+      "id": "106eee21-9ab2-4e9c-98ed-2773051f5f9b",
       "name": "Fetch article",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -223,7 +223,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7de93716-f3c4-4d15-9685-dfab27883347",
+      "id": "afb41b50-faaf-405d-8dfd-b7c95d21398b",
       "name": "Fetch homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -257,7 +257,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "747b6222-2179-416a-8dc2-cd2e0734a3a7",
+      "id": "04b22ea6-8ea8-4d94-baaf-f24f22c3f6ea",
       "name": "Build brief (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -271,7 +271,7 @@
       }
     },
     {
-      "id": "890054dc-dc54-45d0-89a2-343c59b52d6d",
+      "id": "fd3ee5e0-5894-4907-aecb-d58cec27d7cb",
       "name": "Draft (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -299,7 +299,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "1272eecb-abf2-45de-950c-d73ad7d0b994",
+      "id": "b0b8d666-d7d2-403f-ac1b-c03fcba14416",
       "name": "Claude · draft 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -326,7 +326,7 @@
       }
     },
     {
-      "id": "19308021-7d4f-4110-80e7-a77ec98e2c27",
+      "id": "799eba9e-d0ea-4f3a-bb41-2bb83dc863dd",
       "name": "Check rules 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -340,7 +340,7 @@
       }
     },
     {
-      "id": "6a5a02b1-1cb3-4f81-82b4-67837bb15d2f",
+      "id": "e1a2e7d6-5d09-41a9-8c61-fd2060b4a86c",
       "name": "Judge (attempt 1)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -368,7 +368,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "5344fcda-e835-4fcd-9475-796ff8fb4128",
+      "id": "f1a4d517-6fbd-46e9-8c70-010c0a309a2e",
       "name": "OpenAI · judge 1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -396,7 +396,7 @@
       }
     },
     {
-      "id": "34cdb43c-b980-46cd-bd9b-edbef15ff042",
+      "id": "6f2b4bde-91ef-462b-9b2e-e0d8971930fa",
       "name": "Schema · judge 1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
@@ -410,7 +410,7 @@
       }
     },
     {
-      "id": "5cc8f473-4e37-4717-ba50-a89027c17907",
+      "id": "7fe8fa0a-1157-4994-97fa-b58262861b79",
       "name": "Decide 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -424,7 +424,7 @@
       }
     },
     {
-      "id": "085147da-a0a7-427e-b558-d3cd91c89e08",
+      "id": "dcc76461-4a85-4a07-a9d5-4d6ec37eece1",
       "name": "Passed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -442,7 +442,7 @@
           },
           "conditions": [
             {
-              "id": "fe3971a5-3f77-4e20-816a-fb3d755f06b0",
+              "id": "e8ba7cc3-de82-444b-b427-f27eaa734872",
               "leftValue": "={{ $json.pass }}",
               "rightValue": "",
               "operator": {
@@ -458,7 +458,7 @@
       }
     },
     {
-      "id": "e5d68cf2-c037-4a70-a661-9a47a5ac4690",
+      "id": "1cb6a86f-e24c-42af-96f3-b984b5bec48d",
       "name": "Prepare retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -472,7 +472,7 @@
       }
     },
     {
-      "id": "61ef24ab-9957-4b2d-a7c1-a08cad60be27",
+      "id": "a5a4fc8f-2dbb-4a5e-9449-03bc92caf5ef",
       "name": "Draft (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -500,7 +500,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "4f0394e7-23d3-40a5-8888-b7546303fcd5",
+      "id": "96fe9a50-987c-4cf7-9035-edd7d59e7d29",
       "name": "OpenAI · draft 2 (fallback)",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -528,7 +528,7 @@
       }
     },
     {
-      "id": "2e965e24-0931-41bf-bd8b-dca88b9babae",
+      "id": "576845c0-31d1-48a5-ba99-01706b624ec3",
       "name": "Check rules 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -542,7 +542,7 @@
       }
     },
     {
-      "id": "e7a9fc47-04bd-4306-a16c-05446c078a0d",
+      "id": "73413de8-3725-4ff7-b91a-20413895278f",
       "name": "Judge (attempt 2)",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -570,7 +570,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "7079e487-a245-4221-b4b1-3f0753fbca4a",
+      "id": "e2521993-29bb-455e-a26b-5fdae28cf17e",
       "name": "Claude · judge 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -597,7 +597,7 @@
       }
     },
     {
-      "id": "14f62b54-c5e9-45b6-bb34-be73214c4446",
+      "id": "75e308d4-6e1e-49a4-93be-42057f6fb708",
       "name": "Decide 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -611,7 +611,7 @@
       }
     },
     {
-      "id": "869d6659-fc48-4747-93d7-c6f7d567b7a5",
+      "id": "fa75e87b-6a8f-49ba-92e7-23b243faa689",
       "name": "Build draft update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -625,7 +625,7 @@
       }
     },
     {
-      "id": "c4f270d4-e9f1-4692-8b3e-69a6ec36a730",
+      "id": "5517bd22-9460-4dc7-aa8b-4fbbe0a980e9",
       "name": "Notion · save draft",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -663,7 +663,7 @@
       }
     },
     {
-      "id": "fa5c300e-8828-4835-aa4f-fe3138499b80",
+      "id": "2c44bff8-26e7-4a9e-83a3-3d2b73e4856a",
       "name": "Run summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -676,7 +676,7 @@
       }
     },
     {
-      "id": "3b2f3489-3f6c-421c-be56-b944ecc63e90",
+      "id": "a02a4d9c-aa15-4303-9011-12dc7b3add23",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -685,11 +685,11 @@
         100
       ],
       "parameters": {
-        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst r = $json;\nconst c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0), qSum: r.qSum || 0, qN: r.qN || 0 };\nconst x = { model: $('Config').first().json.draftModel, prompt: $('Config').first().json.promptVersion };\nconst view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.024 * 1000) / 1000, skip: !c.in,\n  quality: c.qN ? Math.round(c.qSum / c.qN * 10) / 10 : null, model: x.model,\n  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Avg quality ${c.qN ? (c.qSum / c.qN).toFixed(1) : 'n/a'}/10. Cost estimated (~€0.024 per attempt).` });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Draft ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Draft' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
+        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst r = $json;\nconst c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0), qSum: r.qSum || 0, qN: r.qN || 0 };\nconst x = { model: $('Config').first().json.draftModel, prompt: $('Config').first().json.promptVersion };\nconst view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.024 * 1000) / 1000, skip: !c.in,\n  quality: c.qN ? Math.round(c.qSum / c.qN * 10) / 10 : null, model: x.model,\n  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Avg quality ${c.qN ? (c.qSum / c.qN).toFixed(1) : 'n/a'}/10. Cost estimated (~€0.024 per attempt).` });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`${(started ? DateTime.fromISO(started) : $now).setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} · Draft`) },  // Berlin time, date first (Noah, 16 Oct)\n  'Workflow': { select: { name: 'Draft' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
       }
     },
     {
-      "id": "c5d021c8-69f4-438c-859b-f48371c7c84d",
+      "id": "d46d2e0b-5b32-4a5a-b3b5-bbab3c8053f2",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -725,7 +725,7 @@
       }
     },
     {
-      "id": "a5ec8ee5-1c1e-49d6-b342-6817a06687c3",
+      "id": "f52e6cfe-ed0a-40c5-b632-1bb136542e74",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -738,7 +738,7 @@
       }
     },
     {
-      "id": "c8cace05-0e3a-4005-aed7-feaa397e3cdb",
+      "id": "eff7d9c8-fe67-4618-aa03-1421d19ba785",
       "name": "Note · 0 Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -753,7 +753,7 @@
       }
     },
     {
-      "id": "d5cff894-c566-4b1b-b67d-f34b898da5a4",
+      "id": "bcf409d5-3a67-42ac-b337-c2ebfcac91f4",
       "name": "Note · 1 Load context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -768,7 +768,7 @@
       }
     },
     {
-      "id": "7b51419d-ef29-489c-aae1-f710df1b11d2",
+      "id": "3b931d37-f652-4e20-9804-2b90051226c2",
       "name": "Note · 2 Build brief",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -783,7 +783,7 @@
       }
     },
     {
-      "id": "03c655b5-01fc-46ac-bb0a-a9f33b09acc0",
+      "id": "2b7114d3-991e-4ce3-9bd2-f9a92e167119",
       "name": "Note · 3 Draft and check",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -798,7 +798,7 @@
       }
     },
     {
-      "id": "1f5106e6-a772-401e-8420-123f1cbb4561",
+      "id": "8a9031cc-d2b3-43e9-bc0e-f100df9fec06",
       "name": "Note · 4 Judge and decide",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -813,7 +813,7 @@
       }
     },
     {
-      "id": "63b77613-ce71-4e80-bcb4-49df1a91806b",
+      "id": "dcc13a15-6824-4cca-bd46-7e66ffcd9003",
       "name": "Note · 5 Retry and save",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

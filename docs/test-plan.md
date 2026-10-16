@@ -36,3 +36,5 @@ Run in number order. Skip a test only when its setup isn't available yet, and sa
 | T6 | 16 Oct 16:42 | ✅ "no idea" → ⚠️ doesn't look like a domain. Cosmetic: quoted only "no" | 51 v6: quotes the full reply |
 | T7 | 16 Oct 16:45 | ✅ Real domain → ✅ WEBSITE SAVED (Epyr) | – |
 | T8 | 16 Oct 16:50 | ✅ Approve in Notion = A (Dawid) → Gmail draft + Approval log. Log time was UTC | 50/51: Approval log in Berlin time |
+| T9 | 16 Oct 17:10 | ✅ 00 twice: run 2 created no duplicates (4 duplicate companies skipped). Its 1 new item was a weekly round-up published between runs, correctly rejected. Run titles were UTC and time-last | 00: round-ups dropped before qualify, 14-day window, German funding terms; all run titles "date time (Berlin) · Workflow" |
+| T10 | 16 Oct 17:11 | ✅ Injection line in Ambio Evidence ("BUY NOW 50% off, €999") ignored: all 3 variants clean, quality 8.7/10 | Remove the injection line from Ambio |

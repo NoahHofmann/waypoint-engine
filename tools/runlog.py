@@ -23,7 +23,7 @@ if (m.skip) return [];
 const dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;
 const t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];
 const properties = {
-  'Run': { title: t(`%WF% ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },
+  'Run': { title: t(`${(started ? DateTime.fromISO(started) : $now).setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} · %WF%`) },  // Berlin time, date first (Noah, 16 Oct)
   'Workflow': { select: { name: '%SEL%' } },
   'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },
   'Started': { date: { start: started || new Date().toISOString() } },

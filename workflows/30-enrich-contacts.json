@@ -2,7 +2,7 @@
   "name": "WP · 30 Enrich contacts (sub-workflow)",
   "nodes": [
     {
-      "id": "e5037e13-19aa-4fa5-993c-771fa9c95cbe",
+      "id": "7a163d18-2579-4a59-a1d2-0d2af4d75181",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "58858439-388a-4cd7-9c51-0cc2df48485e",
+      "id": "bec9b48b-7e18-4019-8340-be256780e661",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "80e2e2d1-318c-449e-809c-7a5768b7d618",
+      "id": "20fedcc8-6a3b-45e7-b980-4b0291e8e5cd",
       "name": "Config + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "5ea26733-b672-4e7b-a6a9-2a062e2c859d",
+      "id": "cf4e895c-c238-4c48-bdf9-5d56d5c4d066",
       "name": "Budget left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -57,7 +57,7 @@
           },
           "conditions": [
             {
-              "id": "5a187081-2622-46ec-92ae-f9e1ce3128ce",
+              "id": "df30db99-4aa6-42d8-a10a-7f54d8b7f4fc",
               "leftValue": "={{ $json.allowed }}",
               "rightValue": 0,
               "operator": {
@@ -72,7 +72,7 @@
       }
     },
     {
-      "id": "90365c3f-be58-451c-8c8e-a5b5ab071e0c",
+      "id": "1a8e7bcf-e7b3-4682-a9b2-e04d6c414039",
       "name": "Notion · contacts needing email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -107,7 +107,7 @@
       }
     },
     {
-      "id": "4183d8e0-43e2-4f95-af27-e35d1e63711f",
+      "id": "7087844a-1077-4f90-800c-42d1f7f0c5a2",
       "name": "Pick contacts (persona order, budget cap)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -120,7 +120,7 @@
       }
     },
     {
-      "id": "8bd0755d-5f0b-47be-92da-cfaed2f95b4e",
+      "id": "f3fcab5d-88d4-40aa-8c06-4734c5d98481",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -152,7 +152,7 @@
       }
     },
     {
-      "id": "cb408530-0e49-4517-862d-140ffacefcc8",
+      "id": "f1a1980d-919a-49c0-8dcd-2da3fcc5c654",
       "name": "Prep search",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -166,7 +166,7 @@
       }
     },
     {
-      "id": "2950510e-b61b-4981-b8ea-2678dfcbd79c",
+      "id": "216fddb9-ab3e-41f2-ab53-4bbcef48636b",
       "name": "Brave · LinkedIn attempt 1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -226,7 +226,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "e06a9e7f-3d84-4b9b-95e8-96395202463c",
+      "id": "c3d6a235-28af-4303-8954-eb7f2d35f737",
       "name": "Verify attempt 1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -240,7 +240,7 @@
       }
     },
     {
-      "id": "d209faf5-6a49-4e26-af4c-3cbdeddf129f",
+      "id": "bc9c30cc-b245-41bd-8775-d2f4e44e63c4",
       "name": "LinkedIn found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -258,7 +258,7 @@
           },
           "conditions": [
             {
-              "id": "e4b30f22-f757-43b6-b0de-e6af14e41d5b",
+              "id": "41997378-122e-4514-98aa-e97ef7574537",
               "leftValue": "={{ $json.linkedin }}",
               "rightValue": "",
               "operator": {
@@ -274,7 +274,7 @@
       }
     },
     {
-      "id": "4345dc1b-36a8-43de-bd4f-bd347d2ce3b8",
+      "id": "c583b97b-d44a-47db-9bbf-a2c1fe8eda34",
       "name": "Brave · LinkedIn attempt 2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -334,7 +334,7 @@
       "waitBetweenTries": 2000
     },
     {
-      "id": "4cb3b65f-561d-4cfe-9070-d1760c61322d",
+      "id": "9231722d-6491-412e-8c8a-49308a014dfe",
       "name": "Verify attempt 2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -348,7 +348,7 @@
       }
     },
     {
-      "id": "65e6855b-eea1-4e59-9bca-2c30e1b9d902",
+      "id": "21553650-9ef7-4d6d-aaa0-494f9b5832a3",
       "name": "Hunter · email finder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -395,7 +395,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "97cfff27-9ea3-4344-8a5d-5b052a898fb0",
+      "id": "4f200d33-7752-4165-829c-5c141556babb",
       "name": "Has domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -413,7 +413,7 @@
           },
           "conditions": [
             {
-              "id": "492190eb-5b7a-4895-a4ba-bdb2c18cbcd5",
+              "id": "f9b6abf9-461f-43a9-92c7-5a2c2123a34b",
               "leftValue": "={{ $json.domain }}",
               "rightValue": "",
               "operator": {
@@ -429,7 +429,7 @@
       }
     },
     {
-      "id": "1dc10406-261a-4c1b-9e1f-9d3383436c94",
+      "id": "aa29f4f5-f4a0-4e70-b490-2d0540628676",
       "name": "Website candidates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -442,7 +442,7 @@
       }
     },
     {
-      "id": "6e8280f7-1024-4592-94f6-ae6e12715503",
+      "id": "6060ec72-3184-465a-b50a-8874dd5b733c",
       "name": "Fetch article (links)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -482,7 +482,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "63bc256b-74f2-4224-89c1-f44ba4b6bebc",
+      "id": "8e28da4f-5117-43a3-9194-41b1ab91bcf4",
       "name": "Keep contact + article",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
@@ -497,7 +497,7 @@
       }
     },
     {
-      "id": "acd83969-11d6-4e9d-bf81-71029cec4566",
+      "id": "5ec937aa-5a82-4ac7-837d-62c6c5754daa",
       "name": "Fetch candidate homepage",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -543,7 +543,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e1f5c2f1-3f98-4cda-a520-1e98dbcab655",
+      "id": "a77edd35-a1b9-45f1-8ec2-9ff6f7df2800",
       "name": "Pick verified website",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -556,7 +556,7 @@
       }
     },
     {
-      "id": "69787306-03f5-4044-995c-8ca1b7063d07",
+      "id": "d76fae3c-214b-46d0-b0e1-eed2f0361527",
       "name": "Notion · save company domain",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -592,7 +592,7 @@
       }
     },
     {
-      "id": "0c21babc-d3a5-424e-a1ec-75c60c569eb4",
+      "id": "fd897b6e-1dc7-4be5-b493-d87cc8e21f77",
       "name": "Ready for Hunter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -606,7 +606,7 @@
       }
     },
     {
-      "id": "db5fcf4c-20d1-4aba-a92b-c57deca47a39",
+      "id": "aa06eec1-3b22-4592-81db-fd9c91f2ce44",
       "name": "Site pages to scan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -619,7 +619,7 @@
       }
     },
     {
-      "id": "02cf1979-d490-4a30-8410-2ca55a1ceaf1",
+      "id": "ef108556-bf46-472f-8d69-a2f685883395",
       "name": "Fetch site page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -665,7 +665,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2aab2d61-8fb8-4654-a100-8af0c9ac3d62",
+      "id": "db4f02bb-f3dc-476b-b614-52243697451c",
       "name": "Extract site emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -678,7 +678,7 @@
       }
     },
     {
-      "id": "f28a92d9-93c7-4fd9-933b-ae091763fd70",
+      "id": "187e8b08-ef4b-429b-bb6a-0a48cc2cf4f5",
       "name": "Has company inbox?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -696,7 +696,7 @@
           },
           "conditions": [
             {
-              "id": "cec231bf-47a9-4cda-b60d-c10e193072d9",
+              "id": "086ec3c1-ef5f-459f-be5d-55f9424c953f",
               "leftValue": "={{ $json.companyInbox }}",
               "rightValue": "",
               "operator": {
@@ -712,7 +712,7 @@
       }
     },
     {
-      "id": "5e9b6088-d56f-437f-a442-2b3307b9b2b3",
+      "id": "a28f4a6a-3bc5-4ac0-a0c2-4e19125d6efb",
       "name": "Notion · save company inbox",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -748,7 +748,7 @@
       }
     },
     {
-      "id": "0d9bb691-c0d6-4d25-90d9-57eac4232f50",
+      "id": "13503ff8-21b6-4a01-b2d1-3d3ab24fe8bd",
       "name": "Decide verify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -762,7 +762,7 @@
       }
     },
     {
-      "id": "3a0b18da-8ef8-402a-b3ce-691788544758",
+      "id": "5309ba4e-5fa0-4468-9d5a-d1c91c5a392c",
       "name": "Needs verification?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -780,7 +780,7 @@
           },
           "conditions": [
             {
-              "id": "d02fe791-047e-4e3b-9bfa-be17ec14f7ba",
+              "id": "127f091d-24d6-4ea4-93bd-d85d9d49b037",
               "leftValue": "={{ $json.needVerify }}",
               "rightValue": true,
               "operator": {
@@ -796,7 +796,7 @@
       }
     },
     {
-      "id": "762cfeb6-e554-4e25-b9c4-8766dbe2373a",
+      "id": "d2a64aa1-7c74-4899-af5d-1e92acdbdcee",
       "name": "Hunter · verify (no email sent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -835,7 +835,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "ef37675a-3e7c-4e49-9181-d350909268e0",
+      "id": "8a72edf3-c02f-4e45-96c8-8361017a7f68",
       "name": "Build contact update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -849,7 +849,7 @@
       }
     },
     {
-      "id": "35fa996a-9ad6-474d-8da7-58abbe7bd60c",
+      "id": "f0faff4e-5333-4a59-98b3-418cfb6cb30c",
       "name": "Notion · update contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -884,7 +884,7 @@
       }
     },
     {
-      "id": "a4edc613-81c2-4523-a4d2-10188b7a634f",
+      "id": "8bf48718-d58c-4593-875d-64a856374ec7",
       "name": "Run summary + budget",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -897,7 +897,7 @@
       }
     },
     {
-      "id": "e5b7dd76-3a97-4739-b134-d24535581af7",
+      "id": "943023ce-7f95-4526-81c5-684fc00cf1ca",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -906,11 +906,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config + budget').first().json.startedAt;\nconst r = $json;\nconst c = { in: r.enriched, ready: r.readyToDraft, li: r.linkedinFound, apiErr: r.apiErrors, brave: r.braveCallsThisRun, hunter: r.hunterCreditsThisRun };\nconst x = { braveMonth: r.braveUsedThisMonth, hunterMonth: r.hunterUsedThisMonth };\nconst view = (c, x) => ({ in: c.in, out: c.ready + c.li, errors: c.apiErr, costEur: 0, skip: !c.in,\n  notes: `${c.ready} ready to draft, ${c.li} with LinkedIn, ${c.apiErr} API errors. Brave ${c.brave} (month ${x.braveMonth}/300), Hunter ${c.hunter} (month ${x.hunterMonth}/40). Free tiers: cost 0.` });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Enrich ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Enrich' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
+        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config + budget').first().json.startedAt;\nconst r = $json;\nconst c = { in: r.enriched, ready: r.readyToDraft, li: r.linkedinFound, apiErr: r.apiErrors, brave: r.braveCallsThisRun, hunter: r.hunterCreditsThisRun };\nconst x = { braveMonth: r.braveUsedThisMonth, hunterMonth: r.hunterUsedThisMonth };\nconst view = (c, x) => ({ in: c.in, out: c.ready + c.li, errors: c.apiErr, costEur: 0, skip: !c.in,\n  notes: `${c.ready} ready to draft, ${c.li} with LinkedIn, ${c.apiErr} API errors. Brave ${c.brave} (month ${x.braveMonth}/300), Hunter ${c.hunter} (month ${x.hunterMonth}/40). Free tiers: cost 0.` });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`${(started ? DateTime.fromISO(started) : $now).setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} · Enrich`) },  // Berlin time, date first (Noah, 16 Oct)\n  'Workflow': { select: { name: 'Enrich' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
       }
     },
     {
-      "id": "b881ce73-e126-4a0d-ba62-0367a37bd9c6",
+      "id": "9815503b-c795-4018-8790-20a601769f83",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -946,7 +946,7 @@
       }
     },
     {
-      "id": "a2b17cbb-a473-4dc3-b360-e317ef6be4d3",
+      "id": "d8248197-77da-4d15-853e-39c672ee6f30",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -959,7 +959,7 @@
       }
     },
     {
-      "id": "d178f9be-aa41-4ab5-a7db-175456989efd",
+      "id": "e2c0ae61-2a51-4b0b-bcb8-73c4a53bac35",
       "name": "Note · 30 overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -974,7 +974,7 @@
       }
     },
     {
-      "id": "135e4d2a-1b03-466e-a982-f8bee36360ff",
+      "id": "370df821-d1fe-44ff-a87f-52c3d68b2fc7",
       "name": "Note · Selection",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -989,7 +989,7 @@
       }
     },
     {
-      "id": "347533e3-daaa-4476-ac7f-e1c9b16b534b",
+      "id": "3870ec8a-957f-4151-b126-a9394a04e645",
       "name": "Note · LinkedIn",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1004,7 +1004,7 @@
       }
     },
     {
-      "id": "00ad3770-884f-4441-bb7b-625f4ed79db7",
+      "id": "4e1ae5cd-fbaf-4f8c-9961-2340d55f0e49",
       "name": "Note · Website",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1019,7 +1019,7 @@
       }
     },
     {
-      "id": "ff10900e-0739-4a48-856d-e7a4b6027ded",
+      "id": "dd7d4804-338e-4c03-985a-fdfc5e623e3f",
       "name": "Note · Email",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

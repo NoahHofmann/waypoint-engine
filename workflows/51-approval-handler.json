@@ -2,7 +2,7 @@
   "name": "WP · 51 Approval handler (Telegram trigger)",
   "nodes": [
     {
-      "id": "375c8015-8b2d-4fc1-9b7a-006d230e7054",
+      "id": "f19c67ed-9619-4006-ad2f-89c7b7698698",
       "name": "When called by 50 (Notion approval)",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -15,7 +15,7 @@
       }
     },
     {
-      "id": "94013917-5875-4650-b0ea-6950aa7dcc6d",
+      "id": "ab627154-ff0e-4981-866d-fb91afcb0dad",
       "name": "Notion approval as tap",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -29,7 +29,7 @@
       }
     },
     {
-      "id": "05a09496-a60f-40dc-b5fe-6a1c79d12b35",
+      "id": "3d8b3a27-1a82-46fd-b291-66de7070554e",
       "name": "Telegram trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
@@ -50,10 +50,10 @@
           "name": "Telegram approvals"
         }
       },
-      "webhookId": "2650773a-819d-42a9-bc99-7e3823f48b74"
+      "webhookId": "534494a1-f5a5-47b0-8095-6f146ba0b08c"
     },
     {
-      "id": "2e0d41bf-9f01-42de-9bf9-dde324864f90",
+      "id": "bfd575cd-41b7-474a-98d3-4bd53280ebc2",
       "name": "Parse update (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
       }
     },
     {
-      "id": "3a8ea945-0933-4af2-9c9f-3c659989db59",
+      "id": "f54536a4-1cfe-45ba-a6f7-705630063a5e",
       "name": "Authorized?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -85,7 +85,7 @@
           },
           "conditions": [
             {
-              "id": "90f3aaac-06b3-4e1b-9382-ab343dfa6ef9",
+              "id": "ffd90ba2-fbb6-4956-82a3-a6a7746ac774",
               "leftValue": "={{ $json.ok }}",
               "rightValue": "",
               "operator": {
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "95f815fc-38ba-4a76-bd85-aa8cc56d96c3",
+      "id": "15e63377-3993-4798-a704-17de102ee2f4",
       "name": "Telegram · answer tap",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -127,7 +127,7 @@
       "alwaysOutputData": true
     },
     {
-      "id": "15d7ba60-2067-4ac5-840f-6b5499067475",
+      "id": "5073d9f0-2e7d-4ca0-a87e-9324aae363db",
       "name": "Route update",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -237,7 +237,7 @@
       }
     },
     {
-      "id": "ee72e072-5ca3-4bb2-978c-3933b7bde6f1",
+      "id": "2f3b30d2-ebe1-4455-9155-5a8594abd6e4",
       "name": "Help text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -251,7 +251,7 @@
       }
     },
     {
-      "id": "4b68a3a8-4c74-4322-8027-c6309b7cc292",
+      "id": "f9bbf489-0985-4256-b93c-b67662400e1b",
       "name": "Telegram · help",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -278,7 +278,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "edd29047-b50a-4476-93ec-9a883c091ce2",
+      "id": "6829d8bb-5e13-43db-9190-c828a5fe843c",
       "name": "Build website update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -292,7 +292,7 @@
       }
     },
     {
-      "id": "44146cf5-0fd6-4f2b-8080-9319a531bb1f",
+      "id": "3ecb59c9-546e-4443-a1e7-52667f46df2c",
       "name": "Valid domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -310,7 +310,7 @@
           },
           "conditions": [
             {
-              "id": "228603d5-b2c0-4833-9d2a-b1fe82261dcc",
+              "id": "3817463a-ec1e-477b-9e3c-577deb7aabab",
               "leftValue": "={{ $json.valid }}",
               "rightValue": "",
               "operator": {
@@ -326,7 +326,7 @@
       }
     },
     {
-      "id": "73d5d28f-ff0a-4254-91b4-d59a4c6c9519",
+      "id": "700d03d6-f789-45f3-8345-a4faf9128265",
       "name": "Notion · save website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -364,7 +364,7 @@
       }
     },
     {
-      "id": "05e35a9e-9c06-4174-8a96-39e6c72d657e",
+      "id": "753c8712-be4e-4396-b7ff-016435eb59fb",
       "name": "Telegram · close website question",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -394,7 +394,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "b615d52a-7a36-4f28-b8e6-036c63ed54b0",
+      "id": "adce9e94-f125-4bb0-9ee7-cdb88a27c4ac",
       "name": "Notion · contacts of company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -430,7 +430,7 @@
       }
     },
     {
-      "id": "3112e88b-a81a-44c1-843b-e5dae49264a1",
+      "id": "810607c6-73c6-47b6-b4bb-d4cb1ab216d8",
       "name": "Contacts to retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -443,7 +443,7 @@
       }
     },
     {
-      "id": "83e38522-fdb0-416d-9928-9ae1d91ba7bf",
+      "id": "3ff4cc96-ba8a-4243-85b6-6912505d9eff",
       "name": "Notion · back to Needs email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -479,7 +479,7 @@
       }
     },
     {
-      "id": "1a3a53c1-83c3-4a7c-b2c6-541e9368b8f7",
+      "id": "a2f7f0f5-261c-462d-b34f-9e7d7f097d4c",
       "name": "Telegram · website retry",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -506,7 +506,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a9410540-2d68-402c-a9ef-748d09b2c935",
+      "id": "4388ffb5-a084-41c6-a6f9-74a2dc04c5a9",
       "name": "Notion · get contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -539,7 +539,7 @@
       }
     },
     {
-      "id": "aaf362ad-3a47-458e-a60c-0abf50c6add4",
+      "id": "c1feb796-1155-40ef-adf8-6ea3c692ecc2",
       "name": "Notion · find contact by card",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -575,7 +575,7 @@
       }
     },
     {
-      "id": "0c139d70-fb14-4afe-936b-f7e7a12bfd3b",
+      "id": "43b65812-21a2-4ca4-b529-9cdaf8db7f2d",
       "name": "First match",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -589,7 +589,7 @@
       }
     },
     {
-      "id": "780a20f7-7419-4652-b3dd-d3aadf2eb20c",
+      "id": "3c55f96c-9348-46a7-b393-5bca3038cb12",
       "name": "Decide action (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -603,7 +603,7 @@
       }
     },
     {
-      "id": "0222dc1b-742c-46bc-8b2f-77514c52cb27",
+      "id": "e62ba1ad-5110-443b-a555-716e31398f7f",
       "name": "Route",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -782,7 +782,7 @@
       }
     },
     {
-      "id": "77e4a24c-68a8-444f-ade2-350debe3a477",
+      "id": "6b830397-5402-4274-98f3-6bef45243e2a",
       "name": "Needs lock?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -815,7 +815,7 @@
       }
     },
     {
-      "id": "8e543886-417c-49ef-9704-d0c0a29987ad",
+      "id": "fc886fcb-b058-4915-832b-cb591fee67a7",
       "name": "Notion · claim lock",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -850,7 +850,7 @@
       }
     },
     {
-      "id": "bc0161be-aaa0-4896-a2be-ed1b6bb08fb3",
+      "id": "e8b6af22-a9b3-4c55-ac1d-e05b000bb444",
       "name": "Wait 2 s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -865,7 +865,7 @@
       }
     },
     {
-      "id": "ea225a3b-7f41-47bb-8cb3-830dc3579588",
+      "id": "1b001109-4913-48d9-8f48-1a154e70dbba",
       "name": "Notion · re-read contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -897,7 +897,7 @@
       }
     },
     {
-      "id": "6235c3d8-a4eb-4195-9f2d-b26fb2648f65",
+      "id": "63362b2e-c114-4409-862a-98dbb7b19506",
       "name": "Claim still ours?",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -911,7 +911,7 @@
       }
     },
     {
-      "id": "e8f20ea3-1b0d-4551-831a-29b66085a86f",
+      "id": "e31413bf-d7d4-4fb5-b581-116ef51217d4",
       "name": "Gmail · send",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
@@ -940,7 +940,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c2aa340c-6917-47ae-86bc-9c296ca60fde",
+      "id": "3f320727-0e37-486a-b688-e5a24fd7191c",
       "name": "Gmail · create draft",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
@@ -967,7 +967,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "d3e8125d-4365-46d8-b09e-7d14d302811d",
+      "id": "81b62092-952b-4986-b8f7-2215f250731e",
       "name": "Build outcome",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -981,7 +981,7 @@
       }
     },
     {
-      "id": "f250e44f-b306-4282-8f04-4c1d2db9ea0c",
+      "id": "c50f9bbe-04e1-4e46-a557-c13e079dca93",
       "name": "Notion · save outcome",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1019,7 +1019,7 @@
       }
     },
     {
-      "id": "828e2325-2e49-4c22-aa7c-4a04b3b76ef7",
+      "id": "0ef02ae7-996c-4376-acc8-500521f6fd76",
       "name": "Close card?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1037,7 +1037,7 @@
           },
           "conditions": [
             {
-              "id": "6c1ba8a2-aa5b-4b38-b855-97db1464ecb4",
+              "id": "4b62e657-8d7a-4e7c-a396-2afd9580d6f6",
               "leftValue": "={{ $('Build outcome').item.json.closeText || '' }}",
               "rightValue": "",
               "operator": {
@@ -1052,7 +1052,7 @@
       }
     },
     {
-      "id": "e2fa36c6-ca1f-4ef0-9f3d-513c8ddecfcf",
+      "id": "bd47e682-fa89-4589-b6b7-73167a2e2c51",
       "name": "Telegram · close card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1082,7 +1082,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "598f996d-441a-4ce4-bc31-d5caee8294d2",
+      "id": "5b2dc14e-5654-423f-bf84-6711f8e7a973",
       "name": "Extra message?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1100,7 +1100,7 @@
           },
           "conditions": [
             {
-              "id": "017da3fb-314b-4e66-9035-7c3cbd96b3e0",
+              "id": "305aa5d8-814c-4314-820a-f59f5e3af084",
               "leftValue": "={{ $('Build outcome').item.json.replyText || '' }}",
               "rightValue": "",
               "operator": {
@@ -1115,7 +1115,7 @@
       }
     },
     {
-      "id": "3d528c7e-149f-419b-9054-a7a57be2cc4d",
+      "id": "4ea9ba98-705c-47ae-a8fd-9b044403f367",
       "name": "LinkedIn to-do?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1133,7 +1133,7 @@
           },
           "conditions": [
             {
-              "id": "c4c6a78e-2e75-430f-bb00-075c5154a2ff",
+              "id": "4615b5bf-c0a5-409d-ad28-df459dc55211",
               "leftValue": "={{ $('Build outcome').item.json.liKey || '' }}",
               "rightValue": "",
               "operator": {
@@ -1148,7 +1148,7 @@
       }
     },
     {
-      "id": "2617dd72-210f-4726-b54a-831b7c78a39b",
+      "id": "de2a5da0-1f28-4050-8b83-c6a64ccf4d9a",
       "name": "Telegram · LinkedIn to send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1197,7 +1197,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "12a9a2b5-e414-463c-95f8-0480400b30a6",
+      "id": "d24c8c27-7c98-4688-a4b2-10104d20ee2a",
       "name": "Telegram · extra message",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1224,7 +1224,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a2a9f74d-83ba-43f1-ad03-78f57b85f5de",
+      "id": "60a15e71-945d-4ce7-bb37-1fb09a6d0ed4",
       "name": "Refill queue?",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1237,7 +1237,7 @@
       }
     },
     {
-      "id": "704b3b43-e31e-4d80-9bcd-1d75ac91dc9f",
+      "id": "13c57b88-3cb4-4c85-8586-6f9c933f6032",
       "name": "Run WP · 50 (next card)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -1260,7 +1260,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c1e5148b-d17e-4c16-9227-7fb93b9592f8",
+      "id": "befafd98-ea11-4b1c-98ee-00099176f8cf",
       "name": "Telegram · notice",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1287,7 +1287,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2b03d59e-3115-48de-bcb2-dc67d6905824",
+      "id": "e3733ba3-8bd6-4080-a632-6bba5cdc75de",
       "name": "Telegram · close handled card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1317,7 +1317,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "bbc99340-637c-4cbf-8151-02d8da09e89a",
+      "id": "c0f93039-e3f7-4c30-8d98-72d1c11ac359",
       "name": "Note · 51",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

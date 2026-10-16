@@ -86,7 +86,7 @@
         380
       ],
       "parameters": {
-        "jsCode": "const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`ERROR · ${$json.workflow}`) },\n  'Workflow': { select: { name: 'Error handler' } },\n  'Status': { select: { name: 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($json.executionId) },\n  'Errors': { number: 1 },\n  'Notes': { rich_text: t(`${$json.node}: ${$json.msg}`) }\n}}}];"
+        "jsCode": "const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1900) } }];\nreturn [{ json: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties: {\n  'Run': { title: t(`${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} · ERROR · ${$json.workflow}`) },\n  'Workflow': { select: { name: 'Error handler' } },\n  'Status': { select: { name: 'Failed' } },\n  'Started': { date: { start: new Date().toISOString() } },\n  'Execution ID': { rich_text: t($json.executionId) },\n  'Errors': { number: 1 },\n  'Notes': { rich_text: t(`${$json.node}: ${$json.msg}`) }\n}}}];"
       }
     },
     {
