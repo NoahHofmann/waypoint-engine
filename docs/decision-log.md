@@ -52,3 +52,6 @@
 | 16 Oct | Orchestrator: Always Output Data on Sub · 30/40/50 | A sub-workflow with nothing to do returns 0 items and n8n stops the chain: 40 and 50 never ran at 12:46 |
 | 16 Oct | 30: only decision-maker roles are enriched (CEO/MD, founder, sales, partnerships); a missing role is skipped | Holo's "Founding UX Designer" got a Gmail draft when the CEO was unreachable |
 | 16 Oct | LinkedIn approvals become an open "🔗 LINKEDIN TO SEND" message with Open profile + ✅ Sent on LinkedIn buttons | Noah: "copy and send" texts get lost in the chat; the to-do must stay visibly open until done |
+| 16 Oct | Draft model → Claude Sonnet 5.5; judge-v5 adds a 10-point quality rubric (own benchmark); judge stays GPT-5 mini | Noah added Anthropic; wants good emails without overpaying and a way to compare models over time |
+| 16 Oct | All workflows: credential + workflow IDs preset, Error workflow = WP · 90 | Zero-click imports; every crash reaches the alerts bot |
+| 16 Oct | docs/STATE.md (+ Project doc) is the handover page for new sessions; decision-log keeps the why | Context compaction can drop details; one page restores the state |

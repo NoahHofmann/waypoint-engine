@@ -35,3 +35,10 @@
 - US providers (OpenAI, Anthropic, Google) are covered by the EU–US Data Privacy Framework (upheld by the EU General Court in Sept 2025).
 - Chinese providers (Moonshot/Kimi, Z.ai/GLM, DeepSeek) have no adequacy decision.
 - Low practical risk for public founders' names and roles. It becomes relevant if the engine is sold to clients.
+
+## Decision (16 Oct, 13:30)
+- **Draft model: Claude Sonnet 5.5** ($2/$10, ~€7/month at our volume).
+- Not Opus 5.5: about 2× the cost.
+- Not Haiku 5.5: unproven for prose.
+- **Own benchmark from now on:** each draft is scored 0–10 by the fixed judge (GPT-5 mini, judge-v5 rubric). Runs record *Quality avg* + *Model*.
+- **Baseline:** GPT-5.1 drafts from 15–16 Oct (no score yet). Run a few days per model, then compare Quality avg, code-check pass rate, cost and seconds per contact. Later add reply rate (roadmap).

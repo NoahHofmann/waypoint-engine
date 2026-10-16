@@ -170,6 +170,12 @@
           "timeout": 60000,
           "maxRetries": 2
         }
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "pdSFtuDMCaKd3CHG",
+          "name": "OpenAi account"
+        }
       }
     },
     {
@@ -228,7 +234,13 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ filter: { property: \"Dedupe key\", rich_text: { equals: $json.dedupeKey || \"__none__\" } }, page_size: 1 }) }}"
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "a80e9601-35dd-4b84-b279-94396d88e038",
@@ -322,7 +334,13 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "b00d9221-6240-4e05-bfad-c016ab62edac",
@@ -557,7 +575,8 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "Europe/Berlin",
-    "saveManualExecutions": true
+    "saveManualExecutions": true,
+    "errorWorkflow": "gx1X9dLMg8Hqn5lI"
   },
   "pinData": {}
 }

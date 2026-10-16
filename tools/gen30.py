@@ -1,6 +1,6 @@
 import json, uuid, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids
+from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids, WF_ERROR
 N=[]; C={}
 def node(name,typ,ver,pos,params,**kw):
     n={"id":str(uuid.uuid4()),"name":name,"type":typ,"typeVersion":ver,"position":pos,"parameters":params}; n.update(kw); N.append(n); return name
@@ -463,6 +463,6 @@ Why so strict: two people with the same name are common; a wrong profile poisons
 **Hunter:** finder (1 credit, only when found) → verifier (0.5) unless already sure. Website-found addresses are **always** verified. **No email is ever sent.** If Hunter guessed the domain itself, it must match the company name. API errors keep Needs email for a retry.""")]
 for nm,pos,wd,ht,txt in STICKIES: node(nm,"n8n-nodes-base.stickyNote",1,pos,{"width":wd,"height":ht,"content":txt})
 
-wf={"name":"WP · 30 Enrich contacts (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf={"name":"WP · 30 Enrich contacts (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True,"errorWorkflow":WF_ERROR},"pinData":{}}
 json.dump(wf,open("/home/claude/waypoint-engine/workflows/30-enrich-contacts.json","w"),indent=2,ensure_ascii=False)
 print(len(N),"nodes")

@@ -72,7 +72,7 @@ Run summary to the orchestrator: drafted, passed, passed on the first try, faile
 
 | Role | Model | Why | Price per 1M tokens (input / output) |
 |---|---|---|---|
-| Draft | GPT-5.1, reasoning low (**interim**: decision via blind bake-off, docs/model-choice.md) | Known quality from v3; low reasoning cuts runtime | $1.25 / $10 |
+| Draft | **Claude Sonnet 5.5** (`claude-sonnet-5-5`), temperature 0.6 | Mid-price tier with natural prose; model quality is tracked by our own score (below) | $2 / $10 |
 | Judge | GPT-5 mini, reasoning effort low | Different model family from the drafter; cheap; yes/no checking is easy | $0.25 / $2 |
 
 See docs/model-choice.md for the benchmark comparison and the bake-off plan.
@@ -80,6 +80,8 @@ See docs/model-choice.md for the benchmark comparison and the bake-off plan.
 **Runtime:** both chains process 4 contacts in parallel (`batching.batchSize = 4`). The target is 2–3 minutes for 8 contacts, down from 6:31 in v3 (not yet measured).
 
 **Cost:** about $0.03 per contact per attempt for the draft plus under $0.01 for the judge. That is under $0.50 per run, even with retries.
+
+**Own benchmark (judge-v5):** the judge also scores every variant on a 10-point rubric: hook 0–3, relevance 0–3, natural tone 0–2, clear ask 0–2. Contacts get *Quality score* (the average of the 3 variants); Runs get *Quality avg* + *Model*. The judge model and rubric stay fixed, so when the draft model changes, the scores compare models directly.
 
 ## 5. Failure modes and recovery
 | What breaks | What you see | What the workflow does | What you do |

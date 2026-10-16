@@ -1,6 +1,6 @@
 import json, uuid, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids
+from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids, WF_ERROR
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 N=[]; C={}
@@ -28,10 +28,10 @@ return [{ json: {
   notionOffersDb: '5618b11e453a4704a41fb530812f110a',
   maxDraftsPerRun: 8,
   // Models are preset in the model nodes (sub-nodes under each Draft/Judge chain). These lines document them.
-  draftModel: 'gpt-5.1',           // 'OpenAI · draft 1/2', reasoning effort LOW. Interim until the model decision (docs/model-choice.md)
+  draftModel: 'claude-sonnet-5-5', // 'Claude · draft 1/2'. Change here AND in the two sub-nodes when switching models
   judgeModel: 'gpt-5-mini',         // 'OpenAI · judge 1/2', reasoning effort low. Why: a different model family grades the draft (no self-grading)
   calLink: 'https://cal.com/book-a-call-with-noah/30min',
-  promptVersion: 'draft-v5 / judge-v4',
+  promptVersion: 'draft-v5 / judge-v5',
   playbookPageId: '3fa64e3c573c81bb9e99da3b6be520c1',   // Notion › Sales Playbook (edit there)
   // NOAH PROFILE: the ONLY facts about Noah a draft may use (canonical metrics, project instructions).
   profile: [
@@ -135,7 +135,7 @@ link("Fetch homepage","Build brief (rules)")
 DRAFT_SYS=open(R+'prompts/draft.md').read()
 JUDGE_SYS=open(R+'prompts/judge.md').read()
 DSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"subject":{"type":["string","null"]},"body":{"type":"string"}}}}}},indent=2)
-JSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"unsupported_claims":{"type":["array","null"],"items":{"type":"string"}},"names_ok":{"type":["boolean","null"]},"language_ok":{"type":["boolean","null"]},"specific_opening":{"type":["boolean","null"]},"tone_ok":{"type":["boolean","null"]},"playbook_violations":{"type":["array","null"],"items":{"type":"string"}},"notes":{"type":["string","null"]}}}}}},indent=2)
+JSCHEMA=json.dumps({"type":"object","required":["variants"],"properties":{"variants":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"unsupported_claims":{"type":["array","null"],"items":{"type":"string"}},"names_ok":{"type":["boolean","null"]},"language_ok":{"type":["boolean","null"]},"specific_opening":{"type":["boolean","null"]},"tone_ok":{"type":["boolean","null"]},"playbook_violations":{"type":["array","null"],"items":{"type":"string"}},"notes":{"type":["string","null"]},"score_hook":{"type":["number","null"]},"score_relevance":{"type":["number","null"]},"score_natural":{"type":["number","null"]},"score_ask":{"type":["number","null"]}}}}}},indent=2)
 
 CHECK=r"""// Code checks for EACH variant before the judge: format, link, opt-out, no number outside the brief,
 // and Noah's rule that the funding round is never the headline.
@@ -203,23 +203,26 @@ const variants = p.variants.map(v => {
     ...(j.specific_opening === false ? ['Opening not specific to this company'] : []),
     ...(j.tone_ok === false && judgeKeep(j.notes || 'tone') ? ['Tone: ' + (j.notes || 'not plain/respectful')] : []),
     ...clean(j.playbook_violations).filter(judgeKeep).map(x => 'Playbook: ' + x)];
-  return { ...v, judgeIssues, judgeNote: j?.notes || '', pass: v.issues.length === 0 && judgeIssues.length === 0 };
+  // OWN BENCHMARK: rubric score 0-10 from the (fixed) judge: hook 0-3, relevance 0-3, natural 0-2, ask 0-2.
+  const cl = (x, hi) => Math.max(0, Math.min(hi, Number(x) || 0));
+  const quality = j ? cl(j.score_hook, 3) + cl(j.score_relevance, 3) + cl(j.score_natural, 2) + cl(j.score_ask, 2) : null;
+  return { ...v, judgeIssues, judgeNote: j?.notes || '', quality, pass: v.issues.length === 0 && judgeIssues.length === 0 };
 });
 const passed = variants.filter(v => v.pass).map(v => v.id);
 const notes = `Attempt ${p.attempt}: ${passed.length ? 'passed ' + passed.join(', ') : 'no variant passed'}\n` + variants.map(v =>
-  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\n');
+  `${v.id}: ${v.pass ? 'PASS' : 'FAIL'}${v.quality != null ? ' (' + v.quality + '/10)' : ''}${[...v.issues, ...v.judgeIssues].length ? ' · ' + [...v.issues, ...v.judgeIssues].join(' · ') : ''}`).join('\n');
 return { json: { ...p, variants, passedIds: passed, pass: passed.length > 0,
   judgeNotes: (p.judgeNotes ? p.judgeNotes + '\n' : '') + notes,
   feedback: variants.map(v => `Variant ${v.id}: ` + [...v.issues, ...v.judgeIssues].join('; ')).join('\n') } };"""
 
 def stage(n,x,inp,prev_expr):
-    dn=f"Draft (attempt {n})"; on=f"OpenAI · draft {n}"; sn=f"Schema · draft {n}"
+    dn=f"Draft (attempt {n})"; on=f"Claude · draft {n}"; sn=f"Schema · draft {n}"
     node(dn,"@n8n/n8n-nodes-langchain.chainLlm",1.7,[x,200],{"promptType":"define",
       "text":"={{ $json.briefText }}{{ $json.feedback ? '\\n\\nNONE OF YOUR PREVIOUS VARIANTS PASSED REVIEW. Write three new variants that fix ALL of these:\\n' + $json.feedback : '' }}",
       "hasOutputParser":True,"batching":{"batchSize":4,"delayBetweenBatches":0},"messages":{"messageValues":[{"type":"SystemMessagePromptTemplate","message":DRAFT_SYS}]}},onError="continueRegularOutput")
-    # Interim until the model decision (see docs/model-choice.md): gpt-5.1 with LOW reasoning (v3 used default = slow).
-    node(on,"@n8n/n8n-nodes-langchain.lmChatOpenAi",1.2,[x-60,420],{"model":{"__rl":True,"value":"gpt-5.1","mode":"id"},"options":{"timeout":120000,"maxRetries":2,"reasoningEffort":"low"}},
-         credentials={"openAiApi":{"id":"","name":"OpenAi account"}})
+    # Draft model: Claude Sonnet 5.5 (16 Oct, docs/model-choice.md). Mid-price tier: ~$0.026 per attempt.
+    # To compare models later: swap this sub-node; the judge stays GPT-5 mini so Quality scores stay comparable.
+    node(on,"@n8n/n8n-nodes-langchain.lmChatAnthropic",1.3,[x-60,420],{"model":{"__rl":True,"value":"claude-sonnet-5-5","mode":"id"},"options":{"maxTokensToSample":2500,"temperature":0.6}})
     node(sn,"@n8n/n8n-nodes-langchain.outputParserStructured",1.2,[x+80,420],{"schemaType":"manual","inputSchema":DSCHEMA})
     link(on,dn,kind="ai_languageModel"); link(sn,dn,kind="ai_outputParser")
     link(inp,dn)
@@ -252,8 +255,11 @@ const t = s => [{ type: 'text', text: { content: String(s ?? '').slice(0, 1990) 
 const fmt = v => v ? ((v.subject ? 'Subject: ' + v.subject + '\n\n' : '') + v.body + (v.pass ? '' : '\n\n[did not pass review]')) : '';
 const byId = id => (r.variants || []).find(v => v.id === id);
 const best = (r.variants || []).find(v => v.pass) || null;
+const qs = (r.variants || []).map(v => v.quality).filter(q => q != null);
+const quality = qs.length ? Math.round(qs.reduce((a, b) => a + b, 0) / qs.length * 10) / 10 : null;
 const props = {
   'Status': { status: { name: r.pass ? 'Draft ready' : 'Check manually' } },
+  'Quality score': { number: quality },
   'Variant A': { rich_text: t(fmt(byId('A'))) },
   'Variant B': { rich_text: t(fmt(byId('B'))) },
   'Variant C': { rich_text: t(fmt(byId('C'))) },
@@ -273,7 +279,7 @@ const props = {
 };
 if (r.channel === 'Email') props['Booking link'] = { url: r.bookingLink };
 return { json: { contactPageId: r.contactPageId, name: r.name, company: r.company, channel: r.channel, pass: r.pass,
-  passed: r.passedIds, attempts: r.attempt, notionBody: { properties: props } } };"""
+  passed: r.passedIds, attempts: r.attempt, quality, notionBody: { properties: props } } };"""
 node("Build draft update","n8n-nodes-base.code",2,[3960,100],{"jsCode":UPDATE,"mode":"runOnceForEachItem"})
 link("Passed?","Build draft update",0); link(d2,"Build draft update")
 notion("Notion · save draft",[4200,100],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}","={{ JSON.stringify($json.notionBody) }}",retryOnFail=True,maxTries=3,waitBetweenTries=2000)
@@ -282,13 +288,15 @@ node("Run summary","n8n-nodes-base.code",2,[4440,100],{"jsCode":"""// Summary fo
 const rows = $('Build draft update').all().map(i => i.json);
 return [{ json: { drafted: rows.length, passed: rows.filter(r => r.pass).length,
   firstTry: rows.filter(r => r.pass && r.attempts === 1).length, failed: rows.filter(r => !r.pass).length,
-  drafts: rows.map(r => ({ name: r.name, company: r.company, channel: r.channel, passed: r.passed, attempts: r.attempts })) } }];"""})
+  qSum: rows.reduce((a, r) => a + (r.quality || 0), 0), qN: rows.filter(r => r.quality != null).length,
+  drafts: rows.map(r => ({ name: r.name, company: r.company, channel: r.channel, passed: r.passed, attempts: r.attempts, quality: r.quality })) } }];"""})
 link("Notion · save draft","Run summary")
 M40=r"""const r = $json;
-const c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0) };
+const c = { in: r.drafted, out: r.passed, firstTry: r.firstTry, failed: r.failed, attempts: (r.drafts || []).reduce((a, d) => a + (d.attempts || 1), 0), qSum: r.qSum || 0, qN: r.qN || 0 };
 const x = { model: $('Config').first().json.draftModel, prompt: $('Config').first().json.promptVersion };
-const view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.019 * 1000) / 1000, skip: !c.in,
-  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Cost estimated (~€0.019 per attempt).` });"""
+const view = (c, x) => ({ in: c.in, out: c.out, errors: 0, costEur: Math.round(c.attempts * 0.024 * 1000) / 1000, skip: !c.in,
+  quality: c.qN ? Math.round(c.qSum / c.qN * 10) / 10 : null, model: x.model,
+  notes: `${c.out}/${c.in} passed (${c.firstTry} on the first try), ${c.failed} to Check manually. ${c.attempts} draft attempts. Model ${x.model}, ${x.prompt}. Avg quality ${c.qN ? (c.qSum / c.qN).toFixed(1) : 'n/a'}/10. Cost estimated (~€0.024 per attempt).` });"""
 node("Build run log","n8n-nodes-base.code",2,[4660,100],{"jsCode":runlog_code("Config","Draft","Draft",M40)})
 link("Run summary","Build run log")
 node("Notion · log run","n8n-nodes-base.httpRequest",4.2,[4880,100],runlog_http_params(),onError="continueRegularOutput")
@@ -328,6 +336,6 @@ Docs: docs/40-draft-judge.md"""),
 **Save:** *Build draft update* writes all three variants (failed ones marked "[did not pass review]"), default draft = first passing variant, Status *Draft ready* or *Check manually*. *Run summary* returns counts to the orchestrator.
 **Failure modes:** model/API error → node continues, contact shows "Judge returned no verdict" and lands in *Check manually*; Notion save retries 3×. Re-run safe: only *Ready to draft* / *LinkedIn only* contacts are picked, so drafted contacts are never redrafted.""")]
 for nm,pos,wd,ht,txt in notes: node(nm,"n8n-nodes-base.stickyNote",1,pos,{"width":wd,"height":ht,"content":txt})
-wf={"name":"WP · 40 Draft + judge (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf={"name":"WP · 40 Draft + judge (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True,"errorWorkflow":WF_ERROR},"pinData":{}}
 json.dump(wf,open(R+'workflows/40-draft-judge.json','w'),indent=2,ensure_ascii=False)
 print(len(N))

@@ -32,6 +32,8 @@ const properties = {
   'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },
   'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },
   'Notes': { rich_text: t(m.notes) } };
+if (m.quality != null) properties['Quality avg'] = { number: m.quality };
+if (m.model) properties['Model'] = { rich_text: t(m.model) };
 return [{ json: acc.pageId
   ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }
   : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '%DB%' }, properties } } }];"""
@@ -59,6 +61,8 @@ CRED_IDS = {
     "httpHeaderAuth": {"id": "LeyoiGdCQBySGpwl", "name": "Brave Search API"},
     "httpQueryAuth":  {"id": "Ijnmypzzm24UpmJD", "name": "Hunter API"},
 }
+ANTHROPIC = {"anthropicApi": {"id": "GZsdXTaGEKzuDNrl", "name": "Anthropic account"}}
+WF_ERROR = "gx1X9dLMg8Hqn5lI"   # WP · 90 Error handler
 TG_APPROVALS = {"telegramApi": {"id": "x17tu5yr5xFWMSsZ", "name": "Telegram approvals"}}
 TG_ALERTS    = {"telegramApi": {"id": "GH3lzZFd7mdFuTUq", "name": "Telegram alerts"}}
 WF_IDS = {"50": "nKdLZEFyebsDumCl", "51": "iwDMW5Mq4s7mlia4"}
@@ -72,4 +76,5 @@ def apply_ids(nodes):
             elif p.get("genericAuthType") == "httpQueryAuth": n["credentials"] = {"httpQueryAuth": CRED_IDS["httpQueryAuth"]}
         elif t == "@n8n/n8n-nodes-langchain.lmChatOpenAi": n["credentials"] = {"openAiApi": CRED_IDS["openAiApi"]}
         elif t == "n8n-nodes-base.gmail": n["credentials"] = {"gmailOAuth2": CRED_IDS["gmailOAuth2"]}
+        elif t == "@n8n/n8n-nodes-langchain.lmChatAnthropic": n["credentials"] = ANTHROPIC
     return nodes

@@ -63,6 +63,12 @@
           "timeout": 60000,
           "maxRetries": 2
         }
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "pdSFtuDMCaKd3CHG",
+          "name": "OpenAi account"
+        }
       }
     },
     {
@@ -137,7 +143,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "2053f018-c30f-43e8-843e-f363f99461d6",
@@ -183,7 +195,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "049f6819-52a8-47a8-b175-5a7deb46f95f",
@@ -295,7 +313,8 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "Europe/Berlin",
-    "saveManualExecutions": true
+    "saveManualExecutions": true,
+    "errorWorkflow": "gx1X9dLMg8Hqn5lI"
   },
   "pinData": {}
 }

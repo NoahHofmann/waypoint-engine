@@ -1,6 +1,6 @@
 import json, uuid, sys
 sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
-from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids, WF_IDS, TG_APPROVALS
+from runlog import runlog_code, runlog_http_params, REMEMBER, apply_ids, WF_IDS, TG_APPROVALS, WF_ERROR
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 CHAT='1170608781'
@@ -194,7 +194,7 @@ Sends one Telegram card per contact with Status **Draft ready**: company, person
 Sets Status **Awaiting approval** and stores the card's message id. The taps are handled by **WP · 51** (Telegram trigger).
 **Why Telegram:** approval in seconds from the phone; nothing leaves without a human tap. **Why show the action on the card:** the legal-basis gate is visible before you decide.
 Docs: docs/50-approval.md"""})
-wf50={"name":"WP · 50 Approval cards (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf50={"name":"WP · 50 Approval cards (sub-workflow)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True,"errorWorkflow":WF_ERROR},"pinData":{}}
 json.dump(wf50,open(R+'workflows/50-approval-cards.json','w'),indent=2,ensure_ascii=False)
 n50=len(N)
 
@@ -433,6 +433,6 @@ node("Note · 51","n8n-nodes-base.stickyNote",1,[0,-420],{"width":1200,"height":
 5. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.
 6. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.
 Docs: docs/50-approval.md"""})
-wf51={"name":"WP · 51 Approval handler (Telegram trigger)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True},"pinData":{}}
+wf51={"name":"WP · 51 Approval handler (Telegram trigger)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True,"errorWorkflow":WF_ERROR},"pinData":{}}
 json.dump(wf51,open(R+'workflows/51-approval-handler.json','w'),indent=2,ensure_ascii=False)
 print(n50,len(N))

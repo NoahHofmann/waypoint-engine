@@ -136,7 +136,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
-      "executeOnce": true
+      "executeOnce": true,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "ed3f4faa-2369-4119-9e25-4a677a55663a",
@@ -163,8 +169,8 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "4OE5IZv0U12Or4oP",
+          "mode": "id"
         },
         "mode": "each",
         "options": {
@@ -228,8 +234,8 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "dufRhYLqpo1JCUpH",
+          "mode": "id"
         },
         "mode": "each",
         "options": {
@@ -281,7 +287,13 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "notionApi": {
+          "id": "qrCZkB1IdXKr7Sp3",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "id": "99ac12c0-4bfb-4cd7-8159-336a1261a6a3",
@@ -327,8 +339,8 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "ZOOOloCRp4lfWiJl",
+          "mode": "id"
         },
         "mode": "once",
         "options": {
@@ -351,8 +363,8 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "CMf2GVdr4lZ5ruuU",
+          "mode": "id"
         },
         "mode": "once",
         "options": {
@@ -375,8 +387,8 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "",
-          "mode": "list"
+          "value": "nKdLZEFyebsDumCl",
+          "mode": "id"
         },
         "mode": "once",
         "options": {
@@ -568,7 +580,8 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "Europe/Berlin",
-    "saveManualExecutions": true
+    "saveManualExecutions": true,
+    "errorWorkflow": "gx1X9dLMg8Hqn5lI"
   },
   "pinData": {}
 }
