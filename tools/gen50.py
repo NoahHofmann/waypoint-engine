@@ -32,7 +32,7 @@ node("Config","n8n-nodes-base.code",2,[220,200],{"jsCode":f"""// 50 · Approval 
 return [{{ json: {{ chatId: '{CHAT}', notionContactsDb: '349e3747aa894088a833ca4a76d6a1b2', notionCompaniesDb: '1247998a78a8446993afa06d9811c436', maxOpenCards: 5, maxWebsiteQuestions: 3, startedAt: new Date().toISOString() }} }}];"""})
 link("Run manually","Config"); link("When called by orchestrator","Config")
 notion(node,"Notion · approved in Notion",[440,-160],"POST","=https://api.notion.com/v1/databases/{{ $json.notionContactsDb }}/query",
-  '={{ JSON.stringify({ filter: { and: [ { property: "Approve in Notion", select: { is_not_empty: true } }, { or: [ { property: "Status", status: { equals: "Awaiting approval" } }, { property: "Status", status: { equals: "Draft ready" } }, { property: "Status", status: { equals: "Check manually" } }, { property: "Status", status: { equals: "Backlog" } } ] } ] }, page_size: 20 }) }}',executeOnce=True)
+  '={{ JSON.stringify({ filter: { and: [ { property: "Approve in Notion", select: { is_not_empty: true } }, { or: [ { property: "Status", status: { equals: "Awaiting approval" } }, { property: "Status", status: { equals: "Draft ready" } }, { property: "Status", status: { equals: "Check manually" } }, { property: "Status", status: { equals: "Second contact" } } ] } ] }, page_size: 20 }) }}',executeOnce=True)
 link("Config","Notion · approved in Notion")
 NAPP=TXT+r"""
 // NOTION FALLBACK: you picked A/B/C/Skip in the column 'Approve in Notion' instead of tapping in Telegram.
@@ -55,8 +55,8 @@ node("Pick drafts","n8n-nodes-base.code",2,[880,200],{"jsCode":TXT+"""
 // (the drafts stay 'Draft ready' and go out after you answer the open ones).
 const cfg = $('Config').first().json;
 // ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out
-// (or a second draft for the same company in this batch) goes to BACKLOG: kept with its drafts as the
-// second contact if the first doesn't reply. Not an error; nothing is sent.
+// (or a second draft for the same company in this batch) goes to status SECOND CONTACT: kept with its drafts
+// for when the first doesn't reply. Not an error; nothing is sent.
 const inFlight = $('Notion · cards still open').first().json.results || [];
 const open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;
 const busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });
@@ -77,9 +77,9 @@ return dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { j
 link("Notion · drafts ready","Pick drafts")
 node("Duplicate company?","n8n-nodes-base.if",2.2,[990,200],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"id":str(uuid.uuid4()),"leftValue":"={{ $json.duplicate }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
 link("Pick drafts","Duplicate company?")
-notion(node,"Notion · move to Backlog",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
-  '={{ JSON.stringify({ properties: { Status: { status: { name: "Backlog" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " backlog: " + $json.other + " at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now)." } }] } } }) }}',onError="continueRegularOutput")
-link("Duplicate company?","Notion · move to Backlog",0)
+notion(node,"Notion · mark second contact",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
+  '={{ JSON.stringify({ properties: { Status: { status: { name: "Second contact" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " second contact: " + $json.other + " at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now)." } }] } } }) }}',onError="continueRegularOutput")
+link("Duplicate company?","Notion · mark second contact",0)
 notion(node,"Notion · get company",[1320,200],"GET","=https://api.notion.com/v1/pages/{{ $json.companyPageId }}")
 link("Duplicate company?","Notion · get company",1)
 STACK=TXT+r"""
@@ -100,7 +100,7 @@ const room = Math.max(0, $('Config').first().json.maxOpenCards - open);
 const c = { ready, nApp, cards: Math.min(room, ready) };
 const x = { open, full: room === 0 && ready > 0 };
 const view = (c, x) => ({ in: c.ready + c.nApp, out: c.cards + c.nApp, errors: 0, costEur: 0, skip: c.ready === 0 && c.nApp === 0,
-  notes: `${x.open} cards open before this run, ${c.ready} drafts ready, up to ${c.cards} new card(s) (second contacts at the same company go to Backlog), ${c.nApp} approval(s) from Notion handed to 51.` + (x.full ? ' QUEUE FULL.' : '') });"""
+  notes: `${x.open} cards open before this run, ${c.ready} drafts ready, up to ${c.cards} new card(s) (second people at the same company → Second contact), ${c.nApp} approval(s) from Notion handed to 51.` + (x.full ? ' QUEUE FULL.' : '') });"""
 node("Build run log","n8n-nodes-base.code",2,[880,640],{"jsCode":runlog_code("Config","Approval cards","Approval",M50)})
 link("Notion · drafts ready","Build run log")
 node("Notion · log run","n8n-nodes-base.httpRequest",4.2,[1100,640],runlog_http_params(),onError="continueRegularOutput")
@@ -352,7 +352,7 @@ const base = { ...base0, contactPageId: pg.id, name: txt(P.Name), company, chann
 if (p.kind === 'li_sent') return { json: status === 'Approved'
   ? { ...base, action: 'li_sent' }
   : { ...base, action: 'closed', closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\nStatus: ${h(status)}.` } };
-const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Backlog'] : ['Awaiting approval'];
+const allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Second contact'] : ['Awaiting approval'];
 // Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.
 if (!allowed.includes(status)) return { json: { ...base, action: 'closed',
   closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\nStatus: ${h(status)}. Nothing was sent again.` } };

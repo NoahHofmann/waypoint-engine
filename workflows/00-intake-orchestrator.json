@@ -61,7 +61,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "id": "d958c6a5-56a6-46c1-9be4-c4d5a759ba72",
@@ -79,7 +80,8 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "id": "bfa2b699-6419-4ee4-b7ff-4a43e74c4149",
@@ -90,7 +92,9 @@
         660,
         200
       ],
-      "parameters": {}
+      "parameters": {
+        "numberInputs": 5
+      }
     },
     {
       "id": "d69d4a43-cb75-4a86-9c61-6db31b6c2364",
@@ -102,7 +106,7 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Deterministic intake: clean, keep recent funding-like news, dedupe within batch.\nconst cfg = $('Config').first().json;\nconst cutoff = Date.now() - cfg.maxAgeDays * 864e5;\nconst FUNDING = /\\b(raises?|raised|secures?|secured|closes?|lands?|bags?|funding|seed|pre-seed|series [a-c]|investment round)\\b/i;\nconst strip = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\\s+/g, ' ').trim();\nconst seen = new Set(); const out = [];\nfor (const it of $input.all()) {\n  const j = it.json;\n  const link = (j.link || j.guid || '').split('?')[0].replace(/\\/$/, '');\n  if (!link || seen.has(link)) continue;\n  const date = new Date(j.isoDate || j.pubDate || 0).getTime();\n  if (!date || date < cutoff) continue;\n  const title = strip(j.title);\n  const text = strip(j['content:encoded'] || j.content || j.contentSnippet || j.description).slice(0, 2500);\n  if (!FUNDING.test(title + ' ' + text.slice(0, 400))) continue;\n  seen.add(link);\n  out.push({ json: { title, link, text, published: new Date(date).toISOString().slice(0, 10),\n    source: link.includes('eu-startups') ? 'EU-Startups' : link.includes('tech.eu') ? 'Tech.eu' : 'Other' } });\n}\nreturn out;"
+        "jsCode": "// Deterministic intake: clean, keep recent funding-like news, dedupe within batch.\nconst cfg = $('Config').first().json;\nconst cutoff = Date.now() - cfg.maxAgeDays * 864e5;\nconst FUNDING = /\\b(raises?|raised|secures?|secured|closes?|lands?|bags?|funding|seed|pre-seed|series [a-c]|investment round)\\b/i;\nconst strip = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\\s+/g, ' ').trim();\n// Source priority (1 = read first). Why: the per-run cap (maxLeadsPerRun) takes the best sources first.\n// 1 EU-Startups (funding-only, Europe, no paywall) · 2 Tech.eu (Europe, strong round coverage) · 3 Tech Funding News (funding-only, UK/EU)\n// 4 Silicon Canals (Benelux/Europe) · 5 Trending Topics (DACH/CEE, EN). Sifted and Gründerszene are excluded: paywalled articles break hooks + link extraction.\nconst SOURCES = [['eu-startups', 'EU-Startups', 1], ['tech.eu', 'Tech.eu', 2], ['techfundingnews', 'Tech Funding News', 3], ['siliconcanals', 'Silicon Canals', 4], ['trendingtopics', 'Trending Topics', 5]];\nconst SRC = link => { const s = SOURCES.find(([k]) => link.includes(k)); return s ? { name: s[1], prio: s[2] } : { name: 'Other', prio: 9 }; };\nconst seen = new Set(); const out = [];\nfor (const it of $input.all()) {\n  const j = it.json;\n  const link = (j.link || j.guid || '').split('?')[0].replace(/\\/$/, '');\n  if (!link || seen.has(link)) continue;\n  const date = new Date(j.isoDate || j.pubDate || 0).getTime();\n  if (!date || date < cutoff) continue;\n  const title = strip(j.title);\n  const text = strip(j['content:encoded'] || j.content || j.contentSnippet || j.description).slice(0, 2500);\n  if (!FUNDING.test(title + ' ' + text.slice(0, 400))) continue;\n  seen.add(link);\n  out.push({ json: { title, link, text, published: new Date(date).toISOString().slice(0, 10),\n    source: SRC(link).name, sourcePriority: SRC(link).prio } });\n}\nreturn out;"
       }
     },
     {
@@ -154,7 +158,7 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Idempotency across runs: skip any article already stored as a company. Cap volume for cost.\nconst cfg = $('Config').first().json;\nconst known = new Set(($input.first().json.results || [])\n  .map(p => (p.properties?.['Signal source']?.url || '').split('?')[0].replace(/\\/$/, '')).filter(Boolean));\nreturn $('Normalize + funding filter').all()\n  .filter(i => !known.has(i.json.link))\n  .slice(0, cfg.maxLeadsPerRun)\n  .map(i => ({ json: { ...i.json, cfg } }));"
+        "jsCode": "// Idempotency across runs: skip any article already stored as a company. Cap volume for cost.\nconst cfg = $('Config').first().json;\nconst known = new Set(($input.first().json.results || [])\n  .map(p => (p.properties?.['Signal source']?.url || '').split('?')[0].replace(/\\/$/, '')).filter(Boolean));\nreturn $('Normalize + funding filter').all()\n  .filter(i => !known.has(i.json.link))\n  .sort((a, b) => (a.json.sourcePriority - b.json.sourcePriority) || b.json.published.localeCompare(a.json.published))  // best source first, then newest\n  .slice(0, cfg.maxLeadsPerRun)\n  .map(i => ({ json: { ...i.json, cfg } }));"
       }
     },
     {
@@ -305,7 +309,7 @@
         -120
       ],
       "parameters": {
-        "content": "## Orchestrator\nOnly plumbing lives here: trigger → intake → dedupe → hand each article to sub-workflows. Every sub-workflow has one job and a small input/output contract, so each can be tested alone with pinned data.",
+        "content": "## Orchestrator\nOnly plumbing lives here: trigger → intake → dedupe → hand each article to sub-workflows. Every sub-workflow has one job and a small input/output contract, so each can be tested alone with pinned data.\n\n**Sources (16 Oct), in priority order:** 1 EU-Startups · 2 Tech.eu · 3 Tech Funding News · 4 Silicon Canals · 5 Trending Topics. A feed that fails is skipped (Continue on error), never blocks the run.",
         "height": 170,
         "width": 560,
         "color": 7
@@ -398,6 +402,54 @@
       "executeOnce": true,
       "onError": "continueRegularOutput",
       "alwaysOutputData": true
+    },
+    {
+      "id": "32d29799-5d3b-45b5-8d6b-80d2966de7e5",
+      "name": "RSS · Tech Funding News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        440,
+        500
+      ],
+      "parameters": {
+        "url": "https://techfundingnews.com/feed/",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "b0510724-d463-45eb-8b68-eb74080904b6",
+      "name": "RSS · Silicon Canals",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        440,
+        700
+      ],
+      "parameters": {
+        "url": "https://siliconcanals.com/feed/",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "e69c8d57-74d7-4146-aa85-d63077e72570",
+      "name": "RSS · Trending Topics",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        440,
+        900
+      ],
+      "parameters": {
+        "url": "https://www.trendingtopics.eu/feed/",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     }
   ],
   "connections": {
@@ -433,6 +485,21 @@
           },
           {
             "node": "RSS · Tech.eu",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS · Tech Funding News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS · Silicon Canals",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS · Trending Topics",
             "type": "main",
             "index": 0
           }
@@ -572,6 +639,39 @@
             "node": "Sub · 50 Approval cards",
             "type": "main",
             "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS · Tech Funding News": {
+      "main": [
+        [
+          {
+            "node": "Merge feeds",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS · Silicon Canals": {
+      "main": [
+        [
+          {
+            "node": "Merge feeds",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "RSS · Trending Topics": {
+      "main": [
+        [
+          {
+            "node": "Merge feeds",
+            "type": "main",
+            "index": 4
           }
         ]
       ]

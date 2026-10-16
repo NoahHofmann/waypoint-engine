@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "13e306ce-0e50-47c6-9e50-c817c7912497",
+      "id": "fbd3d92b-5ac4-4733-88ec-871b80882418",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "0128c47e-0c28-4b8d-8516-207484146a45",
+      "id": "98b7e58b-e7f4-4102-b762-c31f96f22a0e",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "c9e92944-e6b7-4c31-a85e-d3b97cac099e",
+      "id": "b1d60190-77bc-495c-afa6-fa399bad470e",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "da6414ef-f624-4592-b338-e4b1381b3556",
+      "id": "e827b78d-1b83-4183-ba4f-1a22864a3d87",
       "name": "Notion · approved in Notion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -64,7 +64,7 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ filter: { and: [ { property: \"Approve in Notion\", select: { is_not_empty: true } }, { or: [ { property: \"Status\", status: { equals: \"Awaiting approval\" } }, { property: \"Status\", status: { equals: \"Draft ready\" } }, { property: \"Status\", status: { equals: \"Check manually\" } }, { property: \"Status\", status: { equals: \"Backlog\" } } ] } ] }, page_size: 20 }) }}"
+        "jsonBody": "={{ JSON.stringify({ filter: { and: [ { property: \"Approve in Notion\", select: { is_not_empty: true } }, { or: [ { property: \"Status\", status: { equals: \"Awaiting approval\" } }, { property: \"Status\", status: { equals: \"Draft ready\" } }, { property: \"Status\", status: { equals: \"Check manually\" } }, { property: \"Status\", status: { equals: \"Second contact\" } } ] } ] }, page_size: 20 }) }}"
       },
       "executeOnce": true,
       "credentials": {
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "dddebb10-9c0a-46b9-9dce-6db02ff5831e",
+      "id": "6f27da48-5aa9-4538-a8cd-f9eea3745d88",
       "name": "Notion approvals → 51",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -88,7 +88,7 @@
       }
     },
     {
-      "id": "27fe587f-87b9-425d-aedf-2c22f20f678c",
+      "id": "d97f1ef3-c4c6-483d-bdbf-04e25ff7785a",
       "name": "Run WP · 51 for each",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -111,7 +111,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "ef5ba75e-1d40-47fa-9aa5-1066dc0e990e",
+      "id": "53114115-39d2-447d-984b-63eadab51944",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -147,7 +147,7 @@
       }
     },
     {
-      "id": "309c3510-9c45-4d06-9bbe-e178a66f2112",
+      "id": "477e7921-90c3-4583-87bc-362da08c1cd7",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -183,7 +183,7 @@
       }
     },
     {
-      "id": "1cb9c5d9-2352-4f43-9e1b-684a9870297a",
+      "id": "854d0431-39e1-4425-9459-ed92da5f64da",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -192,11 +192,11 @@
         200
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new\n// (the drafts stay 'Draft ready' and go out after you answer the open ones).\nconst cfg = $('Config').first().json;\n// ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out\n// (or a second draft for the same company in this batch) goes to BACKLOG: kept with its drafts as the\n// second contact if the first doesn't reply. Not an error; nothing is sent.\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst all = ($input.first().json.results || []).filter(pg => pg.properties.Company?.relation?.[0]?.id);\nconst dups = [], ready = [];\nall.forEach(pg => { const co = pg.properties.Company.relation[0].id;\n  if (busy[co]) dups.push({ pg, other: busy[co] }); else { busy[co] = txt(pg.properties.Name); ready.push(pg); } });\nconst take = ready.slice(0, room);\nconst dupItems = dups.map(d => ({ json: { duplicate: true, contactPageId: d.pg.id, name: txt(d.pg.properties.Name), other: d.other } }));\nreturn dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { json: { duplicate: false,\n  cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  judgeNotes: txt(P['Judge notes']), oneLiner: txt(P['Company one-liner']), quality: txt(P['Quality score']), fromQueue: open > 0,\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };\n// STACK GUARD: only top up to maxOpenCards unanswered cards. If the chat is full, send nothing new\n// (the drafts stay 'Draft ready' and go out after you answer the open ones).\nconst cfg = $('Config').first().json;\n// ONE COMPANY, ONE CONVERSATION: a draft for a company that already has a card open or an email out\n// (or a second draft for the same company in this batch) goes to status SECOND CONTACT: kept with its drafts\n// for when the first doesn't reply. Not an error; nothing is sent.\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst busy = {}; inFlight.forEach(pg => { const co = pg.properties.Company?.relation?.[0]?.id; if (co) busy[co] = txt(pg.properties.Name); });\nconst room = Math.max(0, cfg.maxOpenCards - open);\nconst all = ($input.first().json.results || []).filter(pg => pg.properties.Company?.relation?.[0]?.id);\nconst dups = [], ready = [];\nall.forEach(pg => { const co = pg.properties.Company.relation[0].id;\n  if (busy[co]) dups.push({ pg, other: busy[co] }); else { busy[co] = txt(pg.properties.Name); ready.push(pg); } });\nconst take = ready.slice(0, room);\nconst dupItems = dups.map(d => ({ json: { duplicate: true, contactPageId: d.pg.id, name: txt(d.pg.properties.Name), other: d.other } }));\nreturn dupItems.concat(take.map((pg, i) => { const P = pg.properties; return { json: { duplicate: false,\n  cardNo: open + i + 1, cardTotal: open + take.length, waiting: ready.length - take.length,\n  contactPageId: pg.id, name: txt(P.Name), role: txt(P.Role), channel: txt(P.Channel) || 'Email', language: txt(P['Draft language']),\n  offer: txt(P.Offer), email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only',\n  passed: txt(P['Variants passed']), A: txt(P['Variant A']), B: txt(P['Variant B']), C: txt(P['Variant C']),\n  judgeNotes: txt(P['Judge notes']), oneLiner: txt(P['Company one-liner']), quality: txt(P['Quality score']), fromQueue: open > 0,\n  companyPageId: P.Company?.relation?.[0]?.id || null } }; }));"
       }
     },
     {
-      "id": "5a9c3a98-bcdd-4f3d-94c0-f4b980f38227",
+      "id": "7c23c637-4f00-4ad8-b10b-d1ffb926204c",
       "name": "Duplicate company?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -214,7 +214,7 @@
           },
           "conditions": [
             {
-              "id": "b7c174a5-ba3f-41a6-a709-1c130f6a04fe",
+              "id": "1326d6ff-9347-4282-a747-99e591fdf3af",
               "leftValue": "={{ $json.duplicate }}",
               "rightValue": true,
               "operator": {
@@ -230,8 +230,8 @@
       }
     },
     {
-      "id": "c801b515-57e8-4964-bdd8-13004d4c0ebb",
-      "name": "Notion · move to Backlog",
+      "id": "7a29e85f-fa8e-4df6-908f-012bddd67d9c",
+      "name": "Notion · mark second contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -255,7 +255,7 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Backlog\" } }, \"Approval log\": { rich_text: [{ type: \"text\", text: { content: new Date().toISOString().slice(0,16) + \" backlog: \" + $json.other + \" at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now).\" } }] } } }) }}"
+        "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Second contact\" } }, \"Approval log\": { rich_text: [{ type: \"text\", text: { content: new Date().toISOString().slice(0,16) + \" second contact: \" + $json.other + \" at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now).\" } }] } } }) }}"
       },
       "onError": "continueRegularOutput",
       "credentials": {
@@ -266,7 +266,7 @@
       }
     },
     {
-      "id": "7a53302f-cfbd-4959-b2e8-1269b7def617",
+      "id": "640f6c48-331e-46d2-9890-d1e778ee00df",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "id": "d7b8185b-2eee-47de-bf2d-bcef79ee9cfd",
+      "id": "9564fae5-3d51-43a1-9e21-f2ab991b7939",
       "name": "Queue full notice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -311,7 +311,7 @@
       }
     },
     {
-      "id": "dbf9ff2f-70fb-4352-bd36-7fe35249dc9f",
+      "id": "85939023-2bab-4da1-98d4-613c2f3845ac",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -320,11 +320,11 @@
         640
       ],
       "parameters": {
-        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst ready = ($input.first().json.results || []).length;\nlet nApp = 0; try { nApp = ($('Notion · approved in Notion').first().json.results || []).length; } catch (e) {}\nconst room = Math.max(0, $('Config').first().json.maxOpenCards - open);\nconst c = { ready, nApp, cards: Math.min(room, ready) };\nconst x = { open, full: room === 0 && ready > 0 };\nconst view = (c, x) => ({ in: c.ready + c.nApp, out: c.cards + c.nApp, errors: 0, costEur: 0, skip: c.ready === 0 && c.nApp === 0,\n  notes: `${x.open} cards open before this run, ${c.ready} drafts ready, up to ${c.cards} new card(s) (second contacts at the same company go to Backlog), ${c.nApp} approval(s) from Notion handed to 51.` + (x.full ? ' QUEUE FULL.' : '') });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Approval cards ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Approval' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
+        "jsCode": "// RUN LOG (upsert): one row per execution in Notion › Runs: runtime, volume, errors, estimated cost.\n// This node can run several times per execution (once per branch that reaches it). Counters are summed\n// in the execution's custom data, and the same Notion row is updated instead of creating a new one.\nconst started = $('Config').first().json.startedAt;\nconst inFlight = $('Notion · cards still open').first().json.results || [];\nconst open = inFlight.filter(pg => pg.properties.Status?.status?.name === 'Awaiting approval').length;\nconst ready = ($input.first().json.results || []).length;\nlet nApp = 0; try { nApp = ($('Notion · approved in Notion').first().json.results || []).length; } catch (e) {}\nconst room = Math.max(0, $('Config').first().json.maxOpenCards - open);\nconst c = { ready, nApp, cards: Math.min(room, ready) };\nconst x = { open, full: room === 0 && ready > 0 };\nconst view = (c, x) => ({ in: c.ready + c.nApp, out: c.cards + c.nApp, errors: 0, costEur: 0, skip: c.ready === 0 && c.nApp === 0,\n  notes: `${x.open} cards open before this run, ${c.ready} drafts ready, up to ${c.cards} new card(s) (second people at the same company → Second contact), ${c.nApp} approval(s) from Notion handed to 51.` + (x.full ? ' QUEUE FULL.' : '') });\nconst cd = $execution.customData;\nlet acc = {}; try { acc = JSON.parse(cd.get('runlog') || '{}'); } catch (e) { acc = {}; }\nacc.c = acc.c || {};\nfor (const k of Object.keys(c)) acc.c[k] = (acc.c[k] || 0) + (Number(c[k]) || 0);\nconst m = view(acc.c, x);\ncd.set('runlog', JSON.stringify({ c: acc.c, pageId: acc.pageId || null }));\nif (m.skip) return [];\nconst dur = started ? Math.round((Date.now() - new Date(started).getTime()) / 1000) : null;\nconst t = v => [{ type: 'text', text: { content: String(v ?? '').slice(0, 1900) } }];\nconst properties = {\n  'Run': { title: t(`Approval cards ${new Date(started || Date.now()).toISOString().slice(0, 16).replace('T', ' ')}`) },\n  'Workflow': { select: { name: 'Approval' } },\n  'Status': { select: { name: m.errors ? (m.out > 0 ? 'Partial' : 'Failed') : 'Success' } },\n  'Started': { date: { start: started || new Date().toISOString() } },\n  'Duration s': { number: dur },\n  'Execution ID': { rich_text: t($execution.id) },\n  'Items in': { number: m.in ?? null }, 'Items out': { number: m.out ?? null },\n  'Errors': { number: m.errors || 0 }, 'Cost EUR': { number: m.costEur ?? null },\n  'Notes': { rich_text: t(m.notes) } };\nif (m.quality != null) properties['Quality avg'] = { number: m.quality };\nif (m.model) properties['Model'] = { rich_text: t(m.model) };\nreturn [{ json: acc.pageId\n  ? { method: 'PATCH', url: 'https://api.notion.com/v1/pages/' + acc.pageId, body: { properties } }\n  : { method: 'POST', url: 'https://api.notion.com/v1/pages', body: { parent: { database_id: '84a655097a4449588604e918ae009c1b' }, properties } } }];"
       }
     },
     {
-      "id": "20d887cf-51ac-4f0e-9c52-eda9303fa4f1",
+      "id": "d0ab1f51-50af-4fbb-b6e1-7f12220570a8",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -360,7 +360,7 @@
       }
     },
     {
-      "id": "3f9b7522-dbab-482b-8731-e46a4ac44e06",
+      "id": "3eb78f52-b95d-4d19-a255-ee86f2db315d",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -373,7 +373,7 @@
       }
     },
     {
-      "id": "195c7893-3551-4825-a97c-6f13b583ea61",
+      "id": "fb68ad02-55de-40bf-81a7-19294682a3bf",
       "name": "Telegram · queue full",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -398,7 +398,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "56b7cad5-7157-4ea3-8070-efa2be4ccff8",
+      "id": "892acf77-ba4e-4da5-818d-525264a418ab",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -412,7 +412,7 @@
       }
     },
     {
-      "id": "46a7a410-e89a-4901-8c35-01b4e0365a4d",
+      "id": "b799e54b-1949-46e7-91b2-bed686b75f68",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -485,7 +485,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "ea9cdf84-37db-4ea0-ade2-76357ada6721",
+      "id": "d4e218ec-ac95-460a-bf56-c9fd1b468fc6",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -499,7 +499,7 @@
       }
     },
     {
-      "id": "82dd115f-aa98-4049-bc75-f8019436eff8",
+      "id": "c29d0d47-f6f4-448c-8497-d82b534bb42a",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -534,7 +534,7 @@
       }
     },
     {
-      "id": "6efb7f04-a509-4d4f-a008-2aecb486d976",
+      "id": "08d30522-6ba3-4222-8e0c-cc160525dd54",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -570,7 +570,7 @@
       }
     },
     {
-      "id": "a8e5297d-f13d-4804-a785-3e52bcba6bc2",
+      "id": "703cbdeb-0aac-4f29-bddc-cd49b44de561",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -583,7 +583,7 @@
       }
     },
     {
-      "id": "b0a99981-956f-4eba-a32f-e9a73b196f89",
+      "id": "d1cef8fb-7c52-4faa-8b98-84de771affcf",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -632,7 +632,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "85810899-ff9c-4e28-b43e-496f7bb59173",
+      "id": "ea07d548-7c34-45eb-8b87-5e2b16d57e56",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -668,7 +668,7 @@
       }
     },
     {
-      "id": "08344a5b-09f4-4b1e-82dd-51a5c399ba4d",
+      "id": "b73291df-711b-4705-a9c9-59ae13d387f3",
       "name": "Note · 50 notion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "5b632cc0-6181-4cb3-bb7b-a31b33c0a7d4",
+      "id": "4b255ec2-d999-471c-8153-4e29fd27c805",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -698,7 +698,7 @@
       }
     },
     {
-      "id": "d4998cfc-8516-4751-b59f-658b2c867af7",
+      "id": "af84da9d-26dd-486a-8698-bb15677893b0",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -826,7 +826,7 @@
       "main": [
         [
           {
-            "node": "Notion · move to Backlog",
+            "node": "Notion · mark second contact",
             "type": "main",
             "index": 0
           }

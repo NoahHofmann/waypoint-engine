@@ -22,7 +22,7 @@ Cadence lives in Notion › Sales Playbook:
 - day 8: LinkedIn message, only once the connection is accepted
 - day 13: walk-away email
 
-Backlog contacts become the next step when the first contact never replies.
+Second contacts become the next step when the first contact never replies.
 
 ## H3: Multi-channel
 Email and LinkedIn alternating as one sequence; checking whether the LinkedIn connection was accepted.

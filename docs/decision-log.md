@@ -55,3 +55,5 @@
 | 16 Oct | Draft model → Claude Sonnet 5.5; judge-v5 adds a 10-point quality rubric (own benchmark); judge stays GPT-5 mini | Noah added Anthropic; wants good emails without overpaying and a way to compare models over time |
 | 16 Oct | All workflows: credential + workflow IDs preset, Error workflow = WP · 90 | Zero-click imports; every crash reaches the alerts bot |
 | 16 Oct | docs/STATE.md (+ Project doc) is the handover page for new sessions; decision-log keeps the why | Context compaction can drop details; one page restores the state |
+| 16 Oct | Status "Backlog" renamed to **Second contact**; card tag 📥 BACKLOG = came from the queue | The same word was used for two things |
+| 16 Oct | 3 more RSS feeds (Tech Funding News, Silicon Canals, Trending Topics) with a source priority 1–5 before the per-run cap | Need more fresh funded companies; the best-fit, non-paywalled sources come first. Sifted/Gründerszene excluded (paywall breaks hooks and link extraction) |
