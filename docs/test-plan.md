@@ -31,3 +31,8 @@ Run in number order. Skip a test only when its setup isn't available yet, and sa
 | T2 retest | 16 Oct 16:26 | ✅ Fast B/A/B/A taps on Filip's card → 1 Gmail draft, Approval log has one decision | – |
 | T3 | 16 Oct 16:13 | ✅ "hello" → 🤔 Not matched to a card, with help text | – |
 | T5 | 16 Oct 16:29 | ✅ Reply with own subject/body on Tommi's card → Gmail draft, Chosen variant = Edited, subject "Test" | – |
+| T1 | 16 Oct 16:45 | ✅ /start + message from a second account to both bots → no reply | – |
+| T4 | 16 Oct 16:38 | ✅ Reply to closed card → 🤔 No contact found; nothing created | – |
+| T6 | 16 Oct 16:42 | ✅ "no idea" → ⚠️ doesn't look like a domain. Cosmetic: quoted only "no" | 51 v6: quotes the full reply |
+| T7 | 16 Oct 16:45 | ✅ Real domain → ✅ WEBSITE SAVED (Epyr) | – |
+| T8 | 16 Oct 16:50 | ✅ Approve in Notion = A (Dawid) → Gmail draft + Approval log. Log time was UTC | 50/51: Approval log in Berlin time |

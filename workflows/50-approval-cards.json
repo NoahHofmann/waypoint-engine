@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "dcdd4e76-f0db-4201-a0e7-981837031776",
+      "id": "2bf1795f-0215-46bd-8d74-6a16ec939b0d",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "31a5829c-2fde-4fab-b812-9f800c7c9aa1",
+      "id": "75875c18-aa66-439f-a17b-cafdfa9bc197",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "baa1e709-0347-4a39-8fb2-a26964d4995c",
+      "id": "ae0149e4-aee7-427f-b784-e741238b3f86",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "d4fa9799-2909-4459-827d-133edd90b5bb",
+      "id": "f7848871-99e5-4617-88e6-6aec231f555a",
       "name": "Notion · approved in Notion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "8218528c-fc31-40a7-8822-13ccf4e46632",
+      "id": "072605f1-a838-4013-9fcd-f6ec844bd3a9",
       "name": "Notion approvals → 51",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -88,7 +88,7 @@
       }
     },
     {
-      "id": "69d83574-e07b-4bd4-842b-34afc31634d7",
+      "id": "029542fb-2a44-4265-a8b4-ab1eb0fa01d0",
       "name": "Run WP · 51 for each",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -111,7 +111,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "bb43ec2a-28f8-4c37-a50c-cce497780c28",
+      "id": "3d4b9057-2764-4780-9617-4b13231d4aa1",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -147,7 +147,7 @@
       }
     },
     {
-      "id": "66928be3-ef49-4d12-afb9-54f3b24b31ec",
+      "id": "090125fb-f771-4028-a9fb-1ed78dec9377",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -183,7 +183,7 @@
       }
     },
     {
-      "id": "c4f06d63-1dbf-45c3-8c2a-f92c109debd8",
+      "id": "c41ad994-2b1c-45e8-991b-3cddc5ccdb94",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -196,7 +196,7 @@
       }
     },
     {
-      "id": "012c2539-e0f0-4adc-b01e-2004474f9031",
+      "id": "ad8d82b1-f5f9-441b-8d32-6ae5b1457c30",
       "name": "Duplicate company?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -214,7 +214,7 @@
           },
           "conditions": [
             {
-              "id": "78c5cd2a-0db3-4b89-a415-485feaf2c5b1",
+              "id": "88da88ca-e494-478c-88d2-642be9921797",
               "leftValue": "={{ $json.duplicate }}",
               "rightValue": true,
               "operator": {
@@ -230,7 +230,7 @@
       }
     },
     {
-      "id": "3f272094-cd5f-48ab-91be-ea648be7606d",
+      "id": "c069470f-d1ef-426e-bce3-92ce82df97f6",
       "name": "Notion · mark second contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -255,7 +255,7 @@
         "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Second contact\" } }, \"Approval log\": { rich_text: [{ type: \"text\", text: { content: new Date().toISOString().slice(0,16) + \" second contact: \" + $json.other + \" at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now).\" } }] } } }) }}"
+        "jsonBody": "={{ JSON.stringify({ properties: { Status: { status: { name: \"Second contact\" } }, \"Approval log\": { rich_text: [{ type: \"text\", text: { content: $now.setZone(\"Europe/Berlin\").toFormat(\"yyyy-MM-dd HH:mm\") + \" second contact: \" + $json.other + \" at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now).\" } }] } } }) }}"
       },
       "onError": "continueRegularOutput",
       "credentials": {
@@ -266,7 +266,7 @@
       }
     },
     {
-      "id": "2fb07684-05d3-4399-9ffa-2d169a6888ae",
+      "id": "95dfe0e0-dc89-4ad4-a51e-dbf326fb176a",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "id": "53b66fea-c57e-43c5-a19e-7a776502e31f",
+      "id": "c7f0d44e-218c-43dc-b490-0624264b9efd",
       "name": "Queue full notice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -311,7 +311,7 @@
       }
     },
     {
-      "id": "d385f634-0fae-4b32-aa76-c23be9287aaa",
+      "id": "ac2d6ed2-1864-4a83-9471-4ac72e7d3df6",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -324,7 +324,7 @@
       }
     },
     {
-      "id": "8adc550f-c706-44ab-a8f9-73795c270f53",
+      "id": "6319fb46-87b3-4311-b111-cde527edcde5",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -360,7 +360,7 @@
       }
     },
     {
-      "id": "533f2f54-4c3e-4d58-aa12-d335b77a8278",
+      "id": "d7aa6f2f-e450-45b2-ad89-747a7ba53f4d",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -373,7 +373,7 @@
       }
     },
     {
-      "id": "fe5b8b04-e022-442f-a06e-5cc967778456",
+      "id": "5a1b8917-cfbe-413a-8e4f-a273da209c03",
       "name": "Telegram · queue full",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -398,7 +398,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "759f378e-18ff-4e7c-b1a5-a18b2e5eb32c",
+      "id": "6e8a096e-607d-49ab-b3ec-1ed0bb41c1fb",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -412,7 +412,7 @@
       }
     },
     {
-      "id": "23b5452e-d50c-4ecb-ad62-92d535210690",
+      "id": "fb13e924-f9b3-4cad-bc19-ad0a7db77427",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -485,7 +485,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "37a98d25-0d69-4b8d-82f3-58583a258cc9",
+      "id": "c8bb3026-0876-4890-91eb-c74f2b4ad696",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -494,12 +494,12 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Awaiting approval + the card's message id (idempotency key: a tap is only acted on while the status is Awaiting approval).\nconst c = $('Build card').item.json;\nconst id = $json.result?.message_id;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nif (!id) return { json: { skip: true, contactPageId: c.contactPageId, error: JSON.stringify($json.error || $json).slice(0, 200) } };\nreturn { json: { contactPageId: c.contactPageId, name: c.name, company: c.company, body: { properties: {\n  'Status': { status: { name: 'Awaiting approval' } },\n  'Telegram message ID': { rich_text: t(String(id)) },\n  'Approval log': { rich_text: t(`${new Date().toISOString().slice(0, 16)} card sent (message ${id})`) } } } } };",
+        "jsCode": "// Awaiting approval + the card's message id (idempotency key: a tap is only acted on while the status is Awaiting approval).\nconst c = $('Build card').item.json;\nconst id = $json.result?.message_id;\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nif (!id) return { json: { skip: true, contactPageId: c.contactPageId, error: JSON.stringify($json.error || $json).slice(0, 200) } };\nreturn { json: { contactPageId: c.contactPageId, name: c.name, company: c.company, body: { properties: {\n  'Status': { status: { name: 'Awaiting approval' } },\n  'Telegram message ID': { rich_text: t(String(id)) },\n  'Approval log': { rich_text: t(`${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} card sent (message ${id})`) } } } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "0d122e57-1af8-4c16-9b01-ef80e320fb94",
+      "id": "91ad32c1-a5c0-4c26-969d-513745b724e4",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -534,7 +534,7 @@
       }
     },
     {
-      "id": "0c782efa-10dd-4498-914f-c932861195f8",
+      "id": "2ff3ec1f-7bc9-48d7-9f61-090095d10a8e",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -570,7 +570,7 @@
       }
     },
     {
-      "id": "ec5f6ee4-f092-4be0-95b0-d5f83cff372f",
+      "id": "bf82332b-c979-48bf-9f40-eb91ad940676",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -583,7 +583,7 @@
       }
     },
     {
-      "id": "63194122-bfce-46b9-87c4-49d424eff448",
+      "id": "c91a83d1-18c7-4233-8c1f-999d60d6d570",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -632,7 +632,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "f5c402e3-0022-483b-a4ba-8b343d74cabf",
+      "id": "ac3fbde3-46e7-41d9-ba77-474e8dcd9bae",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -668,7 +668,7 @@
       }
     },
     {
-      "id": "a2f31229-65f0-4ced-846b-cf58a391852c",
+      "id": "bab004e6-ed74-442f-a28d-6a7f60c07a6f",
       "name": "Note · 50 notion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "917397c9-8c35-499d-a5ac-ae6c3ffb0189",
+      "id": "fc2d4413-7e88-48fe-b30e-f223cd487d98",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -698,7 +698,7 @@
       }
     },
     {
-      "id": "17f848c1-850f-4bd9-b98c-8e4d4b9eff50",
+      "id": "12284dae-662d-4f68-92bb-aad88de51f5d",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

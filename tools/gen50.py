@@ -78,7 +78,7 @@ link("Notion · drafts ready","Pick drafts")
 node("Duplicate company?","n8n-nodes-base.if",2.2,[990,200],{"conditions":{"options":{"caseSensitive":True,"leftValue":"","typeValidation":"loose","version":2},"conditions":[{"id":str(uuid.uuid4()),"leftValue":"={{ $json.duplicate }}","rightValue":True,"operator":{"type":"boolean","operation":"true","singleValue":True}}],"combinator":"and"},"options":{}})
 link("Pick drafts","Duplicate company?")
 notion(node,"Notion · mark second contact",[1210,20],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}",
-  '={{ JSON.stringify({ properties: { Status: { status: { name: "Second contact" } }, "Approval log": { rich_text: [{ type: "text", text: { content: new Date().toISOString().slice(0,16) + " second contact: " + $json.other + " at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now)." } }] } } }) }}',onError="continueRegularOutput")
+  '={{ JSON.stringify({ properties: { Status: { status: { name: "Second contact" } }, "Approval log": { rich_text: [{ type: "text", text: { content: $now.setZone("Europe/Berlin").toFormat("yyyy-MM-dd HH:mm") + " second contact: " + $json.other + " at this company is already in conversation. Second contact if there is no reply (set Approve in Notion to use now)." } }] } } }) }}',onError="continueRegularOutput")
 link("Duplicate company?","Notion · mark second contact",0)
 notion(node,"Notion · get company",[1320,200],"GET","=https://api.notion.com/v1/pages/{{ $json.companyPageId }}")
 link("Duplicate company?","Notion · get company",1)
@@ -175,7 +175,7 @@ if (!id) return { json: { skip: true, contactPageId: c.contactPageId, error: JSO
 return { json: { contactPageId: c.contactPageId, name: c.name, company: c.company, body: { properties: {
   'Status': { status: { name: 'Awaiting approval' } },
   'Telegram message ID': { rich_text: t(String(id)) },
-  'Approval log': { rich_text: t(`${new Date().toISOString().slice(0, 16)} card sent (message ${id})`) } } } } };""","mode":"runOnceForEachItem"})
+  'Approval log': { rich_text: t(`${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} card sent (message ${id})`) } } } } };""","mode":"runOnceForEachItem"})
 link("Telegram · send card","Build Notion update")
 notion(node,"Notion · awaiting approval",[2200,200],"PATCH","=https://api.notion.com/v1/pages/{{ $json.contactPageId }}","={{ JSON.stringify($json.body) }}")
 link("Build Notion update","Notion · awaiting approval")
@@ -258,7 +258,7 @@ const ref = String(replyTo?.text || '').match(/ref w\|([0-9a-f]{{32}})/);
 if (msg && ref && msg.text) {{
   const dom = String(msg.text).trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[\/\s]/)[0];
   const okDom = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{{2,}}$/.test(dom);
-  return {{ json: {{ ok: true, kind: okDom ? 'website' : 'website_bad', domain: dom, companyPageId: uuidOf(ref[1]),
+  return {{ json: {{ ok: true, kind: okDom ? 'website' : 'website_bad', domain: dom, rawText: String(msg.text).trim().slice(0, 60), companyPageId: uuidOf(ref[1]),
     cardMessageId: replyTo.message_id, replyMessageId: msg.message_id, cardTitle: titleOf(replyTo.text), chatId }} }};
 }}
 if (msg && replyTo && msg.text) {{
@@ -297,7 +297,7 @@ WEB=H_JS+r"""
 const p = $('Parse update (rules)').item.json;
 const co = h(p.cardTitle || 'Company');
 if (p.kind === 'website_bad') return { json: { ...p, valid: false,
-  notice: `⚠️ <b>"${h(p.domain)}" doesn't look like a domain.</b>\nReply to the 🌐 question again, e.g. <code>acme.ai</code>` } };
+  notice: `⚠️ <b>"${h(p.rawText || p.domain)}" doesn't look like a domain.</b>\nReply to the 🌐 question again, e.g. <code>acme.ai</code>` } };
 const props = p.kind === 'website'
   ? { 'Domain': { url: 'https://' + p.domain }, 'Domain source': { select: { name: 'Manual' } } }
   : { 'Domain source': { select: { name: 'No website' } } };
@@ -435,7 +435,7 @@ else if (d.action === 'li_sent') { status = 'Sent';
   closeText = `✅ <b>SENT ON LINKEDIN · ${who}</b>\n${hhmm} · connection request with note.`; extra['Sent at'] = { date: { start: now } }; }
 else if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\n${hhmm}${via} · nothing will be sent.`; }
 const props = { 'Status': { status: { name: status } },
-  'Approval log': { rich_text: t(`${d.log ? d.log + '\n' : ''}${now.slice(0, 16)} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };
+  'Approval log': { rich_text: t(`${d.log ? d.log + '\n' : ''}${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };
 if (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },
   'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });
 Object.assign(props, extra);
