@@ -21,8 +21,13 @@ Goal: try to break the engine before the demo. Each test lists what to do, what 
 
 **Restore after T11/T12:** put the correct key and DB id back.
 
+## Order
+Run in number order. Skip a test only when its setup isn't available yet, and say why. Today's first run started with T2/T3 (sending paths first, as the highest risk), then went back to number order.
+
 ## Results
 | # | Date | Result | Fix |
 |---|---|---|---|
 | T2 | 16 Oct 16:10 | ❌ Several fast taps (A and B) created 3 Gmail drafts; the card closed only after a few taps | 51 v5: Notion lock (claim → wait 2 s → verify). Retest |
+| T2 retest | 16 Oct 16:26 | ✅ Fast B/A/B/A taps on Filip's card → 1 Gmail draft, Approval log has one decision | – |
 | T3 | 16 Oct 16:13 | ✅ "hello" → 🤔 Not matched to a card, with help text | – |
+| T5 | 16 Oct 16:29 | ✅ Reply with own subject/body on Tommi's card → Gmail draft, Chosen variant = Edited, subject "Test" | – |
