@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 14:20 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 16 Oct 2026, 15:55 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -85,7 +85,8 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 - Tommi, Filip and Victor were re-queued for re-drafting with Claude. Their GPT-5.1 baseline is in `docs/evals/gpt51-baseline-16oct.md`.
 
 ## Open issues (in priority order)
-1. First Claude Sonnet 5.5 drafts are not yet reviewed (no Claude run had input before 14:00).
+1. **Claude emails arrived empty** (15:42 run: Tommi, Filip → Check manually). Cause: Claude's JSON output didn't parse. Fix: 40 v5 / draft-v7 uses plain-text sections; on failure Judge notes show the raw output. Tommi + Filip reset to Ready to draft. T2 is blocked until this runs.
+1b. Intake: Normalize 71 → 20, all 20 already known. Tech Funding News returns 403 (blocks n8n). Planned: TFN via HTTP Request with a browser User-Agent, maxAgeDays 7 → 14, German funding terms.
 2. Stress tests not yet run (`docs/test-plan.md`).
 3. README, architecture diagram and demo script for Monday.
 4. Docs for 00/10/20/90 are not yet in the new template.
