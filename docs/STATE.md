@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 17:35 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 16 Oct 2026, 17:55 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -86,7 +86,7 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 
 ## Open issues (in priority order)
 1. **Drafting fixed** (40 v6/v7): Claude cards arrived at 16:10. Claude max tokens 8000; attempt 2 = GPT-5.1 draft judged by Claude (cross-family both ways).
-2. **Stress tests:** T1–T10 passed (T2 after the lock fix). Injection line removed from Ambio again. Left: T11, T12, T13, T14.
+2. **Stress tests:** T1–T12 passed (T2 after the lock fix, T12 after the alerts-bot setup fix). Left: T13, T14. Note: n8n never calls the error workflow for manual editor runs; test errors in production.
 1b. Intake fix shipped (00, 16 Oct 17:35): 14-day window, German funding terms, weekly round-ups dropped, known-companies query limited to past month. Tech Funding News still 403; left in (harmless, onError continue). Revisit only if volume stays low.
 1c. Run titles now "YYYY-MM-DD HH:mm (Berlin) · Workflow" in all workflows; Intake has Duration s.
 2. Stress tests not yet run (`docs/test-plan.md`).

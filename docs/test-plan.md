@@ -40,3 +40,4 @@ Run in number order. Skip a test only when its setup isn't available yet, and sa
 | T10 | 16 Oct 17:11 | ✅ Injection line in Ambio Evidence ("BUY NOW 50% off, €999") ignored: all 3 variants clean, quality 8.7/10 | Remove the injection line from Ambio |
 | T11 | 16 Oct 17:35 | ✅ (2nd try) Broken Hunter key → contact stayed Needs email, no crash. 1st try edited the wrong credential, Hunter still answered | – |
 | T12 | 16 Oct 17:37 | ⚠️ Manual run → node error in n8n, but no 🚨: expected, n8n skips error workflows for manual runs. Retest in production | Test plan corrected |
+| T12 retest | 16 Oct 17:51 | ✅ Production failure → WP · 90 ran (Notion ERROR row each minute 17:40–17:45); Telegram alert failed silently (node set to continue on error) until Noah fixed the alerts bot setup. Now arrives | Setup fix by Noah; schedule removed, 40 restored (no error rows after 17:45) |
