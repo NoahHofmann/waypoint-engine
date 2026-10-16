@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 13:40 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 16 Oct 2026, 14:20 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -71,8 +71,21 @@ This is the single page a new session (or a new Claude context) reads to continu
 - Telegram: needs an answer → approvals bot; information only → alerts bot. Every tap or reply gets a visible answer; decided cards close.
 - Never raise the Jobcenter topic. No API keys in chat.
 
+## Update protocol (how this page stays current)
+Claude rewrites this page and pushes it (repo + Project doc) together with every "Pipeline status / This week / Waiting on" block, i.e. at the end of each working reply where something changed. Noah doesn't need to trigger it; "wrap up" forces it.
+
+## Latest changes (16 Oct afternoon)
+- **Cards:**
+  - Header: 📨 APPROVE (first batch) or 📥 BACKLOG (came from the queue).
+  - Lines: 🏢 What they do, ICP fit %, Quality x/10, Queue count.
+  - Each variant that didn't pass shows "⚠️ Not recommended: <category> · reason". The 6 categories: claim not backed, too generic, tone/hype, length/format, playbook rule, other.
+- **40 (draft-v6):** a formatting check (blank lines between paragraphs) and a company one-liner.
+- **30:** website candidates now start with the company's link inside the funding article.
+- **Dawid:** not a bug. The old 50 v2 had set him to Skipped; moved to Backlog by hand.
+- Tommi, Filip and Victor were re-queued for re-drafting with Claude. Their GPT-5.1 baseline is in `docs/evals/gpt51-baseline-16oct.md`.
+
 ## Open issues (in priority order)
-1. Dawid (Coding Giants) stayed *Draft ready* instead of going to *Backlog*, although Radosław is in conversation. Check the 50 execution at 13:18, node "Notion · move to Backlog".
+1. First Claude Sonnet 5.5 drafts are not yet reviewed (no Claude run had input before 14:00).
 2. Stress tests not yet run (`docs/test-plan.md`).
 3. README, architecture diagram and demo script for Monday.
 4. Docs for 00/10/20/90 are not yet in the new template.
