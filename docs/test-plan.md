@@ -41,3 +41,13 @@ Run in number order. Skip a test only when its setup isn't available yet, and sa
 | T11 | 16 Oct 17:35 | ✅ (2nd try) Broken Hunter key → contact stayed Needs email, no crash. 1st try edited the wrong credential, Hunter still answered | – |
 | T12 | 16 Oct 17:37 | ⚠️ Manual run → node error in n8n, but no 🚨: expected, n8n skips error workflows for manual runs. Retest in production | Test plan corrected |
 | T12 retest | 16 Oct 17:51 | ✅ Production failure → WP · 90 ran (Notion ERROR row each minute 17:40–17:45); Telegram alert failed silently (node set to continue on error) until Noah fixed the alerts bot setup. Now arrives | Setup fix by Noah; schedule removed, 40 restored (no error rows after 17:45) |
+| T13 | 16 Oct 18:05 | ✅ ✅ Sent on LinkedIn → to-do closed, Status = Sent | – |
+| T14 | 16 Oct 18:08 | ✅ Second Ambio contact (Elmo Pakkanen) set to Draft ready while Tommi's card was open → WP · 50 moved him to Second contact, no card | – |
+
+## Summary (16 Oct, 18:10)
+14/14 passed. Real bugs found and fixed during the run:
+1. **Double tap (T2):** fast taps created 3 Gmail drafts → Notion lock in 51 (claim, wait 2 s, verify).
+2. **Claude drafts empty (pre-test):** output budget too small → 8000 tokens, plain-text sections, GPT-5.1 fallback.
+3. **Alerts never reached Telegram (T12):** alerts-bot setup; the Telegram node fails silently by design, so this only showed in production.
+Cosmetic fixes: Berlin time in logs and run titles, full text in the domain warning, weekly round-ups filtered from intake.
+Learned: n8n doesn't call the error workflow for manual editor runs, so error alerts must be tested in production.
