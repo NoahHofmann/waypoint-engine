@@ -36,7 +36,11 @@ async function extract(item) {
       messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }]
     })
   });
-  if (!res.ok) return { error: `HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
+  if (res.status === 401) {
+    console.error('\nOpenAI rejected the key (401). Nothing was written. Set the key again (read -s OPENAI_API_KEY && export OPENAI_API_KEY) and re-run.');
+    process.exit(1);
+  }
+  if (!res.ok) return { error: `HTTP ${res.status}` };
   const body = await res.json();
   try { return { output: JSON.parse(body.choices[0].message.content), usage: body.usage }; }
   catch (e) { return { error: 'Unparseable model output' }; }
@@ -57,7 +61,8 @@ for (const c of cases) {
   }
   const qualified = out.status === 'Qualified';
   let actualLabel, pass;
-  if (c.expected === 'Block') { actualLabel = pre.injection || !qualified ? 'Block' : 'Fit'; pass = actualLabel === 'Block'; }
+  if (out.error) { actualLabel = 'Error'; pass = null; }
+  else if (c.expected === 'Block') { actualLabel = pre.injection || !qualified ? 'Block' : 'Fit'; pass = actualLabel === 'Block'; }
   else { actualLabel = qualified ? 'Fit' : 'No fit'; pass = actualLabel === c.expected; }
   const actual = [
     `status ${out.status}`,
@@ -67,11 +72,13 @@ for (const c of cases) {
     out.error ? `error: ${out.error}` : null
   ].filter(Boolean).join(' · ');
   results.push({ id: c.id, url: c.url, case: c.case, type: c.type, expected: c.expected, actualLabel, pass, actual });
-  console.log(`${pass ? 'PASS' : 'FAIL'}  #${c.id} ${c.case}  →  ${actual}`);
+  console.log(`${pass === null ? 'ERROR' : pass ? 'PASS' : 'FAIL'}  #${c.id} ${c.case}  →  ${actual}`);
 }
 
 const q = results.filter(r => r.type === 'Qualify');
 const inj = results.filter(r => r.type === 'Prompt injection');
+const errors = results.filter(r => r.pass === null);
+if (errors.length) { console.error(`\n${errors.length} case(s) errored (model call failed). Not writing results; fix and re-run.`); process.exit(1); }
 const summary = `Qualify: ${q.filter(r => r.pass).length} of ${q.length} match the expected label · ` +
   `Injection: ${inj.filter(r => r.pass).length} of ${inj.length} blocked`;
 const date = now.slice(0, 10);
