@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 16 Oct 2026, 18:15 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 18 Oct 2026, 20:30 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -74,24 +74,18 @@ This is the single page a new session (or a new Claude context) reads to continu
 ## Update protocol (how this page stays current)
 Claude rewrites this page and pushes it (repo + Project doc) together with every "Pipeline status / This week / Waiting on" block, i.e. at the end of each working reply where something changed. Noah doesn't need to trigger it; "wrap up" forces it.
 
-## Latest changes (16 Oct afternoon)
-- **Cards:**
-  - Header: 📨 APPROVE (first batch) or 📥 BACKLOG (came from the queue).
-  - Lines: 🏢 What they do, ICP fit %, Quality x/10, Queue count.
-  - Each variant that didn't pass shows "⚠️ Not recommended: <category> · reason". The 6 categories: claim not backed, too generic, tone/hype, length/format, playbook rule, other.
-- **40 (draft-v6):** a formatting check (blank lines between paragraphs) and a company one-liner.
-- **30:** website candidates now start with the company's link inside the funding article.
-- **Dawid:** not a bug. The old 50 v2 had set him to Skipped; moved to Backlog by hand.
-- Tommi, Filip and Victor were re-queued for re-drafting with Claude. Their GPT-5.1 baseline is in `docs/evals/gpt51-baseline-16oct.md`.
+## Latest changes (18 Oct evening)
+- **Scope:** T-010 (Cal.com booking → Notion) cut from the WBS scope; moved to Notion › Future ideas. Drafts already carry the per-contact booking link with metadata[contact], so only the webhook workflow is missing.
+- **T-007 done:** 16/16 drafted contacts judge-passed before approval; draft-v7 4/4 first try (quality 9.4–9.5/10); 11/15 automatic across all draft runs, the 4 others went to Check manually (v6 / first v7 run).
+- **Golden set:** `tools/eval_qualify.mjs` runs the 20 qualify + 2 injection cases through the production code read from `workflows/10-qualify-company.json` (only the gpt-4o-mini call is direct). Cases in `docs/evals/golden-set.json`. Evals cases 20 (dedupe, T9) and 22 (legal gate, T2/T5/T8) marked Pass from stress-test evidence; 21 notes partial coverage.
+- **README:** models updated (Claude Sonnet 5.5 draft, GPT-5 mini judge), eval/test results table, roadmap pointer. `docs/demo-script.md` = shot list for the recording.
+- **Notion › Waypoint Engine › Future ideas** (new database): ICP profiles (= workbook T-015), analytics engine, self-optimising agent, Cal.com booking, follow-ups, LinkedIn acceptance, seniority fallback, sell the engine.
 
 ## Open issues (in priority order)
-1. **Drafting fixed** (40 v6/v7): Claude cards arrived at 16:10. Claude max tokens 8000; attempt 2 = GPT-5.1 draft judged by Claude (cross-family both ways).
-2. **Stress tests: 14/14 passed** (docs/test-plan.md has results + summary). **Code freeze until the demo (Mon 19 Oct):** only fix what breaks a live run.
-1b. Intake fix shipped (00, 16 Oct 17:35): 14-day window, German funding terms, weekly round-ups dropped, known-companies query limited to past month. Tech Funding News still 403; left in (harmless, onError continue). Revisit only if volume stays low.
-1c. Run titles now "YYYY-MM-DD HH:mm (Berlin) · Workflow" in all workflows; Intake has Duration s.
-2. Stress tests not yet run (`docs/test-plan.md`).
-3. README, architecture diagram and demo script for Monday.
-4. Docs for 00/10/20/90 are not yet in the new template.
+1. **Code freeze until the demo (Mon 19 Oct):** only fix what breaks a live run.
+2. Noah: confirm the 20 qualify labels in Notion › Evals, run `OPENAI_API_KEY=… node tools/eval_qualify.mjs`, push `docs/evals/`. Claude then writes results into Notion › Evals and the README table.
+3. Record the demo (docs/demo-script.md), then deck + ElevenLabs video.
+4. Docs for 00/10/20/90 are not yet in the new template (after the demo).
 
 ## Parked (roadmap)
 - Analytics agent (reply rates per variant and per model).
