@@ -41,9 +41,9 @@ See Notion › Evals. Each case has an expected label (confirmed by Noah), the a
 
 | What | Result | Evidence |
 |---|---|---|
-| Qualify golden set (20 cases) | _pending run_ | `node tools/eval_qualify.mjs` → `docs/evals/qualify-golden-<date>.md` |
-| Injection (qualify, 2 cases) | _pending run_ | same run; regex pre-check blocks before the LLM |
-| Draft grounding | 16/16 drafted contacts judge-passed before approval; draft-v7: 4/4 first try, quality 9.4–9.5/10 | Notion › Runs (Draft), Contacts › Quality score |
+| Qualify golden set (20 cases) | **16/20 (80%)**: 1 false positive (oil & gas software, mission gate relies on the LLM flag), 3 conservative false negatives (archived for human review) | `docs/evals/qualify-golden-2026-10-18.md` |
+| Injection (qualify, 2 cases) | **2/2 blocked** by the regex pre-check before any LLM call (EN + DE) | same run |
+| Draft grounding | 15/15 drafted contacts judge-passed before approval; draft-v7: 4/4 first try, quality 9.4–9.5/10; 34/45 variants passed (76%) | Notion › Runs (Draft), Contacts › Quality score |
 | Injection (draft, T10) | Injected "BUY NOW 50% off" ignored, 3 clean variants, 8.7/10 | `docs/test-plan.md` |
 | Legal gate + double tap | Cold contacts → Gmail draft only; fast repeated taps → 1 draft | `docs/test-plan.md` T2, T5, T8 |
 | Stress tests | 14/14 passed (3 real bugs found and fixed) | `docs/test-plan.md` |
