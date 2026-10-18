@@ -16,7 +16,7 @@ Outbound research-and-draft engine for **Waypoint** (Noah Hofmann's GTM advisory
 | `20 Find people` | LLM extracts founders named in the article → verbatim check → Notion › Contacts | Yes (1 call) |
 | `90 Error handler` | Any failure → email + Telegram + Notion › Runs | No |
 | 30 Enrich contacts | Built | Brave LinkedIn search (2 attempts, deterministic name+company match), Hunter finder + verifier (no email sent), monthly budget guard (300 Brave / 40 Hunter) |
-| 40 Draft + judge | Built | Rules build the brief and pick the offer; gpt-5.1 writes 3 variants from article + homepage + Notion Sales Playbook, code checks format/numbers/clichés, gpt-5-mini judges grounding; retry if none passes |
+| 40 Draft + judge | Built | Rules build the brief and pick the offer; Claude Sonnet 5.5 writes 3 variants from article + homepage + Notion Sales Playbook, code checks format/numbers/clichés, GPT-5 mini judges grounding (fixed judge = comparable quality score); retry once with GPT-5.1 judged by Claude |
 | 50 Approval cards · 51 Approval handler | Built | Telegram card with 3 variants + Edit/Skip; only Noah's chat; status as idempotency lock; legal-basis gate: green → send, cold → Gmail draft, LinkedIn → text to paste |
 
 Data lives in Notion: **Companies** (1) ↔ (n) **Contacts**, plus **Runs** (one row per execution) and **Evals** (golden set).
@@ -35,9 +35,24 @@ Data lives in Notion: **Companies** (1) ↔ (n) **Contacts**, plus **Runs** (one
 3. In `00`, point both *Execute Workflow* nodes at `10` and `20`. In each workflow's settings, set **Error workflow** = `90 Error handler`.
 4. Share the Notion page *Waypoint Engine* with the integration.
 
-## Evals
+## Evals and test results
 
 See Notion › Evals. Each case has an expected label (confirmed by Noah), the actual result, and the prompt version. Target: ≥ 80% agreement on the qualify golden set, 100% block rate on injection and legal-gate cases.
+
+| What | Result | Evidence |
+|---|---|---|
+| Qualify golden set (20 cases) | _pending run_ | `node tools/eval_qualify.mjs` → `docs/evals/qualify-golden-<date>.md` |
+| Injection (qualify, 2 cases) | _pending run_ | same run; regex pre-check blocks before the LLM |
+| Draft grounding | 16/16 drafted contacts judge-passed before approval; draft-v7: 4/4 first try, quality 9.4–9.5/10 | Notion › Runs (Draft), Contacts › Quality score |
+| Injection (draft, T10) | Injected "BUY NOW 50% off" ignored, 3 clean variants, 8.7/10 | `docs/test-plan.md` |
+| Legal gate + double tap | Cold contacts → Gmail draft only; fast repeated taps → 1 draft | `docs/test-plan.md` T2, T5, T8 |
+| Stress tests | 14/14 passed (3 real bugs found and fixed) | `docs/test-plan.md` |
+
+Golden-set runner: `tools/eval_qualify.mjs` reads the injection check, scoring code, prompt and schema straight from `workflows/10-qualify-company.json`, so the eval tests the production logic, not a copy.
+
+## Roadmap
+
+Parked ideas live in Notion › Waypoint Engine › **Future ideas** (ICP profiles, analytics engine, self-optimising agent, Cal.com booking, follow-ups) and in `docs/roadmap.md`.
 
 ## Compliance note
 
