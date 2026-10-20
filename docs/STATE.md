@@ -1,12 +1,12 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 18 Oct 2026, 20:50 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 20 Oct 2026, 21:00 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
 ## Deadlines
-- **Mon 19 Oct:** WBS final presentation. Noah builds the deck and video (ElevenLabs).
-- **Fri 16 Oct, end of day:** engine stable and tested; only presentation work left.
+- **Mon 19 Oct:** WBS final presentation (past). Code freeze lifted for bug fixes.
+- **Next:** H0 hygiene sprint (docs/roadmap.md), one engineering block this week, max ~1 day.
 
 ## What works end to end (verified in live runs)
 00 Intake (RSS, weekdays 07:30) → 10 Qualify (gpt-4o-mini, ICP rules) → 20 Find people → 30 Enrich (Brave LinkedIn, website check v3, site scan, Hunter) → 40 Draft + judge (3 variants, code checks + judge, retry once) → 50 Approval cards (Telegram, stack guard 5, backlog, refill) → 51 Approval handler (Gmail draft / send / LinkedIn to-do, closes cards) · 90 Error handler (alerts bot + Notion Runs).
@@ -74,19 +74,17 @@ This is the single page a new session (or a new Claude context) reads to continu
 ## Update protocol (how this page stays current)
 Claude rewrites this page and pushes it (repo + Project doc) together with every "Pipeline status / This week / Waiting on" block, i.e. at the end of each working reply where something changed. Noah doesn't need to trigger it; "wrap up" forces it.
 
-## Latest changes (18 Oct evening)
-- **Scope:** T-010 (Cal.com booking → Notion) cut from the WBS scope; moved to Notion › Future ideas. Drafts already carry the per-contact booking link with metadata[contact], so only the webhook workflow is missing.
-- **Golden set run (20:38):** qualify 16/20 (80%, target met), injection 2/2 blocked. Fail #26 oil & gas = false positive (mission gate depends on LLM flag; backstop in Future ideas). Fails #2, #4, #28 = conservative false negatives. Results in Notion › Evals and `docs/evals/qualify-golden-2026-10-18.md`.
-- **T-007 done:** 15/15 drafted contacts judge-passed before approval; draft-v7 4/4 first try (quality 9.4–9.5/10); 11/15 automatic across all draft runs, the 4 others went to Check manually (v6 / first v7 run).
-- **Golden set:** `tools/eval_qualify.mjs` runs the 20 qualify + 2 injection cases through the production code read from `workflows/10-qualify-company.json` (only the gpt-4o-mini call is direct). Cases in `docs/evals/golden-set.json`. Evals cases 20 (dedupe, T9) and 22 (legal gate, T2/T5/T8) marked Pass from stress-test evidence; 21 notes partial coverage.
-- **README:** models updated (Claude Sonnet 5.5 draft, GPT-5 mini judge), eval/test results table, roadmap pointer. `docs/demo-script.md` = shot list for the recording.
-- **Notion › Waypoint Engine › Future ideas** (new database): ICP profiles (= workbook T-015), analytics engine, self-optimising agent, Cal.com booking, follow-ups, LinkedIn acceptance, seniority fallback, sell the engine.
+## Latest changes (20 Oct)
+- **External audit (Codex, 19 Oct)** reviewed at commit 61787d1. Verdict per finding in `docs/audit-2026-10-19.md`. Code findings confirmed (judge accepts incomplete verdicts, 100-row Notion queries, verifier errors ignored, unconditional "nothing sent" alert, no backups, unpinned images). Severities re-rated for one operator in draft-only mode; SaaS/tenancy work dropped.
+- **Qualify eval, honest numbers:** precision 80% (4/5), recall 57% (4/7), n=20; majority baseline 65%. The miss that matters is #26 (mission gate).
+- **Roadmap reordered** (docs/roadmap.md): H0 hygiene → H1 before 100 contacts → H2 outcome loop (sent/reply/booking sync) → H3 ledger + suppression before auto-send or WP · 60 → H4 only for a paying engine client.
+- **Live state 20 Oct:** 38 contacts. 12 Gmail drafts created (since 16 Oct), none with *Sent at*; 3 awaiting approval; 16 need email.
+- **Legal:** German/Austrian recipients get LinkedIn or warm intro, not cold e-mail, until a lawyer signs off (UWG §7(2) Nr. 2).
 
 ## Open issues (in priority order)
-1. **Code freeze until the demo (Mon 19 Oct):** only fix what breaks a live run.
-2. Done: golden set run and written back (Notion › Evals, README).
-3. Record the demo (docs/demo-script.md), then deck + ElevenLabs video.
-4. Docs for 00/10/20/90 are not yet in the new template (after the demo).
+1. Send or discard the 12 Gmail drafts; mark *Sent* by hand until H2 exists.
+2. H0 hygiene sprint (roadmap), one block.
+3. Docs for 00/10/20/90 into the template.
 
 ## Parked (roadmap)
 - Analytics agent (reply rates per variant and per model).

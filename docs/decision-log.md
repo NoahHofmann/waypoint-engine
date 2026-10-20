@@ -62,3 +62,13 @@
 
 ## 16 Oct, 18:15 · Code freeze after 14/14 stress tests
 All tests passed after three real fixes (double-tap lock, Claude output budget + GPT fallback, alerts-bot setup). No further fixes before Monday: every change now risks the demo more than it improves it. Open items stay parked in the roadmap (analytics agent, WP · 60, seniority fallback, model bake-off, Tech Funding News 403, docs 00/10/20/90 in the template).
+
+## 20 Oct · External audit integrated
+| Date | Decision | Why |
+|---|---|---|
+| 20 Oct | Accept audit code findings F2, F3, F6, alert wording, backups, image pinning, editor access; fix in one H0 block | Confirmed in the generators at 61787d1; each is under an hour |
+| 20 Oct | Re-rate F1/F10 (duplicate send, approval binding) to Low while 51 is forced to draft-only | Every cold lead is a Gmail draft; worst case is a duplicate draft. Re-rated High before auto-send or WP · 60 |
+| 20 Oct | Outcome sync (sent/reply/booking) becomes the next feature, ahead of follow-ups and analytics | 12 drafts have no recorded send; no reply data means no analytics, no bake-off, no safe follow-up stop |
+| 20 Oct | No SaaS, tenancy or Postgres application layer on the roadmap | Audit's own cost model: 7.6% contribution at 5 × €299. Offer 5 is a service on per-client instances |
+| 20 Oct | DE/AT recipients: LinkedIn or warm intro, not cold e-mail, pending legal advice | UWG §7(2) Nr. 2 requires prior consent for advertising e-mail, B2B included; manual sending doesn't change it |
+| 20 Oct | Eval reporting shows precision/recall with counts | "80%" accuracy hid 57% recall against a 65% majority baseline |
