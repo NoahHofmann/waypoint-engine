@@ -26,7 +26,7 @@ cd "$APP_DIR"
 cat > docker-compose.yml <<'YAML'
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16.15
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -41,7 +41,7 @@ services:
       retries: 10
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n:stable
+    image: docker.n8n.io/n8nio/n8n:2.43.5
     restart: unless-stopped
     depends_on:
       postgres:
@@ -70,7 +70,7 @@ services:
       - n8n_data:/home/node/.n8n
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.10.0
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
@@ -84,7 +84,7 @@ volumes:
 YAML
 
 if [ ! -f .env ]; then
-  read -rp "Paste your Cloudflare Tunnel token: " TOKEN
+  read -rsp "Paste your Cloudflare Tunnel token (hidden): " TOKEN; echo
   cat > .env <<ENV
 N8N_HOST=$N8N_HOST
 POSTGRES_USER=n8n
@@ -95,6 +95,21 @@ CLOUDFLARE_TUNNEL_TOKEN=$TOKEN
 ENV
   chmod 600 .env
 fi
+
+echo "==> Block the Hetzner metadata service (169.254.169.254) from containers (SSRF, audit 19 Oct)"
+cat > /etc/systemd/system/block-metadata.service <<'UNIT'
+[Unit]
+Description=Block Hetzner metadata (169.254.169.254) from Docker containers
+After=docker.service
+Requires=docker.service
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'iptables -C DOCKER-USER -d 169.254.169.254 -j DROP 2>/dev/null || iptables -I DOCKER-USER -d 169.254.169.254 -j DROP'
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload && systemctl enable --now block-metadata.service
 
 echo "==> 4/5 Start containers"
 docker compose up -d

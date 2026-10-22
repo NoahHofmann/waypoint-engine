@@ -4,7 +4,7 @@
 
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16.15
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,7 +19,7 @@ services:
       retries: 10
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n:stable
+    image: docker.n8n.io/n8nio/n8n:2.43.5
     restart: unless-stopped
     depends_on:
       postgres:
@@ -48,7 +48,7 @@ services:
       - n8n_data:/home/node/.n8n
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.10.0
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
