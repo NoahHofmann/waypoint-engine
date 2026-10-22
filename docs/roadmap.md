@@ -26,6 +26,7 @@ Bug fixes only; each is small and has a regression fixture in `tools/`.
 - **Action ledger (F1, F10):** one approval = one immutable draft hash + recipient + action; unique key per contact/version/action; `outcome_unknown` never auto-retried.
 - **Suppression registry** checked at draft and at dispatch.
 - **Follow-up cadence** (from Notion › Sales Playbook): day 0 email · day 1 LinkedIn connect · day 4 email · day 8 LinkedIn message once accepted · day 13 walk-away. Second contacts step in when the first never replies.
+- **LinkedIn stack:** approved LinkedIn items queue in one place (third Telegram bot or a daily digest + Notion view "LinkedIn to send") and are worked through in one batch; ✅ per item sets *Sent at*. Notes are optional (free-account cap); the note text becomes the post-acceptance message.
 - **Permission model:** manual cold e-mail to DE/AT recipients is allowed since 22 Oct on an informal lawyer OK (targeted, no spam, honour opt-outs). Auto-send and WP · 60 need written legal advice first.
 
 ## H4: Only when a client pays for an engine deployment

@@ -80,11 +80,10 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 - **Roadmap reordered** (docs/roadmap.md): H0 hygiene → H1 before 100 contacts → H2 outcome loop (sent/reply/booking sync) → H3 ledger + suppression before auto-send or WP · 60 → H4 only for a paying engine client.
 - **Live state 20 Oct:** 38 contacts. 12 Gmail drafts created (since 16 Oct), none with *Sent at*; 3 awaiting approval; 16 need email.
 - **Legal (22 Oct):** German/Austrian recipients may get a targeted manual cold e-mail. Informal OK from a lawyer friend (verbal, not written advice) on the conditions: researched reason, no spam, honour opt-outs (Do not contact + delete e-mail). Residual UWG §7(2) Nr. 2 / TKG §174 risk accepted by Noah. Get written advice before auto-send, WP · 60 or selling offer 5.
-- **22 Oct reconciliation:** Gmail now holds 11 drafts, matching Notion row for row (Holo recreated, Ambio = Noah's edit, Dawid = Second contact with draft deleted). Noah sends them by hand on 22 Oct and sets *Sent at* + Status in Notion.
+- **22 Oct, 15:30 · Live state:** 27 contacts Sent with *Sent at* from Gmail Sent (23 e-mails at 14:47–15:19, 3 LinkedIn requests at 15:23, Victor Canivell on 16 Oct). 0 open Gmail drafts, 0 open approvals. 3 Second contact (Dawid, Marta, +1), 27 Needs email, 2 Check manually. Michał Zachara (KP Labs) is OOO; Noah forwarded by hand to Tomàsz (tpozniak@kplabs.pl), who is not yet in Notion. Bjorn Bergstrom got a connection request **without** a note (free LinkedIn note limit).
 
 ## Open issues (in priority order)
-1. Send the 11 Gmail drafts (22 Oct); mark *Sent* by hand until H2 exists. Then answer the open Telegram cards, send the second round, do the LinkedIn items.
-2. H0 hygiene sprint (roadmap), one block.
+1. H0 hygiene sprint (roadmap), incl. idempotent, Gmail-verified draft creation in 51. Keep marking *Sent* by hand until H2 exists.
 3. Docs for 00/10/20/90 into the template.
 4. H0 addition: make Gmail draft creation in 51 idempotent and verify it against Gmail (22 Oct: 5 recipients had two drafts, one draft disappeared).
 
