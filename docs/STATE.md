@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 22 Oct 2026, 14:50 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 22 Oct 2026, 18:20 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -83,7 +83,7 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 - **22 Oct, 15:30 · Live state:** 27 contacts Sent with *Sent at* from Gmail Sent (23 e-mails at 14:47–15:19, 3 LinkedIn requests at 15:23, Victor Canivell on 16 Oct). 0 open Gmail drafts, 0 open approvals. 3 Second contact (Dawid, Marta, +1), 27 Needs email, 2 Check manually. Michał Zachara (KP Labs) is OOO; Noah forwarded by hand to Tomàsz (tpozniak@kplabs.pl), who is not yet in Notion. Bjorn Bergstrom got a connection request **without** a note (free LinkedIn note limit).
 
 ## Open issues (in priority order)
-1. H0 hygiene sprint (roadmap), incl. idempotent, Gmail-verified draft creation in 51. Keep marking *Sent* by hand until H2 exists.
+1. H0 rest: F2 judge strict, F6 Hunter verifier error, 90 alert wording, mission keyword backstop, weekly off-host dump, P/R reporting. Done 22 Oct: 51 draft-only + Gmail duplicate guard; host (metadata block, token rotation, pinned images, Cloudflare Access). Keep marking *Sent* by hand until H2 exists.
 3. Docs for 00/10/20/90 into the template.
 4. H0 addition: make Gmail draft creation in 51 idempotent and verify it against Gmail (22 Oct: 5 recipients had two drafts, one draft disappeared).
 

@@ -9,7 +9,7 @@ Bug fixes only; each is small and has a regression fixture in `tools/`.
 - **Verifier errors (F6):** a Hunter verifier error counts as `apiError` (contact stays *Needs email*).
 - **Alert wording:** 90 says "send outcome unknown" when the failed workflow is 51, instead of "nothing was sent".
 - **Mission backstop:** deterministic fossil/defense/gambling keyword gate in 10, independent of the LLM flag (golden-set #26).
-- **Host (22 Oct, mostly done):** ✅ images pinned (n8n 2.43.5, postgres 16.15, cloudflared 2026.10.0); ✅ 169.254.169.254 blocked from Docker (systemd `block-metadata.service`); ✅ tunnel token rotated (it was in cloud-init user data); ✅ first pg_dump in /opt/waypoint/backups. Open: Cloudflare Access (email OTP) on n8n.noahhofmann.com with webhook paths bypassed; encryption key in password manager; weekly dump off-host.
+- **Host (22 Oct, mostly done):** ✅ images pinned (n8n 2.43.5, postgres 16.15, cloudflared 2026.10.0); ✅ 169.254.169.254 blocked from Docker (systemd `block-metadata.service`); ✅ tunnel token rotated (it was in cloud-init user data); ✅ first pg_dump in /opt/waypoint/backups. ✅ Cloudflare Access on the editor (One-time PIN, 2 emails, 24 h) with a Bypass app for `webhook/*` + `webhook-test/*`. Open: encryption key in password manager (Noah to confirm); weekly dump off-host.
 - **Reporting:** README and STATE show precision/recall with counts (qualify: P 80% · R 57% · n=20), not only "16/20".
 
 ## H1: Before ~100 contacts (≈ mid-Nov)
