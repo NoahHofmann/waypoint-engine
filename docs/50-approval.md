@@ -73,14 +73,25 @@ Every message starts with a fixed type tag and a divider, so you can see the typ
 **Telegram:** a confirmation reply under the card, or a notice ("Already handled …", "Reply with your text …").
 
 ## 4. Logic and decisions
-**Legal-basis gate (code):**
+**Channel gate (code). Draft-only since 22 Oct (H0, audit F1):** `DRAFT_ONLY = true` in *Decide action* makes every email a Gmail draft, whatever the legal basis, until the action ledger (roadmap H3) exists. The *Gmail · send* branch stays wired but is unreachable.
 
 | Channel | Legal basis | What happens | Status |
 |---|---|---|---|
-| Email | Consent / Existing relationship / Inbound | Sent from hello@ | Sent |
-| Email | None - draft only (all article-sourced leads) | **Gmail draft** in hello@ that you send yourself | Gmail draft created |
+| Email | any (while draft-only) | **Gmail draft** in hello@ that you send yourself | Gmail draft created |
+| Email | Consent / Existing relationship / Inbound (after H3) | Sent from hello@ | Sent |
 | LinkedIn | any | Text plus profile link sent back to paste by hand | Approved |
 | any | Skip | nothing | Skipped |
+
+**Duplicate guard (code, 22 Oct):** before creating a draft, 51 searches Gmail for `to:<email> (in:sent OR is:draft)`.
+
+| Gmail search result | What happens | Status | Card |
+|---|---|---|---|
+| nothing | draft created; draft id written to the Approval log | Gmail draft created | 📝 closed |
+| a draft to that address | **no new draft**; chosen text in Notion is left unchanged | Gmail draft created | ☑️ ALREADY IN GMAIL |
+| a sent email to that address | **no new draft**; *Sent at* from Gmail when available | Sent | ☑️ ALREADY IN GMAIL |
+| search error | nothing created (fail closed) | Awaiting approval | stays open, ❌ reply, tap again |
+
+The guard is per address, with no time window: a person who already got a cold email never gets a second one through 51. Follow-ups (WP · 60) will reply in the existing thread instead.
 
 Why the design looks like this:
 - **Gmail drafts for cold contacts:** German UWG §7 makes unsolicited advertising email risky without (presumed) consent. The engine prepares the email; a human presses send. This is not legal advice.
@@ -106,6 +117,7 @@ Why the design looks like this:
 | 50 / 51 Parse | allowed chat id | 1170608781 |
 
 ## Changelog
+- **v6 · 22 Oct (H0):** draft-only forced in code; Gmail duplicate guard before every draft (fail closed); draft id logged. Trigger: on 22 Oct 5 of 16 recipients had two drafts (Solvera, Epyr, Hylight, Causa Prima, KP Labs) and Noah sends in batches, so a second draft would have been a second cold email. Fixture: `node tools/test_51_guard.mjs` (13 checks).
 - **v5 · 16 Oct (T2 fix):** double-tap lock. Three fast taps created 3 Gmail drafts, because each tap read *Awaiting approval* before any of them wrote. Now 51 writes its execution id to Contacts › *Lock*, waits 2 s, re-reads and continues only if the lock is still its own. Taps that lose get only the toast; the winning tap closes the card. A lock expires after 90 s, so a tap after a Gmail error works again.
 - **v3 · 16 Oct:** duplicates go to Second contact (first named Backlog); one-out-one-in refill from 51; run log row per 50 run in Notion › Runs; Notion approval can also promote a Backlog contact; credential IDs preset.
 - **v2 · 15 Oct:**

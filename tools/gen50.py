@@ -22,6 +22,20 @@ TG={"telegramApi":{"id":"x17tu5yr5xFWMSsZ","name":"Telegram approvals"}}   # IDs
 GM={"gmailOAuth2":{"id":"SZBYk0OCrdNe1W56","name":"Gmail account"}}
 TXT='const txt = p => { if (!p) return \'\'; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join(\'\').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? \'\') + \'\'; };'
 
+GUARD_JS=r"""// Duplicate guard: input = Gmail search 'to:<email> (in:sent OR is:draft)' (0..5 messages, or one error item).
+// clear -> create the draft · exists -> close card, no new draft · error -> fail closed (card stays open, tap again)
+const d = $('Decide action (rules)').first().json;
+const items = $input.all().map(i => i.json);
+const failed = items.find(m => m && m.error);
+if (failed) return [{ json: { ...d, guard: 'error', error: { message: 'Gmail duplicate check failed: ' + String(failed.error.message || failed.error).slice(0, 150) } }, pairedItem: 0 }];
+const hits = items.filter(m => m && m.id);
+if (!hits.length) return [{ json: { ...d, guard: 'clear' }, pairedItem: 0 }];
+const labels = m => (m.labelIds || (m.labels || []).map(l => l.id || l.name)).map(String);
+const sent = hits.filter(m => labels(m).includes('SENT'));
+const ts = sent.map(m => Number(m.internalDate)).filter(Boolean).sort((a, b) => a - b)[0];
+return [{ json: { ...d, guard: 'exists', foundSent: sent.length > 0, sentAt: ts ? new Date(ts).toISOString() : null,
+  hitIds: hits.map(m => m.id) }, pairedItem: 0 }];"""
+
 # ---------------- 50 · Approval cards ----------------
 N,C,node,link=mk()
 node("Run manually","n8n-nodes-base.manualTrigger",1,[0,100],{})
@@ -371,7 +385,10 @@ if (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }
 if (!body) return { json: { ...base, action: 'notice', notice: '⚠️ <b>That variant is empty.</b> Pick another one or reply with your text.' } };
 const chosen = p.kind === 'choose' ? p.variant : 'Edited';
 const GREEN = ['Consent', 'Existing relationship', 'Inbound'];
-const action = base.channel === 'LinkedIn' ? 'linkedin' : (GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');
+// DRAFT-ONLY (H0, audit F1 containment, 22 Oct): every email becomes a Gmail draft, whatever the legal basis,
+// until an action ledger exists (H3). Noah sends by hand. Flip only together with the ledger.
+const DRAFT_ONLY = true;
+const action = base.channel === 'LinkedIn' ? 'linkedin' : (!DRAFT_ONLY && GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');
 if (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `⚠️ <b>No email address for ${h(base.name)}.</b>` } };
 return { json: { ...base, action, chosen, subject, body } };"""
 node("Decide action (rules)","n8n-nodes-base.code",2,[1540,300],{"jsCode":DECIDE,"mode":"runOnceForEachItem"})
@@ -407,8 +424,19 @@ link("Claim still ours?","Route")
 link("Needs lock?","Route",1)
 node("Gmail · send","n8n-nodes-base.gmail",2.1,[2000,60],{"resource":"message","operation":"send","sendTo":"={{ $json.email }}","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"appendAttribution":False,"senderName":"Noah Hofmann"}},credentials=GM,onError="continueRegularOutput")
 link("Route","Gmail · send",0)
-node("Gmail · create draft","n8n-nodes-base.gmail",2.1,[2000,220],{"resource":"draft","operation":"create","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"sendTo":"={{ $json.email }}"}},credentials=GM,onError="continueRegularOutput")
-link("Route","Gmail · create draft",1)
+# --- Duplicate guard (H0, 22 Oct): 5 of 16 recipients had two Gmail drafts and Noah sends drafts in batches,
+# so a second draft = a second cold email. Before creating a draft, search Gmail for ANY draft or sent mail to the
+# same address. Found -> no new draft, card closed as "already in Gmail". Search failed -> fail closed (card stays open).
+node("Gmail · already there?","n8n-nodes-base.gmail",2.1,[2000,220],{"resource":"message","operation":"getAll","returnAll":False,"limit":5,"simple":True,
+  "filters":{"q":"={{ 'to:' + $json.email + ' (in:sent OR is:draft)' }}"}},credentials=GM,alwaysOutputData=True,onError="continueRegularOutput")
+link("Route","Gmail · already there?",1)
+node("Duplicate guard","n8n-nodes-base.code",2,[2220,220],{"jsCode":GUARD_JS})
+link("Gmail · already there?","Duplicate guard")
+node("Clear to draft?","n8n-nodes-base.if",2.2,[2440,220],cond("={{ $json.guard }}","equals","clear"))
+link("Duplicate guard","Clear to draft?")
+node("Gmail · create draft","n8n-nodes-base.gmail",2.1,[2660,160],{"resource":"draft","operation":"create","subject":"={{ $json.subject }}","emailType":"text","message":"={{ $json.body }}","options":{"sendTo":"={{ $json.email }}"}},credentials=GM,onError="continueRegularOutput")
+link("Clear to draft?","Gmail · create draft",0)
+link("Clear to draft?","Build outcome",1)
 OUT=H_JS+r"""
 // Result -> Notion update + how to close the card. A decided card is EDITED into a one-line result and loses its
 // buttons, so an open card (with buttons) always means "still needs you". Errors keep the card open + ❌ reply.
@@ -419,11 +447,16 @@ const t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];
 const err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;
 const who = `${h(d.name)}${d.company ? ' · ' + h(d.company) : ''}`;
 const via = d.fromNotion ? ' · approved in Notion' : '';
-let status, closeText = null, replyText = null, extra = {}, liKey = null, liUrl = null;
+let status, closeText = null, replyText = null, extra = {}, liKey = null, liUrl = null, dup = null, draftId = null;
 if (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent';
   if (err) replyText = `❌ <b>Sending failed · ${who}</b>\n${h(err)}\nThe card stays open: tap again later.`;
   else { closeText = `✅ <b>SENT · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via} · from hello@`; extra['Sent at'] = { date: { start: now } }; } }
-else if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created';
+else if (d.action === 'gmail_draft' && $json.guard === 'exists') {
+  // Duplicate guard hit: a draft or sent email to this address already exists. Nothing new is created.
+  status = $json.foundSent ? 'Sent' : 'Gmail draft created'; dup = $json.foundSent ? 'sent mail' : 'draft';
+  if ($json.foundSent && $json.sentAt) extra['Sent at'] = { date: { start: $json.sentAt } };
+  closeText = `☑️ <b>ALREADY IN GMAIL · ${who}</b>\n${$json.foundSent ? 'An email to this address is already in Sent' : 'A draft to this address already exists'}. No new draft created.\n👉 Check that one in hello@.`; }
+else if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created'; draftId = err ? null : ($json.id || null);
   if (err) replyText = `❌ <b>Gmail draft failed · ${who}</b>\n${h(err)}\nThe card stays open: tap again later.`;
   else closeText = `📝 <b>GMAIL DRAFT · ${who}</b>\nVariant ${d.chosen} · ${hhmm}${via}\n👉 Open Gmail drafts (hello@), check, send.`; }
 else if (d.action === 'linkedin') { status = 'Approved';
@@ -435,8 +468,8 @@ else if (d.action === 'li_sent') { status = 'Sent';
   closeText = `✅ <b>SENT ON LINKEDIN · ${who}</b>\n${hhmm} · connection request with note.`; extra['Sent at'] = { date: { start: now } }; }
 else if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\n${hhmm}${via} · nothing will be sent.`; }
 const props = { 'Status': { status: { name: status } },
-  'Approval log': { rich_text: t(`${d.log ? d.log + '\n' : ''}${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };
-if (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },
+  'Approval log': { rich_text: t(`${d.log ? d.log + '\n' : ''}${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${draftId ? ' · draft ' + draftId : ''}${dup ? ' · NOT CREATED: ' + dup + ' already in Gmail' : ''}${err ? ' ERROR ' + err : ''}`) } };
+if (d.chosen && !err && !dup) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },
   'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });
 Object.assign(props, extra);
 return { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, replyTo: d.replyTo,
@@ -482,9 +515,10 @@ node("Note · 51","n8n-nodes-base.stickyNote",1,[0,-420],{"width":1200,"height":
 1. **Gate:** only Noah's chat id; anything else is ignored silently (security).
 2. **Route update:** 🌐 website answers · replies to a card (own text) · taps (A/B/C/Edit/Skip) · unmatched.
 3. **Idempotent:** acts only while the contact is *Awaiting approval*. A late/double tap closes the card as "Already handled", never a second email.
-4. **Legal-basis gate:** Email + Consent/Existing relationship/Inbound → **sent**. Email + *None - draft only* (all article leads) → **Gmail draft** in hello@. LinkedIn → text to paste.
-5. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.
-6. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.
+4. **Draft-only (22 Oct):** every email → **Gmail draft** in hello@, whatever the legal basis, until the action ledger (H3) exists. LinkedIn → text to paste.
+5. **Duplicate guard:** before a draft, Gmail is searched for any draft or sent mail to the same address. Found → no new draft, card closed as already in Gmail. Search error → card stays open.
+6. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.
+7. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.
 Docs: docs/50-approval.md"""})
 wf51={"name":"WP · 51 Approval handler (Telegram trigger)","nodes":apply_ids(N),"connections":C,"settings":{"executionOrder":"v1","timezone":"Europe/Berlin","saveManualExecutions":True,"errorWorkflow":WF_ERROR},"pinData":{}}
 json.dump(wf51,open(R+'workflows/51-approval-handler.json','w'),indent=2,ensure_ascii=False)

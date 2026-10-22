@@ -2,7 +2,7 @@
   "name": "WP · 50 Approval cards (sub-workflow)",
   "nodes": [
     {
-      "id": "174a8c99-86e6-44cb-934c-638fcacbce66",
+      "id": "a7f82015-67d4-4512-984c-9400e1f9bfb0",
       "name": "Run manually",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -13,7 +13,7 @@
       "parameters": {}
     },
     {
-      "id": "5443554c-2c78-4ac2-b2a1-7d90025dddf3",
+      "id": "5b827639-d08b-4019-82c3-dca9a48c8613",
       "name": "When called by orchestrator",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "a17739eb-2e5a-4c12-b8fc-47fe25a6d99d",
+      "id": "b31de35e-6f35-4063-b587-c4c38975514b",
       "name": "Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -39,7 +39,7 @@
       }
     },
     {
-      "id": "4593cffb-8af3-4790-bf23-975ee8ae707f",
+      "id": "d8e7221c-c517-4462-bb49-1bcd66d1e630",
       "name": "Notion · approved in Notion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -75,7 +75,7 @@
       }
     },
     {
-      "id": "599826b8-9f0d-43ab-b1c6-85ea4b45259e",
+      "id": "eefb57f7-37b0-42c0-ad9d-841d612bae86",
       "name": "Notion approvals → 51",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -88,7 +88,7 @@
       }
     },
     {
-      "id": "441db188-4d34-4727-bb7d-647511d3131b",
+      "id": "17c023c5-8095-4bac-88de-247a5307f3e8",
       "name": "Run WP · 51 for each",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -111,7 +111,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "35f17bfa-1c74-4ca3-8cc3-436c593aebe5",
+      "id": "00314291-db78-4b27-83b0-b59e5e6dcb16",
       "name": "Notion · cards still open",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -147,7 +147,7 @@
       }
     },
     {
-      "id": "a01e6450-7bbe-4bda-8a77-0ffadb7722a8",
+      "id": "ca2e0bbc-9f29-42dc-91e3-29f0b1f99484",
       "name": "Notion · drafts ready",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -183,7 +183,7 @@
       }
     },
     {
-      "id": "5566e0e6-bff8-467f-b470-e47c87dc925b",
+      "id": "d0c9e3cb-0f71-46e6-9332-6940d30d8bcb",
       "name": "Pick drafts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -196,7 +196,7 @@
       }
     },
     {
-      "id": "294e73d2-eeef-4aa9-8ee9-a514c21ed71d",
+      "id": "f994da98-5c96-4354-b703-53d12322fb6a",
       "name": "Duplicate company?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -214,7 +214,7 @@
           },
           "conditions": [
             {
-              "id": "0cba66d8-ced2-4b01-a461-5c0283291378",
+              "id": "1c665fc1-c84c-4f27-ac46-c401aefd7594",
               "leftValue": "={{ $json.duplicate }}",
               "rightValue": true,
               "operator": {
@@ -230,7 +230,7 @@
       }
     },
     {
-      "id": "b1babe34-a772-4de0-8149-65959f47fc78",
+      "id": "3d37a124-a711-4f37-9bc3-975f3a9e9edc",
       "name": "Notion · mark second contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -266,7 +266,7 @@
       }
     },
     {
-      "id": "9d4d6fc3-c906-4826-9c60-28aaa743fb0f",
+      "id": "a685f500-09fc-43e0-942e-c64417d0a002",
       "name": "Notion · get company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -298,7 +298,7 @@
       }
     },
     {
-      "id": "dcdeceab-7c51-4910-b5c0-9d0d5955c49d",
+      "id": "253912dd-cfd6-49f0-ae27-a4506de195d9",
       "name": "Queue full notice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -311,7 +311,7 @@
       }
     },
     {
-      "id": "af237a40-acf4-48f0-bbb1-07708b22c43c",
+      "id": "54453822-0aef-4573-bb74-c66a6a749225",
       "name": "Build run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -324,7 +324,7 @@
       }
     },
     {
-      "id": "2c90563b-b226-4792-84a4-0575ac34d9a0",
+      "id": "dc6b5992-47aa-4be3-ae00-2a7c00532e23",
       "name": "Notion · log run",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -360,7 +360,7 @@
       }
     },
     {
-      "id": "6219b359-dd44-4ee5-a552-3d63578f7c6a",
+      "id": "032de42c-7d16-4763-8052-2772819a4cb6",
       "name": "Remember run log",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -373,7 +373,7 @@
       }
     },
     {
-      "id": "a4cc4cb3-1497-4a11-ae19-185049bf6891",
+      "id": "fb31abb0-fbf9-4bd0-9a11-58489bdcc8ac",
       "name": "Telegram · queue full",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -398,7 +398,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "26848e0d-6185-4abd-9efd-f25b372778a6",
+      "id": "c328f9e7-d2ab-4559-8ce7-237724e34b66",
       "name": "Build card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -412,7 +412,7 @@
       }
     },
     {
-      "id": "fef2e10d-503a-43d9-91fa-a9341ae65e48",
+      "id": "cc1671b6-04f5-4456-84b0-6d9dd3e0d623",
       "name": "Telegram · send card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -485,7 +485,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "458003c0-4509-4f60-9972-3aba23988081",
+      "id": "ff7749ef-acdf-4990-89b5-8e129677ab7d",
       "name": "Build Notion update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -499,7 +499,7 @@
       }
     },
     {
-      "id": "0a16861f-6fa7-482f-a219-e739e48db8a7",
+      "id": "394fe3ae-1b14-4f24-812e-74be8652966d",
       "name": "Notion · awaiting approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -534,7 +534,7 @@
       }
     },
     {
-      "id": "87d24077-63da-4ad4-8e91-14f736ee0303",
+      "id": "f7a63fc8-7e10-4409-8d70-1044784b449b",
       "name": "Notion · companies without website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -570,7 +570,7 @@
       }
     },
     {
-      "id": "efa0b696-1d6a-4735-a100-954adcb8130f",
+      "id": "48ae236f-0d4a-4f4d-9f6a-74de5a1e90be",
       "name": "Build website question",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -583,7 +583,7 @@
       }
     },
     {
-      "id": "c875be9c-dd7f-4b46-9237-23d32eca8fa2",
+      "id": "48c140d3-ff4f-42ac-8dbf-b623638988d2",
       "name": "Telegram · ask website",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -632,7 +632,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "a6364e74-0fe5-4c8a-9578-5bb0b72fa3bc",
+      "id": "d97155f9-2faf-46eb-899a-06d39d3c9a01",
       "name": "Notion · mark asked",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -668,7 +668,7 @@
       }
     },
     {
-      "id": "1e7f874b-d21d-455d-a02b-735f6813fb6f",
+      "id": "c729a42f-1dfd-4b49-9a5c-08f0475457d2",
       "name": "Note · 50 notion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "515eccc6-8e24-4ffb-8848-1c9a3e87ab81",
+      "id": "5e5bf42c-1659-448b-936d-188fbc1c0ab2",
       "name": "Note · 50 websites",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -698,7 +698,7 @@
       }
     },
     {
-      "id": "f40a585c-edb6-46a8-bc8f-29198e974a3f",
+      "id": "8a9bd613-8aa9-4940-b87c-7f9982ef03ec",
       "name": "Note · 50",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,

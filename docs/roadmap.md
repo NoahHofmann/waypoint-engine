@@ -4,7 +4,7 @@ Reordered 20 Oct after the external audit (docs/audit-2026-10-19.md). Rule: engi
 
 ## H0: Hygiene sprint (one block, this week, ≤1 day total)
 Bug fixes only; each is small and has a regression fixture in `tools/`.
-- **Draft-only mode:** 51 always creates a Gmail draft, whatever *Legal basis* says, until an action ledger exists (audit F1 containment).
+- ✅ **Draft-only mode (22 Oct):** 51 always creates a Gmail draft, whatever *Legal basis* says, until an action ledger exists (audit F1 containment). Plus a **Gmail duplicate guard** (no second draft or email to an address already in Drafts/Sent). Fixture `tools/test_51_guard.mjs`.
 - **Judge strict (F2):** every verdict field required and non-null; missing, null or duplicate IDs = fail.
 - **Verifier errors (F6):** a Hunter verifier error counts as `apiError` (contact stays *Needs email*).
 - **Alert wording:** 90 says "send outcome unknown" when the failed workflow is 51, instead of "nothing was sent".

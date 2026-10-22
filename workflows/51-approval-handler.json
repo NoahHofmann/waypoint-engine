@@ -2,7 +2,7 @@
   "name": "WP · 51 Approval handler (Telegram trigger)",
   "nodes": [
     {
-      "id": "f19c67ed-9619-4006-ad2f-89c7b7698698",
+      "id": "ad27c203-8b69-4b20-9613-e6c0c59beb10",
       "name": "When called by 50 (Notion approval)",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -15,7 +15,7 @@
       }
     },
     {
-      "id": "ab627154-ff0e-4981-866d-fb91afcb0dad",
+      "id": "b0210f40-23f2-4787-a345-b44bf68afd48",
       "name": "Notion approval as tap",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -29,7 +29,7 @@
       }
     },
     {
-      "id": "3d8b3a27-1a82-46fd-b291-66de7070554e",
+      "id": "27fdbcb5-34b5-49e6-a737-2ea6c98697b9",
       "name": "Telegram trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
@@ -50,10 +50,10 @@
           "name": "Telegram approvals"
         }
       },
-      "webhookId": "534494a1-f5a5-47b0-8095-6f146ba0b08c"
+      "webhookId": "1b2076cd-e604-413d-b640-b1390b46c938"
     },
     {
-      "id": "bfd575cd-41b7-474a-98d3-4bd53280ebc2",
+      "id": "a775f488-90e6-4bbc-a709-0a542e025b0e",
       "name": "Parse update (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
       }
     },
     {
-      "id": "f54536a4-1cfe-45ba-a6f7-705630063a5e",
+      "id": "520ebf3a-545b-4098-aa13-2bfca246f03a",
       "name": "Authorized?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -85,7 +85,7 @@
           },
           "conditions": [
             {
-              "id": "ffd90ba2-fbb6-4956-82a3-a6a7746ac774",
+              "id": "61da8397-ac8f-4e24-ac8c-fba732798a41",
               "leftValue": "={{ $json.ok }}",
               "rightValue": "",
               "operator": {
@@ -101,7 +101,7 @@
       }
     },
     {
-      "id": "15e63377-3993-4798-a704-17de102ee2f4",
+      "id": "0476d6c0-df25-403a-a7c1-57b48f1ae1c3",
       "name": "Telegram · answer tap",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -127,7 +127,7 @@
       "alwaysOutputData": true
     },
     {
-      "id": "5073d9f0-2e7d-4ca0-a87e-9324aae363db",
+      "id": "18498e52-11e3-4730-b689-24b6efb787fe",
       "name": "Route update",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -237,7 +237,7 @@
       }
     },
     {
-      "id": "2f3b30d2-ebe1-4455-9155-5a8594abd6e4",
+      "id": "ea7faf03-f4ed-46cc-9a91-4262fad14fa8",
       "name": "Help text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -251,7 +251,7 @@
       }
     },
     {
-      "id": "f9bbf489-0985-4256-b93c-b67662400e1b",
+      "id": "ebe9b240-d954-4f82-9dcc-98a5b187913c",
       "name": "Telegram · help",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -278,7 +278,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "6829d8bb-5e13-43db-9190-c828a5fe843c",
+      "id": "ecfe828f-c9e4-44d8-a22a-5cef64d80232",
       "name": "Build website update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -292,7 +292,7 @@
       }
     },
     {
-      "id": "3ecb59c9-546e-4443-a1e7-52667f46df2c",
+      "id": "72491761-ab38-40a4-a01f-e782f54f6daa",
       "name": "Valid domain?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -310,7 +310,7 @@
           },
           "conditions": [
             {
-              "id": "3817463a-ec1e-477b-9e3c-577deb7aabab",
+              "id": "57146c56-0555-41c1-be5c-0ef41eae3c33",
               "leftValue": "={{ $json.valid }}",
               "rightValue": "",
               "operator": {
@@ -326,7 +326,7 @@
       }
     },
     {
-      "id": "700d03d6-f789-45f3-8345-a4faf9128265",
+      "id": "d7638608-198d-4586-956b-093acc220cce",
       "name": "Notion · save website",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -364,7 +364,7 @@
       }
     },
     {
-      "id": "753c8712-be4e-4396-b7ff-016435eb59fb",
+      "id": "498e508b-3f7d-43e0-8636-7a0fc714a380",
       "name": "Telegram · close website question",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -394,7 +394,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "adce9e94-f125-4bb0-9ee7-cdb88a27c4ac",
+      "id": "8358d6b9-be3d-4ec0-af02-46df0e6eb3b2",
       "name": "Notion · contacts of company",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -430,7 +430,7 @@
       }
     },
     {
-      "id": "810607c6-73c6-47b6-b4bb-d4cb1ab216d8",
+      "id": "d60339fb-d45a-4dbe-a8b6-091651f01560",
       "name": "Contacts to retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -443,7 +443,7 @@
       }
     },
     {
-      "id": "3ff4cc96-ba8a-4243-85b6-6912505d9eff",
+      "id": "c82a9b2c-3466-4e13-bf92-55ecaf987ff6",
       "name": "Notion · back to Needs email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -479,7 +479,7 @@
       }
     },
     {
-      "id": "a2f7f0f5-261c-462d-b34f-9e7d7f097d4c",
+      "id": "79c19479-0b54-461a-97e5-3c88601aca60",
       "name": "Telegram · website retry",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -506,7 +506,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "4388ffb5-a084-41c6-a6f9-74a2dc04c5a9",
+      "id": "385c7585-da2f-41fb-8fc7-88f43513af77",
       "name": "Notion · get contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -539,7 +539,7 @@
       }
     },
     {
-      "id": "c1feb796-1155-40ef-adf8-6ea3c692ecc2",
+      "id": "f9a341b3-c3fe-49a5-bf3d-efdb42ed5096",
       "name": "Notion · find contact by card",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -575,7 +575,7 @@
       }
     },
     {
-      "id": "43b65812-21a2-4ca4-b529-9cdaf8db7f2d",
+      "id": "90cd8ed2-0b3e-47b5-926b-302f2b89757d",
       "name": "First match",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -589,7 +589,7 @@
       }
     },
     {
-      "id": "3c55f96c-9348-46a7-b393-5bca3038cb12",
+      "id": "ed82f197-7f97-49a8-b7a4-ea6317ec9b80",
       "name": "Decide action (rules)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -598,12 +598,12 @@
         300
       ],
       "parameters": {
-        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Decide what to do (rules). Idempotent: acts only while Status is \"Awaiting approval\".\n// Legal-basis gate: only Consent / Existing relationship / Inbound may be sent automatically.\nconst p = $('Parse update (rules)').item.json;\nconst pg = $json;\nconst base0 = { chatId: p.chatId, cardMessageId: p.cardMessageId, replyTo: p.replyMessageId || p.cardMessageId, cardTitle: p.cardTitle, fromNotion: !!p.fromNotion };\nif (pg.notFound || !pg.properties) return { json: { ...base0, action: 'notice',\n  notice: '🤔 <b>No contact found for this message.</b>\\nReply directly to a 📨 card (not to a confirmation).' } };\nconst P = pg.properties;\nconst status = txt(P.Status);\nconst company = (p.cardTitle || '').split(' · ')[0] || '';\nconst base = { ...base0, contactPageId: pg.id, name: txt(P.Name), company, channel: txt(P.Channel) || 'Email',\n  email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };\n// '✅ Sent on LinkedIn' tap: you pasted the note on LinkedIn. Only valid while the contact is Approved (LinkedIn).\nif (p.kind === 'li_sent') return { json: status === 'Approved'\n  ? { ...base, action: 'li_sent' }\n  : { ...base, action: 'closed', closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\\nStatus: ${h(status)}.` } };\nconst allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Second contact'] : ['Awaiting approval'];\n// Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.\nif (!allowed.includes(status)) return { json: { ...base, action: 'closed',\n  closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\\nStatus: ${h(status)}. Nothing was sent again.` } };\n// Lock (T2, 16 Oct): a tap that is still being processed by another execution holds the contact for 90 s.\nconst lock = txt(P.Lock); const [lockId, lockTs] = lock.split('|');\n// The in-flight execution closes the card itself; this tap only gets the 'Got it' toast (action 'ignore' = no route).\nif (lockId && lockId !== String($execution.id) && Date.now() - Number(lockTs || 0) < 90000) return { json: { ...base, action: 'ignore' } };\nif (p.kind === 'skip') return { json: { ...base, action: 'skip' } };\nif (p.kind === 'edit') return { json: { ...base, action: 'notice',\n  notice: `✏️ <b>Edit ${h(base.name)}</b>\\nSwipe left on the card (Reply) and send your version. First line <code>Subject: …</code> for emails.` } };\nlet raw = p.kind === 'choose' ? txt(P['Variant ' + p.variant]) : p.text;\nraw = String(raw || '').replace(/\\n*\\[did not pass review\\]\\s*$/, '').trim();\nlet subject = txt(P['Draft subject']), body = raw;\nconst m = raw.match(/^subject:\\s*(.+)\\n+/i);\nif (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }\nif (!body) return { json: { ...base, action: 'notice', notice: '⚠️ <b>That variant is empty.</b> Pick another one or reply with your text.' } };\nconst chosen = p.kind === 'choose' ? p.variant : 'Edited';\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\nconst action = base.channel === 'LinkedIn' ? 'linkedin' : (GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');\nif (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `⚠️ <b>No email address for ${h(base.name)}.</b>` } };\nreturn { json: { ...base, action, chosen, subject, body } };",
+        "jsCode": "const txt = p => { if (!p) return ''; const a = p.title || p.rich_text; if (a) return a.map(t => t.plain_text).join('').trim(); return p.url || p.email || p.select?.name || p.status?.name || (p.number ?? '') + ''; };const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Decide what to do (rules). Idempotent: acts only while Status is \"Awaiting approval\".\n// Legal-basis gate: only Consent / Existing relationship / Inbound may be sent automatically.\nconst p = $('Parse update (rules)').item.json;\nconst pg = $json;\nconst base0 = { chatId: p.chatId, cardMessageId: p.cardMessageId, replyTo: p.replyMessageId || p.cardMessageId, cardTitle: p.cardTitle, fromNotion: !!p.fromNotion };\nif (pg.notFound || !pg.properties) return { json: { ...base0, action: 'notice',\n  notice: '🤔 <b>No contact found for this message.</b>\\nReply directly to a 📨 card (not to a confirmation).' } };\nconst P = pg.properties;\nconst status = txt(P.Status);\nconst company = (p.cardTitle || '').split(' · ')[0] || '';\nconst base = { ...base0, contactPageId: pg.id, name: txt(P.Name), company, channel: txt(P.Channel) || 'Email',\n  email: txt(P.Email), linkedin: txt(P.LinkedIn), legalBasis: txt(P['Legal basis']) || 'None - draft only', log: txt(P['Approval log']) };\n// '✅ Sent on LinkedIn' tap: you pasted the note on LinkedIn. Only valid while the contact is Approved (LinkedIn).\nif (p.kind === 'li_sent') return { json: status === 'Approved'\n  ? { ...base, action: 'li_sent' }\n  : { ...base, action: 'closed', closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\\nStatus: ${h(status)}.` } };\nconst allowed = p.fromNotion ? ['Awaiting approval', 'Draft ready', 'Check manually', 'Second contact'] : ['Awaiting approval'];\n// Already decided (double tap, or decided in Notion): close the card so no buttons are left, nothing sent again.\nif (!allowed.includes(status)) return { json: { ...base, action: 'closed',\n  closeText: `☑️ <b>ALREADY HANDLED · ${h(base.name)}</b>\\nStatus: ${h(status)}. Nothing was sent again.` } };\n// Lock (T2, 16 Oct): a tap that is still being processed by another execution holds the contact for 90 s.\nconst lock = txt(P.Lock); const [lockId, lockTs] = lock.split('|');\n// The in-flight execution closes the card itself; this tap only gets the 'Got it' toast (action 'ignore' = no route).\nif (lockId && lockId !== String($execution.id) && Date.now() - Number(lockTs || 0) < 90000) return { json: { ...base, action: 'ignore' } };\nif (p.kind === 'skip') return { json: { ...base, action: 'skip' } };\nif (p.kind === 'edit') return { json: { ...base, action: 'notice',\n  notice: `✏️ <b>Edit ${h(base.name)}</b>\\nSwipe left on the card (Reply) and send your version. First line <code>Subject: …</code> for emails.` } };\nlet raw = p.kind === 'choose' ? txt(P['Variant ' + p.variant]) : p.text;\nraw = String(raw || '').replace(/\\n*\\[did not pass review\\]\\s*$/, '').trim();\nlet subject = txt(P['Draft subject']), body = raw;\nconst m = raw.match(/^subject:\\s*(.+)\\n+/i);\nif (m) { subject = m[1].trim(); body = raw.slice(m[0].length).trim(); }\nif (!body) return { json: { ...base, action: 'notice', notice: '⚠️ <b>That variant is empty.</b> Pick another one or reply with your text.' } };\nconst chosen = p.kind === 'choose' ? p.variant : 'Edited';\nconst GREEN = ['Consent', 'Existing relationship', 'Inbound'];\n// DRAFT-ONLY (H0, audit F1 containment, 22 Oct): every email becomes a Gmail draft, whatever the legal basis,\n// until an action ledger exists (H3). Noah sends by hand. Flip only together with the ledger.\nconst DRAFT_ONLY = true;\nconst action = base.channel === 'LinkedIn' ? 'linkedin' : (!DRAFT_ONLY && GREEN.includes(base.legalBasis) ? 'send' : 'gmail_draft');\nif (action !== 'linkedin' && !base.email) return { json: { ...base, action: 'notice', notice: `⚠️ <b>No email address for ${h(base.name)}.</b>` } };\nreturn { json: { ...base, action, chosen, subject, body } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "e62ba1ad-5110-443b-a555-716e31398f7f",
+      "id": "c251c4fb-dbab-4607-b40a-372e520137eb",
       "name": "Route",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -782,7 +782,7 @@
       }
     },
     {
-      "id": "6b830397-5402-4274-98f3-6bef45243e2a",
+      "id": "2467516e-f3d4-4504-a1c8-7ba288d567bc",
       "name": "Needs lock?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -815,7 +815,7 @@
       }
     },
     {
-      "id": "fc886fcb-b058-4915-832b-cb591fee67a7",
+      "id": "b984bc11-1faa-414c-ad20-3f82c737d7d3",
       "name": "Notion · claim lock",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -850,7 +850,7 @@
       }
     },
     {
-      "id": "e8b6af22-a9b3-4c55-ac1d-e05b000bb444",
+      "id": "139d39be-6ef6-492a-8384-90f6cdd04d71",
       "name": "Wait 2 s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -865,7 +865,7 @@
       }
     },
     {
-      "id": "1b001109-4913-48d9-8f48-1a154e70dbba",
+      "id": "802da637-cb57-4707-9644-7f1a20e7fd31",
       "name": "Notion · re-read contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -897,7 +897,7 @@
       }
     },
     {
-      "id": "63362b2e-c114-4409-862a-98dbb7b19506",
+      "id": "feefef6a-be16-4858-9ecc-cae356ce084e",
       "name": "Claim still ours?",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -911,7 +911,7 @@
       }
     },
     {
-      "id": "e31413bf-d7d4-4fb5-b581-116ef51217d4",
+      "id": "8c83519b-6232-4b3e-9761-727840dcb7cc",
       "name": "Gmail · send",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
@@ -940,13 +940,87 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "3f320727-0e37-486a-b688-e5a24fd7191c",
-      "name": "Gmail · create draft",
+      "id": "d396aa42-101a-45de-acae-1b579711ceec",
+      "name": "Gmail · already there?",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
         2000,
         220
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 5,
+        "simple": true,
+        "filters": {
+          "q": "={{ 'to:' + $json.email + ' (in:sent OR is:draft)' }}"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SZBYk0OCrdNe1W56",
+          "name": "Gmail account"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5ae9febf-4e3b-4492-84ad-4b3e2b5797bf",
+      "name": "Duplicate guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2220,
+        220
+      ],
+      "parameters": {
+        "jsCode": "// Duplicate guard: input = Gmail search 'to:<email> (in:sent OR is:draft)' (0..5 messages, or one error item).\n// clear -> create the draft · exists -> close card, no new draft · error -> fail closed (card stays open, tap again)\nconst d = $('Decide action (rules)').first().json;\nconst items = $input.all().map(i => i.json);\nconst failed = items.find(m => m && m.error);\nif (failed) return [{ json: { ...d, guard: 'error', error: { message: 'Gmail duplicate check failed: ' + String(failed.error.message || failed.error).slice(0, 150) } }, pairedItem: 0 }];\nconst hits = items.filter(m => m && m.id);\nif (!hits.length) return [{ json: { ...d, guard: 'clear' }, pairedItem: 0 }];\nconst labels = m => (m.labelIds || (m.labels || []).map(l => l.id || l.name)).map(String);\nconst sent = hits.filter(m => labels(m).includes('SENT'));\nconst ts = sent.map(m => Number(m.internalDate)).filter(Boolean).sort((a, b) => a - b)[0];\nreturn [{ json: { ...d, guard: 'exists', foundSent: sent.length > 0, sentAt: ts ? new Date(ts).toISOString() : null,\n  hitIds: hits.map(m => m.id) }, pairedItem: 0 }];"
+      }
+    },
+    {
+      "id": "addd7d7e-2424-4c49-8ec7-51079ecf8d77",
+      "name": "Clear to draft?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2440,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "50de8942-6caa-4d61-9e76-95b0d567cdc9",
+              "leftValue": "={{ $json.guard }}",
+              "rightValue": "clear",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "42cc64fb-f52e-4485-a43f-a95c7b188e83",
+      "name": "Gmail · create draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2660,
+        160
       ],
       "parameters": {
         "resource": "draft",
@@ -967,7 +1041,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "81b62092-952b-4986-b8f7-2215f250731e",
+      "id": "2a6eefc2-5826-48cd-aeab-d6a4faa92d2a",
       "name": "Build outcome",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -976,12 +1050,12 @@
         260
       ],
       "parameters": {
-        "jsCode": "const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Result -> Notion update + how to close the card. A decided card is EDITED into a one-line result and loses its\n// buttons, so an open card (with buttons) always means \"still needs you\". Errors keep the card open + ❌ reply.\nconst d = $('Decide action (rules)').item.json;\nconst now = new Date().toISOString();\nconst hhmm = new Date().toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nconst err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;\nconst who = `${h(d.name)}${d.company ? ' · ' + h(d.company) : ''}`;\nconst via = d.fromNotion ? ' · approved in Notion' : '';\nlet status, closeText = null, replyText = null, extra = {}, liKey = null, liUrl = null;\nif (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent';\n  if (err) replyText = `❌ <b>Sending failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else { closeText = `✅ <b>SENT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · from hello@`; extra['Sent at'] = { date: { start: now } }; } }\nelse if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created';\n  if (err) replyText = `❌ <b>Gmail draft failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else closeText = `📝 <b>GMAIL DRAFT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via}\\n👉 Open Gmail drafts (hello@), check, send.`; }\nelse if (d.action === 'linkedin') { status = 'Approved';\n  closeText = `🔗 <b>LINKEDIN · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · the note to send is the next message 👇`;\n  // Separate, OPEN message (with buttons) = the LinkedIn to-do. It stays open until you tap '✅ Sent on LinkedIn'.\n  replyText = `🔗 <b>LINKEDIN TO SEND · ${d.company ? h(d.company) + ' · ' : ''}${h(d.name)}</b>\\n━━━━━━━━━━━━━━━━\\n1. Tap <b>Open profile</b> → Connect → Add a note\\n2. Long-press the text below → Copy → paste\\n3. Tap <b>✅ Sent on LinkedIn</b>\\n\\n<code>${h(d.body)}</code>`;\n  liKey = String(d.contactPageId).replace(/-/g, ''); liUrl = d.linkedin || ''; }\nelse if (d.action === 'li_sent') { status = 'Sent';\n  closeText = `✅ <b>SENT ON LINKEDIN · ${who}</b>\\n${hhmm} · connection request with note.`; extra['Sent at'] = { date: { start: now } }; }\nelse if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\\n${hhmm}${via} · nothing will be sent.`; }\nconst props = { 'Status': { status: { name: status } },\n  'Approval log': { rich_text: t(`${d.log ? d.log + '\\n' : ''}${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${err ? ' ERROR ' + err : ''}`) } };\nif (d.chosen && !err) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },\n  'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });\nObject.assign(props, extra);\nreturn { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, replyTo: d.replyTo,\n  closeText, replyText, liKey, liUrl, ok: !err, notionBody: { properties: props } } };",
+        "jsCode": "const h = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n// Result -> Notion update + how to close the card. A decided card is EDITED into a one-line result and loses its\n// buttons, so an open card (with buttons) always means \"still needs you\". Errors keep the card open + ❌ reply.\nconst d = $('Decide action (rules)').item.json;\nconst now = new Date().toISOString();\nconst hhmm = new Date().toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });\nconst t = s => [{ type: 'text', text: { content: String(s).slice(0, 1990) } }];\nconst err = $json.error ? String($json.error.message || $json.error).slice(0, 200) : null;\nconst who = `${h(d.name)}${d.company ? ' · ' + h(d.company) : ''}`;\nconst via = d.fromNotion ? ' · approved in Notion' : '';\nlet status, closeText = null, replyText = null, extra = {}, liKey = null, liUrl = null, dup = null, draftId = null;\nif (d.action === 'send') { status = err ? 'Awaiting approval' : 'Sent';\n  if (err) replyText = `❌ <b>Sending failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else { closeText = `✅ <b>SENT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · from hello@`; extra['Sent at'] = { date: { start: now } }; } }\nelse if (d.action === 'gmail_draft' && $json.guard === 'exists') {\n  // Duplicate guard hit: a draft or sent email to this address already exists. Nothing new is created.\n  status = $json.foundSent ? 'Sent' : 'Gmail draft created'; dup = $json.foundSent ? 'sent mail' : 'draft';\n  if ($json.foundSent && $json.sentAt) extra['Sent at'] = { date: { start: $json.sentAt } };\n  closeText = `☑️ <b>ALREADY IN GMAIL · ${who}</b>\\n${$json.foundSent ? 'An email to this address is already in Sent' : 'A draft to this address already exists'}. No new draft created.\\n👉 Check that one in hello@.`; }\nelse if (d.action === 'gmail_draft') { status = err ? 'Awaiting approval' : 'Gmail draft created'; draftId = err ? null : ($json.id || null);\n  if (err) replyText = `❌ <b>Gmail draft failed · ${who}</b>\\n${h(err)}\\nThe card stays open: tap again later.`;\n  else closeText = `📝 <b>GMAIL DRAFT · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via}\\n👉 Open Gmail drafts (hello@), check, send.`; }\nelse if (d.action === 'linkedin') { status = 'Approved';\n  closeText = `🔗 <b>LINKEDIN · ${who}</b>\\nVariant ${d.chosen} · ${hhmm}${via} · the note to send is the next message 👇`;\n  // Separate, OPEN message (with buttons) = the LinkedIn to-do. It stays open until you tap '✅ Sent on LinkedIn'.\n  replyText = `🔗 <b>LINKEDIN TO SEND · ${d.company ? h(d.company) + ' · ' : ''}${h(d.name)}</b>\\n━━━━━━━━━━━━━━━━\\n1. Tap <b>Open profile</b> → Connect → Add a note\\n2. Long-press the text below → Copy → paste\\n3. Tap <b>✅ Sent on LinkedIn</b>\\n\\n<code>${h(d.body)}</code>`;\n  liKey = String(d.contactPageId).replace(/-/g, ''); liUrl = d.linkedin || ''; }\nelse if (d.action === 'li_sent') { status = 'Sent';\n  closeText = `✅ <b>SENT ON LINKEDIN · ${who}</b>\\n${hhmm} · connection request with note.`; extra['Sent at'] = { date: { start: now } }; }\nelse if (d.action === 'skip') { status = 'Skipped'; closeText = `⏭ <b>SKIPPED · ${who}</b>\\n${hhmm}${via} · nothing will be sent.`; }\nconst props = { 'Status': { status: { name: status } },\n  'Approval log': { rich_text: t(`${d.log ? d.log + '\\n' : ''}${$now.setZone('Europe/Berlin').toFormat('yyyy-MM-dd HH:mm')} ${d.action}${d.chosen ? ' ' + d.chosen : ''}${d.fromNotion ? ' (Notion)' : ''}${draftId ? ' · draft ' + draftId : ''}${dup ? ' · NOT CREATED: ' + dup + ' already in Gmail' : ''}${err ? ' ERROR ' + err : ''}`) } };\nif (d.chosen && !err && !dup) Object.assign(props, { 'Chosen variant': { select: { name: d.chosen } }, 'Draft subject': { rich_text: t(d.subject || '') },\n  'Draft body': { rich_text: t(d.body) }, 'Approved at': { date: { start: now } } });\nObject.assign(props, extra);\nreturn { json: { contactPageId: d.contactPageId, chatId: d.chatId, cardMessageId: d.cardMessageId, replyTo: d.replyTo,\n  closeText, replyText, liKey, liUrl, ok: !err, notionBody: { properties: props } } };",
         "mode": "runOnceForEachItem"
       }
     },
     {
-      "id": "c50f9bbe-04e1-4e46-a557-c13e079dca93",
+      "id": "e2cc84cd-3eac-4b01-aab5-2501725811ac",
       "name": "Notion · save outcome",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1019,7 +1093,7 @@
       }
     },
     {
-      "id": "0ef02ae7-996c-4376-acc8-500521f6fd76",
+      "id": "e27f3c18-da43-44b7-a012-ec5c3ff271f4",
       "name": "Close card?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1037,7 +1111,7 @@
           },
           "conditions": [
             {
-              "id": "4b62e657-8d7a-4e7c-a396-2afd9580d6f6",
+              "id": "2b0527a2-2321-4f67-b318-2ba5ce3ef69b",
               "leftValue": "={{ $('Build outcome').item.json.closeText || '' }}",
               "rightValue": "",
               "operator": {
@@ -1052,7 +1126,7 @@
       }
     },
     {
-      "id": "bd47e682-fa89-4589-b6b7-73167a2e2c51",
+      "id": "258adc21-7093-483b-87ea-8f12766caa9f",
       "name": "Telegram · close card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1082,7 +1156,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "5b2dc14e-5654-423f-bf84-6711f8e7a973",
+      "id": "822857c7-15f1-436c-93d1-813cdf5eb979",
       "name": "Extra message?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1100,7 +1174,7 @@
           },
           "conditions": [
             {
-              "id": "305aa5d8-814c-4314-820a-f59f5e3af084",
+              "id": "b1d6184b-2add-47aa-b435-d57bc8656f04",
               "leftValue": "={{ $('Build outcome').item.json.replyText || '' }}",
               "rightValue": "",
               "operator": {
@@ -1115,7 +1189,7 @@
       }
     },
     {
-      "id": "4ea9ba98-705c-47ae-a8fd-9b044403f367",
+      "id": "99a0b3be-a001-4102-83a2-2d3715a83998",
       "name": "LinkedIn to-do?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1133,7 +1207,7 @@
           },
           "conditions": [
             {
-              "id": "4615b5bf-c0a5-409d-ad28-df459dc55211",
+              "id": "3fda8ad2-577f-4910-bd17-dee77a3f250e",
               "leftValue": "={{ $('Build outcome').item.json.liKey || '' }}",
               "rightValue": "",
               "operator": {
@@ -1148,7 +1222,7 @@
       }
     },
     {
-      "id": "de2a5da0-1f28-4050-8b83-c6a64ccf4d9a",
+      "id": "90313bd0-1a1b-4905-b744-bf3d7c29f775",
       "name": "Telegram · LinkedIn to send",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1197,7 +1271,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "d24c8c27-7c98-4688-a4b2-10104d20ee2a",
+      "id": "c030467c-edb8-40f8-b81b-2ee1a7b55b4a",
       "name": "Telegram · extra message",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1224,7 +1298,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "60a15e71-945d-4ce7-bb37-1fb09a6d0ed4",
+      "id": "9ebcef6b-1310-406a-bd3c-95786f1ec506",
       "name": "Refill queue?",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1237,7 +1311,7 @@
       }
     },
     {
-      "id": "13c57b88-3cb4-4c85-8586-6f9c933f6032",
+      "id": "64ee7990-a646-475d-9a30-45019722f45e",
       "name": "Run WP · 50 (next card)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
@@ -1260,7 +1334,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "befafd98-ea11-4b1c-98ee-00099176f8cf",
+      "id": "f3487641-8983-4948-ba77-8fb02293652b",
       "name": "Telegram · notice",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1287,7 +1361,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "e3733ba3-8bd6-4080-a632-6bba5cdc75de",
+      "id": "265f7a7b-cceb-408d-8fec-98c5d1911d5b",
       "name": "Telegram · close handled card",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1317,7 +1391,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "c0f93039-e3f7-4c30-8d98-72d1c11ac359",
+      "id": "4c6fd9c1-01e6-45d3-929a-5844068a240f",
       "name": "Note · 51",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -1328,7 +1402,7 @@
       "parameters": {
         "width": 1200,
         "height": 380,
-        "content": "## WP · 51 Approval handler (Telegram trigger): what and why\n**Input:** every tap and message in the approvals chat (and Notion approvals handed over by WP · 50). **Must be published.**\n**Rule: you always get an answer.** Tap → toast \"Got it ✔\" + the card is **closed** (edited into a one-line result, buttons removed). Reply → result or a clear note. Anything unmatched → 🤔 help note. No answer = bug.\n1. **Gate:** only Noah's chat id; anything else is ignored silently (security).\n2. **Route update:** 🌐 website answers · replies to a card (own text) · taps (A/B/C/Edit/Skip) · unmatched.\n3. **Idempotent:** acts only while the contact is *Awaiting approval*. A late/double tap closes the card as \"Already handled\", never a second email.\n4. **Legal-basis gate:** Email + Consent/Existing relationship/Inbound → **sent**. Email + *None - draft only* (all article leads) → **Gmail draft** in hello@. LinkedIn → text to paste.\n5. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.\n6. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.\nDocs: docs/50-approval.md"
+        "content": "## WP · 51 Approval handler (Telegram trigger): what and why\n**Input:** every tap and message in the approvals chat (and Notion approvals handed over by WP · 50). **Must be published.**\n**Rule: you always get an answer.** Tap → toast \"Got it ✔\" + the card is **closed** (edited into a one-line result, buttons removed). Reply → result or a clear note. Anything unmatched → 🤔 help note. No answer = bug.\n1. **Gate:** only Noah's chat id; anything else is ignored silently (security).\n2. **Route update:** 🌐 website answers · replies to a card (own text) · taps (A/B/C/Edit/Skip) · unmatched.\n3. **Idempotent:** acts only while the contact is *Awaiting approval*. A late/double tap closes the card as \"Already handled\", never a second email.\n4. **Draft-only (22 Oct):** every email → **Gmail draft** in hello@, whatever the legal basis, until the action ledger (H3) exists. LinkedIn → text to paste.\n5. **Duplicate guard:** before a draft, Gmail is searched for any draft or sent mail to the same address. Found → no new draft, card closed as already in Gmail. Search error → card stays open.\n6. **Close + log:** Notion gets Status, Chosen variant, final text, timestamps, Approval log; the card is edited (✅/📝/🔗/⏭). Errors keep the card open with a ❌ reply.\n7. **One out, one in:** after a decision, WP · 50 runs at once so the next card arrives.\nDocs: docs/50-approval.md"
       }
     }
   ],
@@ -1626,7 +1700,7 @@
         ],
         [
           {
-            "node": "Gmail · create draft",
+            "node": "Gmail · already there?",
             "type": "main",
             "index": 0
           }
@@ -1655,6 +1729,46 @@
         [
           {
             "node": "Telegram · close handled card",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail · already there?": {
+      "main": [
+        [
+          {
+            "node": "Duplicate guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate guard": {
+      "main": [
+        [
+          {
+            "node": "Clear to draft?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear to draft?": {
+      "main": [
+        [
+          {
+            "node": "Gmail · create draft",
             "type": "main",
             "index": 0
           }
