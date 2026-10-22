@@ -26,7 +26,7 @@ Bug fixes only; each is small and has a regression fixture in `tools/`.
 - **Action ledger (F1, F10):** one approval = one immutable draft hash + recipient + action; unique key per contact/version/action; `outcome_unknown` never auto-retried.
 - **Suppression registry** checked at draft and at dispatch.
 - **Follow-up cadence** (from Notion › Sales Playbook): day 0 email · day 1 LinkedIn connect · day 4 email · day 8 LinkedIn message once accepted · day 13 walk-away. Second contacts step in when the first never replies.
-- **Permission model:** German/Austrian recipients route to LinkedIn or warm intro until a lawyer has signed off on the e-mail basis.
+- **Permission model:** manual cold e-mail to DE/AT recipients is allowed since 22 Oct on an informal lawyer OK (targeted, no spam, honour opt-outs). Auto-send and WP · 60 need written legal advice first.
 
 ## H4: Only when a client pays for an engine deployment
 Per-client n8n instance (no shared tenancy), environment manifest instead of hard-coded IDs, staging + CI, restore drill, n8n licence check for the exact delivery model. Multi-channel sequences and LinkedIn acceptance checks.

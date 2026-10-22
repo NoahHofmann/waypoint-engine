@@ -1,6 +1,6 @@
 # Waypoint Engine: current state (read this first)
 
-Last updated: 20 Oct 2026, 21:00 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
+Last updated: 22 Oct 2026, 14:50 · Owner: Noah · Repo: NoahHofmann/waypoint-engine (main)
 
 This is the single page a new session (or a new Claude context) reads to continue without losing anything. The details live in `docs/decision-log.md` (every decision and why) and the per-workflow docs.
 
@@ -79,12 +79,14 @@ Claude rewrites this page and pushes it (repo + Project doc) together with every
 - **Qualify eval, honest numbers:** precision 80% (4/5), recall 57% (4/7), n=20; majority baseline 65%. The miss that matters is #26 (mission gate).
 - **Roadmap reordered** (docs/roadmap.md): H0 hygiene → H1 before 100 contacts → H2 outcome loop (sent/reply/booking sync) → H3 ledger + suppression before auto-send or WP · 60 → H4 only for a paying engine client.
 - **Live state 20 Oct:** 38 contacts. 12 Gmail drafts created (since 16 Oct), none with *Sent at*; 3 awaiting approval; 16 need email.
-- **Legal:** German/Austrian recipients get LinkedIn or warm intro, not cold e-mail, until a lawyer signs off (UWG §7(2) Nr. 2).
+- **Legal (22 Oct):** German/Austrian recipients may get a targeted manual cold e-mail. Informal OK from a lawyer friend (verbal, not written advice) on the conditions: researched reason, no spam, honour opt-outs (Do not contact + delete e-mail). Residual UWG §7(2) Nr. 2 / TKG §174 risk accepted by Noah. Get written advice before auto-send, WP · 60 or selling offer 5.
+- **22 Oct reconciliation:** Gmail now holds 11 drafts, matching Notion row for row (Holo recreated, Ambio = Noah's edit, Dawid = Second contact with draft deleted). Noah sends them by hand on 22 Oct and sets *Sent at* + Status in Notion.
 
 ## Open issues (in priority order)
-1. Send or discard the 12 Gmail drafts; mark *Sent* by hand until H2 exists.
+1. Send the 11 Gmail drafts (22 Oct); mark *Sent* by hand until H2 exists. Then answer the open Telegram cards, send the second round, do the LinkedIn items.
 2. H0 hygiene sprint (roadmap), one block.
 3. Docs for 00/10/20/90 into the template.
+4. H0 addition: make Gmail draft creation in 51 idempotent and verify it against Gmail (22 Oct: 5 recipients had two drafts, one draft disappeared).
 
 ## Parked (roadmap)
 - Analytics agent (reply rates per variant and per model).

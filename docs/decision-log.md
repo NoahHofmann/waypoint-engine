@@ -72,3 +72,11 @@ All tests passed after three real fixes (double-tap lock, Claude output budget +
 | 20 Oct | No SaaS, tenancy or Postgres application layer on the roadmap | Audit's own cost model: 7.6% contribution at 5 × €299. Offer 5 is a service on per-client instances |
 | 20 Oct | DE/AT recipients: LinkedIn or warm intro, not cold e-mail, pending legal advice | UWG §7(2) Nr. 2 requires prior consent for advertising e-mail, B2B included; manual sending doesn't change it |
 | 20 Oct | Eval reporting shows precision/recall with counts | "80%" accuracy hid 57% recall against a 65% majority baseline |
+
+## 22 Oct · Legal stance, Gmail/Notion reconciliation
+| Date | Decision | Why |
+|---|---|---|
+| 22 Oct | DE/AT recipients may receive a manual cold e-mail again, with a concrete, researched reason to contact them. The 20 Oct "LinkedIn or warm intro only" rule is withdrawn for now. The engine gate stays: Legal basis "None - draft only", Gmail draft, Noah sends by hand | Noah spoke informally with a lawyer friend: fine as long as it is targeted and not spam (no bulk or generic blasts, remove and delete anyone who asks to stop). **Informal and verbal, not written advice, and no formal sign-off.** It differs from the 19 Oct audit reading of UWG §7(2) Nr. 2 (prior consent, B2B included; Austria stricter under TKG §174). Residual risk (cease-and-desist letter) is accepted by Noah. Re-check with written advice before auto-send, WP · 60, or selling offer 5 to a client |
+| 22 Oct | Opt-out handling: on any "stop" reply set Status = Do not contact, delete the e-mail address, never contact again | Conditions of the informal go-ahead |
+| 22 Oct | Gmail drafts reconciled with Notion: 6 stale or duplicate drafts deleted (5 from an earlier 10:16 run on 16 Oct for Solvera, Epyr, Hylight, Causa Prima, KP Labs; Dawid at Coding Giants). Dawid set to **Second contact**. Holo draft (lost, no trace in Gmail or Sent) recreated from Notion. Ambio: Noah's hand-edited Gmail text adopted, Notion synced (Chosen variant = Edited) | Rule: no discrepancy between Notion and Gmail before sending. Observation for H0: 5 recipients had two Gmail drafts and one draft vanished, so draft creation in 51 is not idempotent and not verified against Gmail |
+
