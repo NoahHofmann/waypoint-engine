@@ -70,7 +70,7 @@ services:
       - n8n_data:/home/node/.n8n
 
   cloudflared:
-    image: cloudflare/cloudflared:2026.10.0
+    image: cloudflare/cloudflared:2026.10.2
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
